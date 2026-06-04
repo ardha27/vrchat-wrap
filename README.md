@@ -15,19 +15,27 @@ No account, no upload, no server. The file is read locally with sql.js (SQLite c
 
 ## What you get
 
-Ten slides pulled straight from your own logs:
+Pick a window first — last 30 days, last 12 months, or all time — then walk ten slides pulled straight from your own logs:
 
 - Hours spent in-world
 - Unique worlds visited
-- The world you kept coming back to
+- The world you kept coming back to (click it to open in VRChat)
 - People you crossed paths with
-- Your squad: who you spent the most time with
-- Friends added this year
+- Your squad: who you spent the most time with (each links to their VRChat profile)
+- Friends added
 - When you're actually online (night-owl clock)
 - Your busiest month
-- A holographic trading card to screenshot and share
+- A holographic trading card you can download and share to X
 
-The year is auto-detected from whichever year has the most activity.
+The final card has a name field, an auto-filled caption with the site link and hashtags, a download button, and Share on X (plus native share on mobile).
+
+### Languages
+
+English, Indonesian, Japanese, Korean, Chinese, Spanish, and French. It picks your browser language by default and remembers your choice.
+
+### A note on world and friend images
+
+VRChat thumbnails and profile pictures aren't shown. The VRChat API needs a login and blocks browser requests (CORS), and VRCX's offline image cache is usually empty and stores nothing for friends. Instead, worlds and friends get generated color avatars so the lists still read well, and both link out to VRChat where you can see the real thing.
 
 ## Run locally
 

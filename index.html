@@ -6,576 +6,759 @@
 <title>VRChat Wrap — Your Year in VR</title>
 <meta name="description" content="Drop your VRCX database and relive your VRChat year. 100% local, nothing leaves your device." />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<meta property="og:title" content="VRChat Wrap — Your Year in VR" />
+<meta property="og:description" content="Relive your VRChat year. 100% local, nothing leaves your device." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --bg:#070710;
-    --bg2:#0c0c18;
-    --panel:rgba(16,16,28,.66);
-    --line:rgba(255,255,255,.07);
-    --ink:#f4f5ff;
-    --muted:#8b8ca8;
-    --green:#27ff95;
-    --cyan:#34d6ff;
-    --magenta:#e15bff;
-    --orange:#ff9d3c;
-    --pink:#ff4d8d;
-    --accent:var(--green);
-    --accent2:var(--cyan);
-    --grid:rgba(255,255,255,.045);
+    --bg:#070710;--bg2:#0c0c18;--panel:rgba(16,16,28,.66);--line:rgba(255,255,255,.07);
+    --ink:#f4f5ff;--muted:#8b8ca8;
+    --green:#27ff95;--cyan:#34d6ff;--magenta:#e15bff;--orange:#ff9d3c;--pink:#ff4d8d;
+    --accent:var(--green);--accent2:var(--cyan);--grid:rgba(255,255,255,.045);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Outfit',sans-serif;
-    overflow:hidden;
-    position:fixed;inset:0;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;overflow:hidden;position:fixed;inset:0;-webkit-font-smoothing:antialiased}
   canvas#fx{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
-  /* wireframe grid + glow atmosphere */
-  .atmos{
-    position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(120% 90% at 50% -10%, color-mix(in srgb,var(--accent) 16%, transparent), transparent 55%),
-      radial-gradient(90% 70% at 90% 110%, color-mix(in srgb,var(--accent2) 14%, transparent), transparent 60%),
-      linear-gradient(180deg,var(--bg),var(--bg2));
-    transition:background .8s ease;
-  }
-  .atmos::after{
-    content:"";position:absolute;inset:0;
+  .atmos{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% -10%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 55%),
+      radial-gradient(90% 70% at 90% 110%,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));transition:background .8s ease}
+  .atmos::after{content:"";position:absolute;inset:0;
     background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:46px 46px;
-    -webkit-mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);
-            mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);
-  }
-  /* grain */
+    background-size:46px 46px;-webkit-mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%)}
   .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .stage{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;padding:max(env(safe-area-inset-top),64px) 18px max(env(safe-area-inset-bottom),18px)}
 
-  .stage{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;padding:max(env(safe-area-inset-top),18px) 18px max(env(safe-area-inset-bottom),18px)}
-
-  /* ---------- HUD chrome ---------- */
   .brand{position:fixed;top:max(env(safe-area-inset-top),16px);left:18px;z-index:6;display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.18em}
   .brand .mk{width:22px;height:22px;border:1.5px solid var(--accent);border-radius:7px;display:grid;place-items:center;color:var(--accent);box-shadow:0 0 16px color-mix(in srgb,var(--accent) 50%,transparent);transition:.5s}
   .brand .mk b{font-size:11px;line-height:1}
   .brand span{opacity:.85}
-  .restart{position:fixed;top:max(env(safe-area-inset-top),14px);right:16px;z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;transition:.25s;display:none}
+  .topright{position:fixed;top:max(env(safe-area-inset-top),12px);right:14px;z-index:7;display:flex;gap:8px;align-items:center}
+  .lang{position:relative}
+  .lang select{appearance:none;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;color:var(--ink);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;padding:7px 28px 7px 13px;cursor:pointer}
+  .lang::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:10px}
+  .lang select:focus{outline:none;border-color:var(--accent)}
+  .restart{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;transition:.25s;display:none}
   .restart:hover{color:var(--ink);border-color:var(--accent)}
 
-  /* progress segments */
   .progress{position:fixed;top:max(env(safe-area-inset-top),52px);left:50%;transform:translateX(-50%);z-index:6;display:none;gap:5px;width:min(560px,82vw)}
   .progress .seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
   .progress .seg i{display:block;height:100%;width:0;background:var(--accent);box-shadow:0 0 10px var(--accent);transition:width .35s}
-  .progress .seg.done i{width:100%}
-  .progress .seg.active i{width:100%}
+  .progress .seg.done i,.progress .seg.active i{width:100%}
 
-  /* nav arrows */
   .nav{position:fixed;z-index:6;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.5);backdrop-filter:blur(6px);color:var(--ink);display:none;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:.25s}
   .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .nav.prev{left:14px}.nav.next{right:14px}
   @media(max-width:680px){.nav{display:none!important}}
+  .tapnav{position:fixed;inset:0;z-index:1}
 
-  /* ---------- screens ---------- */
   .screen{display:none;width:100%;max-width:720px}
   .screen.on{display:block}
 
-  /* intake / landing */
   #intake{text-align:center}
-  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin-bottom:18px}
-  .hero-title{font-family:'Anton',sans-serif;font-weight:400;line-height:.86;letter-spacing:.01em;text-transform:uppercase;
-    font-size:clamp(52px,15vw,128px);
-    background:linear-gradient(180deg,#fff 30%,color-mix(in srgb,var(--accent) 70%,#fff));
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-    filter:drop-shadow(0 6px 30px color-mix(in srgb,var(--accent) 30%,transparent))}
-  .hero-sub{color:var(--muted);max-width:440px;margin:18px auto 30px;font-size:clamp(14px,2.4vw,17px);line-height:1.55}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin-bottom:16px}
+  .hero-title{font-family:'Anton',sans-serif;font-weight:400;line-height:.86;letter-spacing:.01em;text-transform:uppercase;font-size:clamp(48px,13vw,116px);
+    background:linear-gradient(180deg,#fff 30%,color-mix(in srgb,var(--accent) 70%,#fff));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 6px 30px color-mix(in srgb,var(--accent) 30%,transparent))}
+  .hero-sub{color:var(--muted);max-width:440px;margin:16px auto 22px;font-size:clamp(14px,2.4vw,16px);line-height:1.55}
   .hero-sub b{color:var(--ink);font-weight:600}
 
-  .drop{position:relative;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:22px;padding:34px 22px;background:var(--panel);backdrop-filter:blur(10px);cursor:pointer;transition:.3s;max-width:480px;margin:0 auto;overflow:hidden}
+  .tf{max-width:480px;margin:0 auto 20px}
+  .tf-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .tf-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .tf-opt{border:1px solid var(--line);border-radius:13px;padding:14px 8px;background:rgba(255,255,255,.025);cursor:pointer;transition:.25s;text-align:center}
+  .tf-opt .tv{font-family:'Anton';font-size:clamp(18px,4.5vw,24px);line-height:1;text-transform:uppercase}
+  .tf-opt .tl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--muted);margin-top:6px}
+  .tf-opt:hover{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+  .tf-opt.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);box-shadow:0 0 26px -10px var(--accent)}
+  .tf-opt.sel .tv{color:var(--accent)}
+
+  .drop{position:relative;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:22px;padding:30px 22px;background:var(--panel);backdrop-filter:blur(10px);cursor:pointer;transition:.3s;max-width:480px;margin:0 auto;overflow:hidden}
   .drop::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 0%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%);opacity:0;transition:.3s}
   .drop:hover,.drop.hot{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 18px 50px -18px color-mix(in srgb,var(--accent) 60%,transparent)}
   .drop:hover::before,.drop.hot::before{opacity:1}
   .drop .ic{color:var(--accent);margin-bottom:12px;line-height:0;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 60%,transparent))}
-  .privacy svg{color:var(--green);flex:none}
   .drop h3{font-size:18px;font-weight:700;margin-bottom:6px}
   .drop p{color:var(--muted);font-size:13px;line-height:1.5}
   .drop .path{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);margin-top:12px;word-break:break-all;opacity:.9}
-
-  .or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:12px;letter-spacing:.2em;font-family:'Space Mono',monospace;margin:22px auto;max-width:480px;text-transform:uppercase}
+  .or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:12px;letter-spacing:.2em;font-family:'Space Mono',monospace;margin:20px auto;max-width:480px;text-transform:uppercase}
   .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
-  .btn{display:inline-flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:14px 26px;border-radius:14px;border:1px solid var(--accent);color:#04120a;background:var(--accent);cursor:pointer;transition:.25s;box-shadow:0 0 30px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:14px 24px;border-radius:14px;border:1px solid var(--accent);color:#04120a;background:var(--accent);cursor:pointer;transition:.25s;box-shadow:0 0 30px -6px color-mix(in srgb,var(--accent) 70%,transparent);text-decoration:none}
   .btn:hover{transform:translateY(-2px);box-shadow:0 0 44px -4px color-mix(in srgb,var(--accent) 90%,transparent)}
   .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line);box-shadow:none}
   .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
-  .privacy{margin-top:26px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:center;font-family:'Space Mono',monospace;letter-spacing:.06em}
+  .btn svg{flex:none}
+  .privacy{margin-top:22px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:center;font-family:'Space Mono',monospace;letter-spacing:.06em}
   .privacy b{color:var(--green)}
+  .privacy svg{color:var(--green);flex:none}
 
-  /* loading */
   #loading{display:none;text-align:center}
   .ring{width:70px;height:70px;margin:0 auto 24px;border-radius:50%;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);animation:spin 1s linear infinite;box-shadow:0 0 30px -6px var(--accent)}
   @keyframes spin{to{transform:rotate(360deg)}}
   #loading .lt{font-family:'Anton';font-size:clamp(28px,7vw,46px);text-transform:uppercase;letter-spacing:.02em}
   #loading .ls{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;margin-top:10px;letter-spacing:.08em}
 
-  /* ---------- slide card ---------- */
   .card{position:relative;width:100%;max-width:560px;margin:0 auto;border-radius:26px;border:1px solid var(--line);
-    background:linear-gradient(180deg,rgba(20,20,34,.86),rgba(10,10,20,.92));
-    backdrop-filter:blur(12px);overflow:hidden;
-    box-shadow:0 40px 90px -40px #000, inset 0 1px 0 rgba(255,255,255,.06);
-    min-height:clamp(420px,72vh,620px);display:flex;flex-direction:column}
-  .card::before{content:"";position:absolute;inset:0;pointer-events:none;
-    background:radial-gradient(110% 80% at 50% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
-  .card::after{content:"";position:absolute;inset:0;pointer-events:none;
-    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
+    background:linear-gradient(180deg,rgba(20,20,34,.86),rgba(10,10,20,.92));backdrop-filter:blur(12px);overflow:hidden;
+    box-shadow:0 40px 90px -40px #000,inset 0 1px 0 rgba(255,255,255,.06);min-height:clamp(420px,72vh,620px);display:flex;flex-direction:column}
+  .card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(110% 80% at 50% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
+  .card::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
   .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted)}
   .card-top .tag{color:var(--accent)}
   .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px}
   .card-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
   .pix{display:flex;gap:5px;font-size:13px;opacity:.7}
-
-  .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--accent)}
-  .bignum{font-family:'Anton';font-weight:400;line-height:.82;text-transform:uppercase;letter-spacing:.005em;
-    font-size:clamp(74px,20vw,150px);
-    background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--accent) 75%,#fff));
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-    filter:drop-shadow(0 4px 22px color-mix(in srgb,var(--accent) 35%,transparent))}
-  .unit{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:-2px}
+  .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
+  .bignum{font-family:'Anton';font-weight:400;line-height:.82;text-transform:uppercase;font-size:clamp(74px,20vw,150px);
+    background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--accent) 75%,#fff));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 22px color-mix(in srgb,var(--accent) 35%,transparent))}
+  .unit{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:-2px}
   .headline{font-family:'Anton';font-weight:400;text-transform:uppercase;line-height:.92;font-size:clamp(30px,8vw,52px)}
   .headline em{font-style:normal;color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent);padding:0 .12em;border-radius:6px}
-  .lede{color:var(--muted);font-size:clamp(14px,3.2vw,17px);line-height:1.55;max-width:42ch}
+  .lede{color:var(--muted);font-size:clamp(14px,3.2vw,17px);line-height:1.55;max-width:44ch}
   .lede b{color:var(--ink);font-weight:600}
 
-  /* rank list (squad / worlds) */
   .ranks{display:flex;flex-direction:column;gap:9px}
-  .rank{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025);transition:.3s}
-  .rank .n{font-family:'Anton';font-size:22px;color:var(--accent);width:30px;text-align:center;flex:none}
+  .rank{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025);transition:.3s}
+  .rank .n{font-family:'Anton';font-size:20px;color:var(--accent);width:22px;text-align:center;flex:none}
+  .rank .av{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:'Anton';font-size:16px;color:#0a0a12;text-shadow:0 1px 0 rgba(255,255,255,.25)}
+  .rank .av.sq{border-radius:50%}
   .rank .nm{flex:1;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rank .v{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);flex:none}
   .rank.top{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:color-mix(in srgb,var(--accent) 9%,transparent);box-shadow:0 0 26px -10px var(--accent)}
   .rank.top .nm{color:#fff}
+  a.rank{text-decoration:none;color:inherit;cursor:pointer}
+  a.rank:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 0 26px -12px var(--accent)}
+  .rank .ext{flex:none;color:var(--muted);opacity:.6;font-size:12px}
+  a.rank:hover .ext{color:var(--accent);opacity:1}
+  .wlink{color:inherit;text-decoration:none;border-bottom:2px solid color-mix(in srgb,var(--accent) 50%,transparent);transition:.25s}
+  .wlink:hover{border-color:var(--accent)}
 
-  /* mini stat grid */
   .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
   .mini .m{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}
   .mini .m .mv{font-family:'Anton';font-size:clamp(26px,7vw,38px);color:var(--accent);line-height:1}
-  .mini .m .ml{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-top:6px}
+  .mini .m .ml{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:6px}
 
-  /* clock bars (night owl) */
   .bars{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:6px}
   .bars .b{flex:1;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 25%,transparent));border-radius:3px 3px 0 0;min-height:3px;transition:height .6s cubic-bezier(.2,.8,.2,1);opacity:.85}
   .bars .b.peak{background:linear-gradient(180deg,#fff,var(--accent));box-shadow:0 0 14px var(--accent)}
   .axis{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
 
-  /* final trading card */
   #s-card .card-body{align-items:center;text-align:center}
-  .tcard{position:relative;width:min(300px,78vw);aspect-ratio:3/4.2;border-radius:20px;padding:16px;
-    background:linear-gradient(150deg,#15152a,#0a0a16);
-    border:1px solid rgba(255,255,255,.14);overflow:hidden;
-    box-shadow:0 30px 60px -24px #000;
-    transform-style:preserve-3d;transition:transform .15s}
-  .tcard::before{content:"";position:absolute;inset:0;
-    background:linear-gradient(115deg,transparent 30%,color-mix(in srgb,var(--magenta) 35%,transparent) 45%,color-mix(in srgb,var(--cyan) 35%,transparent) 55%,transparent 70%);
-    background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.55;animation:holo 6s linear infinite}
-  @keyframes holo{0%{background-position:0% 0%}100%{background-position:200% 200%}}
+  .tcard{position:relative;width:min(300px,78vw);aspect-ratio:3/4.2;border-radius:20px;padding:16px;background:linear-gradient(150deg,#15152a,#0a0a16);border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 30px 60px -24px #000;transform-style:preserve-3d;transition:transform .15s}
+  .tcard .holo{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(225,91,255,.35) 45%,rgba(52,214,255,.35) 55%,transparent 70%);background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.55;animation:holo 6s linear infinite;pointer-events:none}
+  @keyframes holo{0%{background-position:0 0}100%{background-position:200% 200%}}
   .tcard .tc-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);position:relative;z-index:2}
-  .tc-art{position:relative;z-index:2;margin:14px auto;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:42px;
-    background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--accent) 60%,transparent),transparent 70%);
-    border:1.5px solid color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 0 30px -4px var(--accent)}
-  .tc-name{position:relative;z-index:2;font-family:'Anton';font-size:26px;text-transform:uppercase;line-height:1;margin-top:4px}
+  .tc-art{position:relative;z-index:2;margin:14px auto 0;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:40px;color:#0a0a12;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 0 30px -4px var(--accent)}
+  .tc-name{position:relative;z-index:2;font-family:'Anton';font-size:26px;text-transform:uppercase;line-height:1;margin-top:12px;word-break:break-word}
   .tc-role{position:relative;z-index:2;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-top:6px}
   .tc-stats{position:relative;z-index:2;margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;text-align:left;padding:0 6px}
   .tc-stats div{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
   .tc-stats div b{display:block;font-family:'Outfit';font-weight:800;font-size:16px;color:#fff;letter-spacing:0}
-  .tc-foot{position:absolute;left:0;right:0;bottom:12px;z-index:2;font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--muted);text-align:center}
-  .name-in{margin-top:14px;display:flex;gap:8px;justify-content:center}
-  .name-in input{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;padding:9px 12px;width:160px;text-align:center;letter-spacing:.06em}
+  .tc-foot{position:absolute;left:0;right:0;bottom:12px;z-index:2;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--muted);text-align:center;padding:0 10px}
+  .name-in{margin-top:14px;display:flex;gap:8px;justify-content:center;width:100%}
+  .name-in input{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;padding:10px 12px;width:min(220px,70vw);text-align:center;letter-spacing:.06em}
   .name-in input:focus{outline:none;border-color:var(--accent)}
+  .actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:6px;width:100%}
+  .actions .btn{padding:12px 18px;font-size:12px}
+  .cap{width:100%;max-width:340px;margin:4px auto 0}
+  .cap textarea{width:100%;min-height:64px;resize:vertical;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-family:'Space Mono',monospace;font-size:11px;line-height:1.5;padding:10px 12px}
+  .cap textarea:focus{outline:none;border-color:var(--accent)}
+  .cap-lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;text-align:left}
+  .kofi{display:inline-flex;align-items:center;gap:8px;margin-top:4px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.06em;color:var(--ink);background:linear-gradient(135deg,var(--pink),var(--magenta));border:none;border-radius:12px;padding:11px 18px;text-decoration:none;transition:.25s;box-shadow:0 0 24px -8px var(--magenta)}
+  .kofi:hover{transform:translateY(-2px);box-shadow:0 0 34px -6px var(--magenta)}
 
-  /* reveal animation */
   .rv{opacity:0;transform:translateY(22px)}
   .screen.on .rv{animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards}
-  .screen.on .rv:nth-child(1){animation-delay:.05s}
-  .screen.on .rv:nth-child(2){animation-delay:.15s}
-  .screen.on .rv:nth-child(3){animation-delay:.25s}
-  .screen.on .rv:nth-child(4){animation-delay:.35s}
+  .screen.on .rv:nth-child(1){animation-delay:.05s}.screen.on .rv:nth-child(2){animation-delay:.13s}
+  .screen.on .rv:nth-child(3){animation-delay:.21s}.screen.on .rv:nth-child(4){animation-delay:.29s}
   .card .rv{animation-delay:.1s}
   @keyframes rise{to{opacity:1;transform:none}}
-
-  .hint{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--muted);display:none;align-items:center;gap:8px;text-transform:uppercase}
+  .hint{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);display:none;align-items:center;gap:8px;text-transform:uppercase;text-align:center}
   .hint kbd{border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:10px}
-  .err{color:var(--pink);font-family:'Space Mono',monospace;font-size:13px;margin-top:18px;display:none;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5}
-  .glitch{position:relative}
-  .swipezone{position:fixed;inset:0;z-index:3;display:none}
+  .err{color:var(--pink);font-family:'Space Mono',monospace;font-size:13px;margin-top:18px;display:none;max-width:430px;margin:18px auto 0;line-height:1.5}
 </style>
 </head>
 <body>
 <canvas id="fx"></canvas>
 <div class="atmos"></div>
 <div class="grain"></div>
+<div class="tapnav" id="tapnav"></div>
 
 <div class="brand"><span class="mk"><b>VR</b></span><span>VRCHAT&nbsp;WRAP</span></div>
-<button class="restart" id="restart">↺ RESTART</button>
+<div class="topright">
+  <div class="lang"><select id="langSel" aria-label="Language"></select></div>
+  <button class="restart" id="restart" data-i="restart">Restart</button>
+</div>
 <div class="progress" id="progress"></div>
 <button class="nav prev" id="prev">‹</button>
 <button class="nav next" id="next">›</button>
-<div class="hint" id="hint"><kbd>←</kbd><kbd>→</kbd> or tap to move</div>
-<div class="swipezone" id="swipe"></div>
+<div class="hint" id="hint"></div>
 
 <div class="stage">
-
-  <!-- LANDING -->
   <section class="screen on" id="intake">
     <div class="eyebrow rv">Checkpoint · <span class="curYear"></span></div>
     <h1 class="hero-title rv">VRChat<br>Wrap</h1>
-    <p class="hero-sub rv">A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, every friend, every late-night session of <span class="curYear"></span>.</p>
+    <p class="hero-sub rv" data-i="sub"></p>
+    <div class="tf rv">
+      <div class="tf-label" data-i="tf_label"></div>
+      <div class="tf-opts" id="tfOpts">
+        <div class="tf-opt" data-tf="month"><div class="tv" data-i="tf_month_v"></div><div class="tl" data-i="tf_month"></div></div>
+        <div class="tf-opt sel" data-tf="year"><div class="tv" data-i="tf_year_v"></div><div class="tl" data-i="tf_year"></div></div>
+        <div class="tf-opt" data-tf="all"><div class="tv" data-i="tf_all_v"></div><div class="tl" data-i="tf_all"></div></div>
+      </div>
+    </div>
     <div class="drop rv" id="drop">
       <div class="ic"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></div>
-      <h3>Drop your VRCX.sqlite here</h3>
-      <p>or click to browse — the file never leaves your browser</p>
+      <h3 data-i="drop_title"></h3>
+      <p data-i="drop_hint"></p>
       <div class="path">%AppData%\VRCX\VRCX.sqlite3</div>
       <input type="file" id="file" accept=".sqlite,.db,.sqlite3" hidden />
     </div>
-    <div class="or rv">or</div>
-    <div class="rv" style="text-align:center">
-      <button class="btn ghost" id="demo">▶ View demo with sample data</button>
-    </div>
-    <div class="privacy rv"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> <span>100% local · <b>no upload</b> · no server · no tracking</span></div>
+    <div class="or rv" data-i="or"></div>
+    <div class="rv" style="text-align:center"><button class="btn ghost" id="demo" data-i="demo"></button></div>
+    <div class="privacy rv"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> <span data-i="privacy"></span></div>
     <div class="err" id="err"></div>
   </section>
 
-  <!-- LOADING -->
   <section class="screen" id="loading">
     <div class="ring"></div>
-    <div class="lt">Reading your year…</div>
-    <div class="ls" id="loadmsg">parsing VRCX tables</div>
+    <div class="lt" data-i="load_title"></div>
+    <div class="ls" id="loadmsg"></div>
   </section>
 
-  <!-- SLIDES injected here -->
   <div id="deck"></div>
-
 </div>
 
 <script>
-/* ============================= ENGINE ============================= */
-const $ = s => document.querySelector(s);
-const fmt = n => (n==null||isNaN(n)) ? '0' : Math.round(n).toLocaleString('en-US');
-const fmt1 = n => (Math.round(n*10)/10).toLocaleString('en-US');
+/* ============================= I18N ============================= */
+const SITE='https://ardha27.github.io/vrchat-wrap/';
+const KOFI='https://ko-fi.com/ardhach';
+const MONTHS={
+  en:['January','February','March','April','May','June','July','August','September','October','November','December'],
+  id:['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
+  es:['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+  fr:['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+};
+function monthName(l,i){ if(l==='ja'||l==='zh') return (i+1)+'月'; if(l==='ko') return (i+1)+'월'; return (MONTHS[l]||MONTHS.en)[i]; }
 
-/* ---- canvas particles + drifting grid ---- */
+const I18N={
+ en:{native:'English',restart:'Restart',
+  sub:'A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, friend, and late-night session.',
+  tf_label:'Pick your window',tf_month:'last 30 days',tf_year:'last 12 months',tf_all:'everything',tf_month_v:'1 Month',tf_year_v:'1 Year',tf_all_v:'All Time',
+  drop_title:'Drop your VRCX database here',drop_hint:'or click to browse — the file never leaves your browser',
+  or:'or',demo:'View demo with sample data',privacy:'100% local · <b>no upload</b> · no server · no tracking',
+  load_title:'Reading your year…',load_msg:'parsing VRCX tables',
+  err_invalid:"That doesn't look like a valid SQLite file.",err_empty:'No VRChat activity found in this window. Try a wider range or check your VRCX.sqlite3.',err_read:'Could not read that file.',
+  hint:'swipe or use ← → to move',
+  s1_tag:'Checkpoint',s1_kick:'Your year in VR · {label}',s1_head:"Let's replay<br>your <em>{year}</em>.",s1_lede:"You logged in. You stayed up too late. You met strangers who became regulars. Here's the proof, pulled from your own logs.",m_visits:'World visits',m_days:'Days online',
+  s2_tag:'Time lived',s2_kick:'Hours spent in-world',s2_unit:'hours · about {d} full days',s2_lede:"Real time, real presence. Every hour spent somewhere that doesn't exist.",
+  s3_tag:'Explorer',s3_kick:'Worlds you stepped into',s3_unit:'unique worlds across {v} visits',s3_lede:'From quiet lounges to chaos rooms, you wandered into <b>{n}</b> corners of the metaverse.',
+  s4_tag:'Home base',s4_kick:'The place you kept coming back to',s4_lede:'Your most-visited world, <b>{v} times</b>. Everyone has a spot that feels like home.',
+  s5_tag:'Social',s5_kick:'Different people you crossed paths with',s5_unit:'avatars met · {e} total encounters',s5_lede:'Behind every avatar was a person. You shared a space with <b>{n}</b> of them.',
+  s6_tag:'Your squad',s6_kick:'The people you spent the most time with',s6_head:'Squad',s6_seen:'{n} seen',s6_empty:'Not enough join logs to name names, but they know who they are.',
+  s7_tag:'New bonds',s7_kick:'Friends you added',s7_unit:'new friendships',s7_lede:'<b>{n}</b> people went from stranger to friend. The list keeps growing.',s7_lede0:'The real ones were already on the list. Quality over quantity.',
+  s8_tag:'Rhythm',s8_kick:"When you're really online",s8_owl:'Night<br><em>owl</em>',s8_peak:'Peak: <em>{t}</em>',s8_lede:'<b>{p}%</b> of your sessions started after midnight. Your prime time is <b>{t}</b>.',
+  s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
+  s10_tag:'Collect',s10_kick:'Your {year} VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
+  tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
+  name_ph:'type your name',dl:'Download card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  outro:'Screenshot it. Share it. See you next time.',
+  caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:'},
+
+ id:{native:'Indonesia',restart:'Ulangi',
+  sub:'Satu tahun di dalam metaverse, diputar ulang. Taruh <b>database VRCX</b> kamu dan kenang lagi tiap world, teman, dan sesi tengah malam.',
+  tf_label:'Pilih rentang waktu',tf_month:'30 hari terakhir',tf_year:'12 bulan terakhir',tf_all:'semuanya',tf_month_v:'1 Bulan',tf_year_v:'1 Tahun',tf_all_v:'Semua',
+  drop_title:'Taruh database VRCX kamu di sini',drop_hint:'atau klik untuk pilih file — file tidak pernah keluar dari browser',
+  or:'atau',demo:'Lihat demo dengan data contoh',privacy:'100% lokal · <b>tanpa unggah</b> · tanpa server · tanpa pelacakan',
+  load_title:'Membaca tahunmu…',load_msg:'membaca tabel VRCX',
+  err_invalid:'Ini sepertinya bukan file SQLite yang valid.',err_empty:'Tidak ada aktivitas VRChat di rentang ini. Coba rentang lebih luas atau cek VRCX.sqlite3 kamu.',err_read:'Gagal membaca file itu.',
+  hint:'geser atau pakai ← → untuk pindah',
+  s1_tag:'Checkpoint',s1_kick:'Tahunmu di VR · {label}',s1_head:'Putar ulang<br>tahun <em>{year}</em> kamu.',s1_lede:'Kamu login. Begadang. Ketemu orang asing yang jadi langganan. Ini buktinya, langsung dari log kamu sendiri.',m_visits:'Kunjungan world',m_days:'Hari aktif',
+  s2_tag:'Waktu hidup',s2_kick:'Jam yang dihabiskan di world',s2_unit:'jam · sekitar {d} hari penuh',s2_lede:'Waktu nyata, kehadiran nyata. Tiap jam dihabiskan di tempat yang tidak benar-benar ada.',
+  s3_tag:'Penjelajah',s3_kick:'World yang kamu masuki',s3_unit:'world unik dari {v} kunjungan',s3_lede:'Dari lounge tenang sampai ruang kacau, kamu masuk ke <b>{n}</b> sudut metaverse.',
+  s4_tag:'Markas',s4_kick:'Tempat yang selalu kamu datangi',s4_lede:'World paling sering kamu kunjungi, <b>{v} kali</b>. Semua orang punya tempat yang terasa seperti rumah.',
+  s5_tag:'Sosial',s5_kick:'Orang berbeda yang kamu temui',s5_unit:'avatar ditemui · {e} total pertemuan',s5_lede:'Di balik tiap avatar ada manusia. Kamu berbagi ruang dengan <b>{n}</b> di antaranya.',
+  s6_tag:'Squad kamu',s6_kick:'Orang yang paling sering bareng kamu',s6_head:'Squad',s6_seen:'{n} kali',s6_empty:'Log join belum cukup buat sebut nama, tapi mereka tahu siapa mereka.',
+  s7_tag:'Ikatan baru',s7_kick:'Teman yang kamu tambah',s7_unit:'pertemanan baru',s7_lede:'<b>{n}</b> orang berubah dari asing jadi teman. Daftarnya terus bertambah.',s7_lede0:'Yang sejati sudah ada di daftar. Kualitas di atas kuantitas.',
+  s8_tag:'Ritme',s8_kick:'Kapan kamu benar-benar online',s8_owl:'Burung<br><em>malam</em>',s8_peak:'Puncak: <em>{t}</em>',s8_lede:'<b>{p}%</b> sesimu mulai setelah tengah malam. Waktu emasmu jam <b>{t}</b>.',
+  s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
+  s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
+  tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
+  name_ph:'tulis namamu',dl:'Unduh kartu',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
+  caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:'},
+
+ ja:{native:'日本語',restart:'最初から',
+  sub:'メタバースで過ごした一年を振り返ろう。<b>VRCXデータベース</b>をドロップして、訪れたワールド、出会った人、夜更かしの記録を見よう。',
+  tf_label:'期間を選ぶ',tf_month:'過去30日',tf_year:'過去12か月',tf_all:'すべて',tf_month_v:'1か月',tf_year_v:'1年',tf_all_v:'全期間',
+  drop_title:'VRCXデータベースをここにドロップ',drop_hint:'またはクリックして選択 — ファイルはブラウザの外に出ません',
+  or:'または',demo:'サンプルデータでデモを見る',privacy:'100%ローカル · <b>アップロードなし</b> · サーバーなし · 追跡なし',
+  load_title:'あなたの一年を読み込み中…',load_msg:'VRCXテーブルを解析中',
+  err_invalid:'有効なSQLiteファイルではないようです。',err_empty:'この期間にVRChatの記録が見つかりません。範囲を広げるかVRCX.sqlite3を確認してください。',err_read:'ファイルを読み込めませんでした。',
+  hint:'スワイプまたは ← → で移動',
+  s1_tag:'チェックポイント',s1_kick:'VRでの一年 · {label}',s1_head:'<em>{year}</em>を<br>振り返ろう。',s1_lede:'ログインして、夜更かしして、出会った人が常連になった。その証拠を、あなた自身の記録から。',m_visits:'ワールド訪問',m_days:'オンライン日数',
+  s2_tag:'過ごした時間',s2_kick:'ワールド内で過ごした時間',s2_unit:'時間 · 約{d}日分',s2_lede:'本物の時間、本物の存在感。存在しない場所で過ごした一時間一時間。',
+  s3_tag:'探検家',s3_kick:'足を踏み入れたワールド',s3_unit:'のユニークワールド／{v}回の訪問',s3_lede:'静かなラウンジからカオスな部屋まで、メタバースの<b>{n}</b>か所を巡った。',
+  s4_tag:'ホーム',s4_kick:'何度も戻ってきた場所',s4_lede:'一番訪れたワールド、<b>{v}回</b>。誰にでも家のように感じる場所がある。',
+  s5_tag:'ソーシャル',s5_kick:'すれ違った人の数',s5_unit:'人と遭遇 · 合計{e}回',s5_lede:'どのアバターの裏にも人がいた。<b>{n}</b>人と空間を共にした。',
+  s6_tag:'あなたの仲間',s6_kick:'一番一緒に過ごした人たち',s6_head:'仲間',s6_seen:'{n}回',s6_empty:'名前を挙げるにはログが足りないけど、彼らは分かっている。',
+  s7_tag:'新しい絆',s7_kick:'追加したフレンド',s7_unit:'人の新しいフレンド',s7_lede:'<b>{n}</b>人が他人からフレンドになった。リストは増え続ける。',s7_lede0:'本物はもうリストにいた。量より質。',
+  s8_tag:'リズム',s8_kick:'本当にオンラインな時間',s8_owl:'夜<br><em>ふくろう</em>',s8_peak:'ピーク: <em>{t}</em>',s8_lede:'セッションの<b>{p}%</b>が深夜0時以降に開始。ゴールデンタイムは<b>{t}</b>。',
+  s9_tag:'勢い',s9_kick:'最も忙しかった月',s9_lede:'その月に一番現れた。何かが引き戻し続けた。',m_month_v:'その月の訪問',m_month_avg:'月平均',
+  s10_tag:'コレクト',s10_kick:'あなたの{year}年VRChatカード',role_night:'夜の放浪者',role_vet:'ワールド老兵',role_expl:'メタバース探検家',
+  tc_hours:'時間',tc_worlds:'ワールド',tc_met:'遭遇',tc_friends:'フレンド',tc_foot:'VRCHAT WRAP · データはこの端末から出ていません',
+  name_ph:'名前を入力',dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',
+  outro:'スクショして、シェアして、また会おう。',
+  caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:'},
+
+ ko:{native:'한국어',restart:'다시',
+  sub:'메타버스에서 보낸 한 해를 다시 재생하세요. <b>VRCX 데이터베이스</b>를 올려 모든 월드, 친구, 늦은 밤 세션을 되돌아보세요.',
+  tf_label:'기간 선택',tf_month:'최근 30일',tf_year:'최근 12개월',tf_all:'전체',tf_month_v:'1개월',tf_year_v:'1년',tf_all_v:'전체 기간',
+  drop_title:'여기에 VRCX 데이터베이스를 놓으세요',drop_hint:'또는 클릭해서 선택 — 파일은 브라우저를 떠나지 않습니다',
+  or:'또는',demo:'샘플 데이터로 데모 보기',privacy:'100% 로컬 · <b>업로드 없음</b> · 서버 없음 · 추적 없음',
+  load_title:'당신의 한 해를 읽는 중…',load_msg:'VRCX 테이블 분석 중',
+  err_invalid:'유효한 SQLite 파일이 아닌 것 같습니다.',err_empty:'이 기간에 VRChat 활동이 없습니다. 범위를 넓히거나 VRCX.sqlite3를 확인하세요.',err_read:'파일을 읽을 수 없습니다.',
+  hint:'스와이프하거나 ← → 로 이동',
+  s1_tag:'체크포인트',s1_kick:'VR에서의 한 해 · {label}',s1_head:'<em>{year}</em>년을<br>다시 재생.',s1_lede:'로그인하고, 밤을 새우고, 낯선 사람이 단골이 되었죠. 그 증거를 당신의 로그에서.',m_visits:'월드 방문',m_days:'접속한 날',
+  s2_tag:'보낸 시간',s2_kick:'월드에서 보낸 시간',s2_unit:'시간 · 약 {d}일',s2_lede:'진짜 시간, 진짜 존재. 존재하지 않는 곳에서 보낸 모든 시간.',
+  s3_tag:'탐험가',s3_kick:'발을 들인 월드',s3_unit:'개의 고유 월드 / {v}회 방문',s3_lede:'조용한 라운지부터 혼돈의 방까지, 메타버스의 <b>{n}</b>곳을 누볐습니다.',
+  s4_tag:'홈',s4_kick:'계속 돌아온 곳',s4_lede:'가장 많이 방문한 월드, <b>{v}회</b>. 누구나 집처럼 느껴지는 곳이 있죠.',
+  s5_tag:'소셜',s5_kick:'마주친 다른 사람들',s5_unit:'명과 만남 · 총 {e}회',s5_lede:'모든 아바타 뒤에 사람이 있었죠. <b>{n}</b>명과 공간을 나눴습니다.',
+  s6_tag:'당신의 스쿼드',s6_kick:'가장 많은 시간을 함께한 사람들',s6_head:'스쿼드',s6_seen:'{n}회',s6_empty:'이름을 부르기엔 로그가 부족하지만, 그들은 압니다.',
+  s7_tag:'새로운 인연',s7_kick:'추가한 친구',s7_unit:'명의 새 친구',s7_lede:'<b>{n}</b>명이 남에서 친구가 되었습니다. 목록은 계속 늘어납니다.',s7_lede0:'진짜는 이미 목록에 있었죠. 양보다 질.',
+  s8_tag:'리듬',s8_kick:'진짜 접속하는 시간',s8_owl:'야행성<br><em>올빼미</em>',s8_peak:'피크: <em>{t}</em>',s8_lede:'세션의 <b>{p}%</b>가 자정 이후 시작. 황금 시간대는 <b>{t}</b>.',
+  s9_tag:'모멘텀',s9_kick:'가장 바빴던 달',s9_lede:'그달에 가장 많이 나타났죠. 무언가가 계속 당신을 끌어당겼습니다.',m_month_v:'그달 방문',m_month_avg:'월 평균',
+  s10_tag:'컬렉트',s10_kick:'당신의 {year} VRChat 카드',role_night:'밤의 방랑자',role_vet:'월드 베테랑',role_expl:'메타버스 탐험가',
+  tc_hours:'시간',tc_worlds:'월드',tc_met:'만남',tc_friends:'친구',tc_foot:'VRCHAT WRAP · 데이터는 이 기기를 떠나지 않았습니다',
+  name_ph:'이름 입력',dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',
+  outro:'스크린샷하고, 공유하고, 다음에 또 만나요.',
+  caption:'내 VRChat Wrap — {h}시간, 월드 {w}곳, {p}명과 만남. 당신도 만들어보세요:'},
+
+ zh:{native:'中文',restart:'重新开始',
+  sub:'回放你在元宇宙度过的一年。拖入你的<b>VRCX数据库</b>，重温每个世界、每位好友和每个深夜时光。',
+  tf_label:'选择时间范围',tf_month:'最近30天',tf_year:'最近12个月',tf_all:'全部',tf_month_v:'1个月',tf_year_v:'1年',tf_all_v:'全部时间',
+  drop_title:'把你的VRCX数据库拖到这里',drop_hint:'或点击选择 — 文件不会离开你的浏览器',
+  or:'或',demo:'用示例数据查看演示',privacy:'100%本地 · <b>不上传</b> · 无服务器 · 无追踪',
+  load_title:'正在读取你的一年…',load_msg:'正在解析VRCX表',
+  err_invalid:'这看起来不是有效的SQLite文件。',err_empty:'此范围内没有VRChat活动。请扩大范围或检查你的VRCX.sqlite3。',err_read:'无法读取该文件。',
+  hint:'滑动或用 ← → 切换',
+  s1_tag:'检查点',s1_kick:'你在VR的一年 · {label}',s1_head:'回放你的<br><em>{year}</em>年。',s1_lede:'你登录、熬夜、把陌生人变成常客。这就是证据，来自你自己的记录。',m_visits:'世界访问',m_days:'在线天数',
+  s2_tag:'度过的时间',s2_kick:'在世界中度过的时间',s2_unit:'小时 · 约{d}整天',s2_lede:'真实的时间，真实的存在。每一小时都花在并不存在的地方。',
+  s3_tag:'探索者',s3_kick:'你踏入的世界',s3_unit:'个独特世界 / {v}次访问',s3_lede:'从安静的休息室到混乱的房间，你走进了元宇宙的<b>{n}</b>个角落。',
+  s4_tag:'大本营',s4_kick:'你一再回到的地方',s4_lede:'你访问最多的世界，<b>{v}次</b>。每个人都有一个像家的地方。',
+  s5_tag:'社交',s5_kick:'你遇见的不同的人',s5_unit:'个化身相遇 · 共{e}次',s5_lede:'每个化身背后都有一个人。你与其中<b>{n}</b>位共享了空间。',
+  s6_tag:'你的小队',s6_kick:'你花时间最多的人',s6_head:'小队',s6_seen:'{n}次',s6_empty:'记录还不够点名，但他们心里有数。',
+  s7_tag:'新羁绊',s7_kick:'你添加的好友',s7_unit:'位新好友',s7_lede:'<b>{n}</b>人从陌生人变成好友。名单还在增长。',s7_lede0:'真正的人早已在名单里。质胜于量。',
+  s8_tag:'节奏',s8_kick:'你真正在线的时间',s8_owl:'夜<br><em>猫子</em>',s8_peak:'高峰: <em>{t}</em>',s8_lede:'你<b>{p}%</b>的会话在午夜后开始。你的黄金时段是<b>{t}</b>。',
+  s9_tag:'势头',s9_kick:'你最忙的月份',s9_lede:'那个月你出现得最多。有什么一直把你拉回来。',m_month_v:'当月访问',m_month_avg:'月均',
+  s10_tag:'收藏',s10_kick:'你的{year}年VRChat卡片',role_night:'夜行者',role_vet:'世界老兵',role_expl:'元宇宙探索者',
+  tc_hours:'小时',tc_worlds:'世界',tc_met:'相遇',tc_friends:'好友',tc_foot:'VRCHAT WRAP · 数据从未离开此设备',
+  name_ph:'输入你的名字',dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',
+  outro:'截图、分享、下次再见。',
+  caption:'我的VRChat Wrap — {h}小时，{w}个世界，遇见{p}人。来做你的:'},
+
+ es:{native:'Español',restart:'Reiniciar',
+  sub:'Un año dentro del metaverso, repetido. Suelta tu <b>base de datos VRCX</b> y revive cada mundo, amigo y sesión de madrugada.',
+  tf_label:'Elige tu rango',tf_month:'últimos 30 días',tf_year:'últimos 12 meses',tf_all:'todo',tf_month_v:'1 Mes',tf_year_v:'1 Año',tf_all_v:'Todo',
+  drop_title:'Suelta aquí tu base de datos VRCX',drop_hint:'o haz clic para buscar — el archivo nunca sale de tu navegador',
+  or:'o',demo:'Ver demo con datos de ejemplo',privacy:'100% local · <b>sin subidas</b> · sin servidor · sin rastreo',
+  load_title:'Leyendo tu año…',load_msg:'analizando tablas VRCX',
+  err_invalid:'Esto no parece un archivo SQLite válido.',err_empty:'No hay actividad de VRChat en este rango. Prueba un rango más amplio o revisa tu VRCX.sqlite3.',err_read:'No se pudo leer el archivo.',
+  hint:'desliza o usa ← → para moverte',
+  s1_tag:'Checkpoint',s1_kick:'Tu año en VR · {label}',s1_head:'Repitamos<br>tu <em>{year}</em>.',s1_lede:'Iniciaste sesión. Trasnochaste. Conociste a extraños que se volvieron habituales. Aquí está la prueba, de tus propios registros.',m_visits:'Visitas a mundos',m_days:'Días en línea',
+  s2_tag:'Tiempo vivido',s2_kick:'Horas dentro de mundos',s2_unit:'horas · unos {d} días completos',s2_lede:'Tiempo real, presencia real. Cada hora en un lugar que no existe.',
+  s3_tag:'Explorador',s3_kick:'Mundos en los que entraste',s3_unit:'mundos únicos en {v} visitas',s3_lede:'De salas tranquilas a cuartos caóticos, recorriste <b>{n}</b> rincones del metaverso.',
+  s4_tag:'Base',s4_kick:'El lugar al que siempre volvías',s4_lede:'Tu mundo más visitado, <b>{v} veces</b>. Todos tienen un sitio que se siente como hogar.',
+  s5_tag:'Social',s5_kick:'Personas distintas que cruzaste',s5_unit:'avatares conocidos · {e} encuentros',s5_lede:'Detrás de cada avatar había una persona. Compartiste espacio con <b>{n}</b> de ellas.',
+  s6_tag:'Tu escuadrón',s6_kick:'Con quienes pasaste más tiempo',s6_head:'Escuadrón',s6_seen:'{n} veces',s6_empty:'No hay registros suficientes para nombrar, pero ellos lo saben.',
+  s7_tag:'Nuevos lazos',s7_kick:'Amigos que añadiste',s7_unit:'nuevas amistades',s7_lede:'<b>{n}</b> personas pasaron de extraños a amigos. La lista sigue creciendo.',s7_lede0:'Los de verdad ya estaban en la lista. Calidad sobre cantidad.',
+  s8_tag:'Ritmo',s8_kick:'Cuándo estás realmente en línea',s8_owl:'Ave<br><em>nocturna</em>',s8_peak:'Pico: <em>{t}</em>',s8_lede:'El <b>{p}%</b> de tus sesiones empezó después de medianoche. Tu hora pico es <b>{t}</b>.',
+  s9_tag:'Impulso',s9_kick:'Tu mes más activo',s9_lede:'Ahí fue cuando más apareciste. Algo te seguía trayendo de vuelta.',m_month_v:'Visitas ese mes',m_month_avg:'Promedio mensual',
+  s10_tag:'Colecciona',s10_kick:'Tu tarjeta VRChat {year}',role_night:'Errante Nocturno',role_vet:'Veterano de Mundos',role_expl:'Explorador del Metaverso',
+  tc_hours:'horas',tc_worlds:'mundos',tc_met:'conocidos',tc_friends:'amigos',tc_foot:'VRCHAT WRAP · TUS DATOS NUNCA SALIERON DE ESTE DISPOSITIVO',
+  name_ph:'escribe tu nombre',dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',
+  outro:'Captúrala. Compártela. Hasta la próxima.',
+  caption:'Mi VRChat Wrap — {h}h en {w} mundos, {p} personas conocidas. Haz el tuyo:'},
+
+ fr:{native:'Français',restart:'Recommencer',
+  sub:'Une année dans le métavers, rejouée. Dépose ta <b>base de données VRCX</b> et revis chaque monde, ami et session nocturne.',
+  tf_label:'Choisis ta période',tf_month:'30 derniers jours',tf_year:'12 derniers mois',tf_all:'tout',tf_month_v:'1 Mois',tf_year_v:'1 An',tf_all_v:'Tout',
+  drop_title:'Dépose ta base de données VRCX ici',drop_hint:'ou clique pour parcourir — le fichier ne quitte jamais ton navigateur',
+  or:'ou',demo:'Voir la démo avec des données d\'exemple',privacy:'100% local · <b>aucun envoi</b> · aucun serveur · aucun suivi',
+  load_title:'Lecture de ton année…',load_msg:'analyse des tables VRCX',
+  err_invalid:'Cela ne ressemble pas à un fichier SQLite valide.',err_empty:'Aucune activité VRChat sur cette période. Élargis la plage ou vérifie ton VRCX.sqlite3.',err_read:'Impossible de lire ce fichier.',
+  hint:'glisse ou utilise ← → pour avancer',
+  s1_tag:'Checkpoint',s1_kick:'Ton année en VR · {label}',s1_head:'Rejouons<br>ton <em>{year}</em>.',s1_lede:'Tu t\'es connecté. Tu as veillé tard. Des inconnus sont devenus des habitués. Voici la preuve, tirée de tes propres journaux.',m_visits:'Visites de mondes',m_days:'Jours en ligne',
+  s2_tag:'Temps vécu',s2_kick:'Heures passées dans les mondes',s2_unit:'heures · environ {d} jours pleins',s2_lede:'Du temps réel, une présence réelle. Chaque heure passée dans un lieu qui n\'existe pas.',
+  s3_tag:'Explorateur',s3_kick:'Mondes où tu es entré',s3_unit:'mondes uniques sur {v} visites',s3_lede:'Des salons calmes aux salles chaotiques, tu as parcouru <b>{n}</b> coins du métavers.',
+  s4_tag:'Camp de base',s4_kick:'L\'endroit où tu revenais toujours',s4_lede:'Ton monde le plus visité, <b>{v} fois</b>. Chacun a un endroit qui ressemble à un chez-soi.',
+  s5_tag:'Social',s5_kick:'Personnes différentes croisées',s5_unit:'avatars rencontrés · {e} rencontres',s5_lede:'Derrière chaque avatar, une personne. Tu as partagé un espace avec <b>{n}</b> d\'entre elles.',
+  s6_tag:'Ton équipe',s6_kick:'Ceux avec qui tu as passé le plus de temps',s6_head:'Équipe',s6_seen:'{n} fois',s6_empty:'Pas assez de journaux pour citer des noms, mais ils se reconnaissent.',
+  s7_tag:'Nouveaux liens',s7_kick:'Amis ajoutés',s7_unit:'nouvelles amitiés',s7_lede:'<b>{n}</b> personnes sont passées d\'inconnus à amis. La liste s\'allonge.',s7_lede0:'Les vrais étaient déjà sur la liste. La qualité avant la quantité.',
+  s8_tag:'Rythme',s8_kick:'Quand tu es vraiment en ligne',s8_owl:'Oiseau<br><em>de nuit</em>',s8_peak:'Pic : <em>{t}</em>',s8_lede:'<b>{p}%</b> de tes sessions ont commencé après minuit. Ton heure de pointe est <b>{t}</b>.',
+  s9_tag:'Élan',s9_kick:'Ton mois le plus actif',s9_lede:'C\'est là que tu es le plus apparu. Quelque chose te ramenait sans cesse.',m_month_v:'Visites ce mois',m_month_avg:'Moyenne mensuelle',
+  s10_tag:'Collection',s10_kick:'Ta carte VRChat {year}',role_night:'Vagabond Nocturne',role_vet:'Vétéran des Mondes',role_expl:'Explorateur du Métavers',
+  tc_hours:'heures',tc_worlds:'mondes',tc_met:'rencontrés',tc_friends:'amis',tc_foot:'VRCHAT WRAP · TES DONNÉES N\'ONT JAMAIS QUITTÉ CET APPAREIL',
+  name_ph:'écris ton nom',dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',
+  outro:'Capture-la. Partage-la. À la prochaine.',
+  caption:'Mon VRChat Wrap — {h}h dans {w} mondes, {p} personnes rencontrées. Fais le tien :'}
+};
+const LANGS=['en','id','ja','ko','zh','es','fr'];
+let LANG='en';
+function pickLang(){
+  const saved=localStorage.getItem('vrcwrap_lang');
+  if(saved&&I18N[saved])return saved;
+  const n=(navigator.language||'en').toLowerCase();
+  if(n.startsWith('id')||n.startsWith('in'))return 'id';
+  for(const l of LANGS) if(n.startsWith(l))return l;
+  if(n.startsWith('zh'))return 'zh';
+  return 'en';
+}
+function t(key,vars){ let s=(I18N[LANG]&&I18N[LANG][key])!=null?I18N[LANG][key]:(I18N.en[key]||key);
+  if(vars) for(const k in vars) s=s.replaceAll('{'+k+'}',vars[k]); return s; }
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i]').forEach(el=>{ el.innerHTML=t(el.getAttribute('data-i')); });
+  $('#loadmsg').textContent=t('load_msg');
+  $('#hint').innerHTML=t('hint');
+}
+
+/* ============================= ENGINE ============================= */
+const $=s=>document.querySelector(s);
+const fmt=n=>(n==null||isNaN(n))?'0':Math.round(n).toLocaleString('en-US');
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString('en-US');
+function hashHue(s){let h=0;for(let i=0;i<(s||'').length;i++)h=(h*31+s.charCodeAt(i))%360;return h;}
+function avatarStyle(s,round){const h=hashHue(s);return `background:linear-gradient(135deg,hsl(${h} 80% 58%),hsl(${(h+45)%360} 80% 50%))`;}
+function initial(s){return (String(s||'?').trim()[0]||'?').toUpperCase();}
+
 (function fx(){
   const c=$('#fx'),x=c.getContext('2d');let w,h,P=[];
   function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=[];const n=Math.min(110,Math.floor(w*h/14000));for(let i=0;i<n;i++)P.push({x:Math.random()*w,y:Math.random()*h,z:Math.random()*.8+.2,vy:-(Math.random()*.3+.05)});}
   rs();addEventListener('resize',rs);
-  (function loop(){
-    x.clearRect(0,0,w,h);
-    const col=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#27ff95';
-    for(const p of P){p.y+=p.vy;if(p.y<-2){p.y=h+2;p.x=Math.random()*w;}
-      x.globalAlpha=p.z*.6;x.fillStyle=col;x.beginPath();x.arc(p.x,p.y,p.z*1.7,0,7);x.fill();}
-    x.globalAlpha=1;requestAnimationFrame(loop);
-  })();
+  (function loop(){x.clearRect(0,0,w,h);const col=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#27ff95';
+    for(const p of P){p.y+=p.vy;if(p.y<-2){p.y=h+2;p.x=Math.random()*w;}x.globalAlpha=p.z*.6;x.fillStyle=col;x.beginPath();x.arc(p.x,p.y,p.z*1.7,0,7);x.fill();}
+    x.globalAlpha=1;requestAnimationFrame(loop);})();
 })();
 
-/* ============================= VRCX PARSING ============================= */
-function parseTime(s){ // VRCX created_at variants
-  if(!s) return null;
-  let t=String(s).replace(' ','T');
-  if(!/[zZ]|[+\-]\d\d:?\d\d$/.test(t)) t+='Z';
-  const d=new Date(t); return isNaN(d)?null:d;
-}
-function detectYear(rows){
-  const years={};
-  rows.forEach(r=>{const d=parseTime(r); if(d){years[d.getUTCFullYear()]=(years[d.getUTCFullYear()]||0)+1;}});
-  let best=new Date().getFullYear(),mx=-1;
-  for(const y in years) if(years[y]>mx){mx=years[y];best=+y;}
-  return best;
-}
+/* ============================= PARSING ============================= */
+function parseTime(s){if(!s)return null;let t=String(s).replace(' ','T');if(!/[zZ]|[+\-]\d\d:?\d\d$/.test(t))t+='Z';const d=new Date(t);return isNaN(d)?null:d;}
 
-function analyze(db){
-  const log=[];
-  const out=(m)=>{ $('#loadmsg').textContent=m; };
-  // discover tables
-  let tables=[];
-  try{ const r=db.exec("SELECT name FROM sqlite_master WHERE type='table'"); if(r[0]) tables=r[0].values.map(v=>v[0]); }catch(e){}
+function analyze(db,range){
+  const out=m=>{$('#loadmsg').textContent=m;};
+  let tables=[];try{const r=db.exec("SELECT name FROM sqlite_master WHERE type='table'");if(r[0])tables=r[0].values.map(v=>v[0]);}catch(e){}
   const has=n=>tables.includes(n);
   const findSuffix=suf=>tables.filter(t=>t.toLowerCase().endsWith(suf));
-  const rowsOf=sql=>{ try{const r=db.exec(sql); if(!r[0])return[]; const cols=r[0].columns; return r[0].values.map(v=>{const o={};cols.forEach((c,i)=>o[c]=v[i]);return o;});}catch(e){return[];} };
+  const rowsOf=sql=>{try{const r=db.exec(sql);if(!r[0])return[];const cols=r[0].columns;return r[0].values.map(v=>{const o={};cols.forEach((c,i)=>o[c]=v[i]);return o;});}catch(e){return[];}};
 
-  // ---- pick year ----
-  out('detecting your active year');
-  let yearProbe=[];
-  if(has('gamelog_location')) yearProbe=rowsOf("SELECT created_at FROM gamelog_location").map(r=>r.created_at);
-  if(!yearProbe.length){ const t=findSuffix('feed_gps')[0]; if(t) yearProbe=rowsOf(`SELECT created_at FROM "${t}"`).map(r=>r.created_at); }
-  const YEAR=yearProbe.length?detectYear(yearProbe):new Date().getFullYear();
-  const inYear=d=>d&&d.getUTCFullYear()===YEAR;
-
-  const stats={year:YEAR};
-
-  // ---- worlds (gamelog_location) ----
-  out('counting worlds');
+  out(t('load_msg'));
   let loc=has('gamelog_location')?rowsOf("SELECT created_at,world_name,world_id,time FROM gamelog_location"):[];
-  loc=loc.map(r=>({d:parseTime(r.created_at),name:r.world_name||'Unknown World',id:r.world_id,time:+r.time||0})).filter(r=>inYear(r.d));
+  loc=loc.map(r=>({d:parseTime(r.created_at),name:r.world_name||'Unknown World',id:r.world_id,time:+r.time||0})).filter(r=>r.d);
+  const allDates=loc.map(r=>r.d);
+  const end=allDates.length?new Date(Math.max(...allDates.map(d=>d.getTime()))):new Date();
+  let start;
+  if(range==='month')start=new Date(end.getTime()-30*864e5);
+  else if(range==='year')start=new Date(end.getTime()-365*864e5);
+  else start=new Date(0);
+  const inR=d=>d&&d>=start&&d<=end;
+
+  const stats={year:end.getFullYear(),range};
+  stats.label = range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all');
+
+  // self user id, reconstructed from the VRCX per-user table prefix (usr<32hex>_...)
+  let selfId=null,selfName=null;
+  const ut=tables.find(x=>/^usr[0-9a-f]{32}_/i.test(x));
+  if(ut){const hx=ut.match(/^usr([0-9a-f]{32})_/i)[1];selfId='usr_'+hx.slice(0,8)+'-'+hx.slice(8,12)+'-'+hx.slice(12,16)+'-'+hx.slice(16,20)+'-'+hx.slice(20);}
+
+  loc=loc.filter(r=>inR(r.d));
   stats.sessions=loc.length;
   stats.uniqueWorlds=new Set(loc.map(r=>r.id||r.name)).size;
   stats.hours=loc.reduce((a,r)=>a+r.time,0)/3600000;
-  // top worlds by visit count
-  const wc={};loc.forEach(r=>{wc[r.name]=(wc[r.name]||0)+1;});
-  stats.topWorlds=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v}));
-  // hour-of-day histogram (local)
-  const hours=new Array(24).fill(0);
-  loc.forEach(r=>{if(r.d)hours[r.d.getHours()]++;});
+  const wc={},wid={};loc.forEach(r=>{wc[r.name]=(wc[r.name]||0)+1;if(!wid[r.name]&&r.id)wid[r.name]=r.id;});
+  stats.topWorlds=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v,id:wid[n]}));
+  const hours=new Array(24).fill(0);loc.forEach(r=>{if(r.d)hours[r.d.getHours()]++;});
   stats.hours24=hours;
   const night=hours.slice(0,6).reduce((a,b)=>a+b,0);
   stats.nightPct=loc.length?Math.round(night/loc.length*100):0;
-  // months
-  const mo=new Array(12).fill(0);loc.forEach(r=>{if(r.d)mo[r.d.getUTCMonth()]++;});
+  const mo=new Array(12).fill(0);loc.forEach(r=>{if(r.d)mo[r.d.getMonth()]++;});
   stats.months=mo;
-  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  stats.busiestMonth=mo.some(x=>x)?MN[mo.indexOf(Math.max(...mo))]:'—';
-  // distinct active days
+  stats.busiestMonthIdx=mo.some(x=>x)?mo.indexOf(Math.max(...mo)):-1;
+  stats.monthMax=Math.max(0,...mo);
   stats.activeDays=new Set(loc.map(r=>r.d&&r.d.toISOString().slice(0,10))).size;
 
-  // ---- people (gamelog_join_leave) ----
-  out('remembering the people');
-  let jl=has('gamelog_join_leave')?rowsOf("SELECT created_at,type,display_name FROM gamelog_join_leave"):[];
-  jl=jl.map(r=>({d:parseTime(r.created_at),type:r.type,nm:r.display_name})).filter(r=>inYear(r.d)&&(/join/i.test(r.type||'')));
-  const pc={};jl.forEach(r=>{if(r.nm)pc[r.nm]=(pc[r.nm]||0)+1;});
+  out(t('load_msg'));
+  let jl=has('gamelog_join_leave')?rowsOf("SELECT created_at,type,display_name,user_id FROM gamelog_join_leave"):[];
+  jl=jl.map(r=>({d:parseTime(r.created_at),type:r.type,nm:r.display_name,uid:r.user_id})).filter(r=>inR(r.d)&&/join/i.test(r.type||''));
+  // resolve self display name, then drop self from the people/squad stats
+  if(selfId){const sr=jl.find(r=>r.uid===selfId);if(sr)selfName=sr.nm;}
+  jl=jl.filter(r=>r.uid!==selfId && (!selfName||r.nm!==selfName));
+  const pc={},pid={};jl.forEach(r=>{if(r.nm){pc[r.nm]=(pc[r.nm]||0)+1;if(!pid[r.nm]&&r.uid)pid[r.nm]=r.uid;}});
   stats.peopleMet=Object.keys(pc).length;
   stats.encounters=jl.length;
-  stats.squad=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v}));
+  stats.squad=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v,uid:pid[n]}));
 
-  // ---- friends added (friend_log_history) ----
-  out('tallying friendships');
   const flt=findSuffix('friend_log_history')[0];
   let added=0;
-  if(flt){ const fl=rowsOf(`SELECT created_at,type FROM "${flt}"`); added=fl.map(r=>({d:parseTime(r.created_at),type:r.type})).filter(r=>inYear(r.d)&&/^friend$/i.test(r.type||'')).length; }
+  if(flt){const fl=rowsOf(`SELECT created_at,type FROM "${flt}"`);added=fl.map(r=>({d:parseTime(r.created_at),type:r.type})).filter(r=>inR(r.d)&&/^friend$/i.test(r.type||'')).length;}
   stats.friendsAdded=added;
-
-  stats.hasReal = (loc.length+jl.length)>0;
+  stats.hasReal=(loc.length+jl.length)>0;
   return stats;
 }
 
-/* ============================= DEMO DATA ============================= */
-function demoStats(){
-  return {year:new Date().getFullYear(),sessions:1287,uniqueWorlds:342,hours:1645,activeDays:228,nightPct:61,
-    busiestMonth:'October',
+/* ============================= DEMO ============================= */
+function demoStats(range){
+  const y=new Date().getFullYear();
+  const base={month:{s:118,w:54,h:142,d:24,p:486,e:1620,fa:11,sq:[['Nyx',61],['Kuma_VR',54],['Pixel',43],['Aurora',31],['Volt',22]],tw:[['The Black Cat',22],['Murder 4',14],['Prismic Lounge',11],['Movie & Chill',8],['Just Hangout',6]]},
+    year:{s:1287,w:342,h:1645,d:228,p:3914,e:14820,fa:127,sq:[['Nyx',412],['Kuma_VR',388],['Pixel',301],['Aurora',264],['Volt',198]],tw:[['The Black Cat',142],['Murder 4',97],['Prismic Lounge',73],['Movie & Chill',58],['Just Hangout',44]]},
+    all:{s:3120,w:760,h:4210,d:540,p:8800,e:36500,fa:640,sq:[['Nyx',980],['Kuma_VR',870],['Pixel',640],['Aurora',520],['Volt',410]],tw:[['The Black Cat',330],['Murder 4',210],['Prismic Lounge',180],['Movie & Chill',150],['Just Hangout',120]]}};
+  const b=base[range]||base.year;
+  return {year:y,range,label:range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all'),
+    sessions:b.s,uniqueWorlds:b.w,hours:b.h,activeDays:b.d,nightPct:61,
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
-    months:[88,76,91,84,99,103,112,108,121,138,96,71],
-    topWorlds:[{n:'The Black Cat',v:142},{n:'Murder 4',v:97},{n:'Prismic Lounge',v:73},{n:'Movie & Chill',v:58},{n:'Just Hangout',v:44}],
-    peopleMet:3914,encounters:14820,
-    squad:[{n:'Nyx',v:412},{n:'Kuma_VR',v:388},{n:'Pixel',v:301},{n:'Aurora',v:264},{n:'Volt',v:198}],
-    friendsAdded:127,hasReal:true,demo:true};
+    months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,
+    topWorlds:b.tw.map(([n,v])=>({n,v})),peopleMet:b.p,encounters:b.e,
+    squad:b.sq.map(([n,v])=>({n,v})),friendsAdded:range==='all'?640:b.fa,hasReal:true,demo:true};
 }
 
-/* ============================= SLIDE BUILDER ============================= */
+/* ============================= SLIDES ============================= */
 const ACCENTS=['--green','--cyan','--magenta','--orange','--pink','--green','--cyan','--magenta','--green'];
 let SLIDES=[],S=null,idx=0,YR=new Date().getFullYear();
-
-function setAccent(varname){
-  const v=getComputedStyle(document.documentElement).getPropertyValue(varname);
-  document.documentElement.style.setProperty('--accent',v);
+function setAccent(v){const val=getComputedStyle(document.documentElement).getPropertyValue(v);
+  document.documentElement.style.setProperty('--accent',val);
   const map={'--green':'--cyan','--cyan':'--green','--magenta':'--pink','--orange':'--pink','--pink':'--magenta'};
-  document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[varname]||'--cyan'));
-}
-
-function card(tag,page,total,bodyHTML,footL){
+  document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[v]||'--cyan'));}
+function card(tag,page,bodyHTML,footL){
   return `<div class="card">
-    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${String(page).padStart(2,'0')} / ${String(total).padStart(2,'0')}</span></div>
+    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${String(page).padStart(2,'0')} / 10</span></div>
     <div class="card-body">${bodyHTML}</div>
     <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
-  </div>`;
-}
+  </div>`;}
 
 function build(st){
-  const T=10;
+  const busiest = st.busiestMonthIdx>=0?monthName(LANG,st.busiestMonthIdx):'—';
+  const peakH=(()=>{const mx=Math.max(...st.hours24,1);return st.hours24.indexOf(mx);})();
+  const peakStr=String(peakH).padStart(2,'0')+':00';
   SLIDES=[
-    // 1 intro
-    ()=>card('CHECKPOINT',1,T,`
-      <div class="kicker rv">Your year in VR · ${st.year}</div>
-      <h2 class="headline rv">Let's replay<br>your <em>${st.year}</em>.</h2>
-      <p class="lede rv">You logged in. You stayed up too late. You met strangers who became regulars. Here's the proof — pulled straight from your own logs.</p>
+    ()=>card(t('s1_tag'),1,`
+      <div class="kicker rv">${t('s1_kick',{label:st.label})}</div>
+      <h2 class="headline rv">${t('s1_head',{year:st.year})}</h2>
+      <p class="lede rv">${t('s1_lede')}</p>
       <div class="mini rv" style="margin-top:6px">
-        <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">World visits</div></div>
-        <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">Days online</div></div>
+        <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('m_visits')}</div></div>
+        <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('m_days')}</div></div>
       </div>`),
-    // 2 hours
-    ()=>card('TIME LIVED',2,T,`
-      <div class="kicker rv">Hours spent in-world</div>
+    ()=>card(t('s2_tag'),2,`
+      <div class="kicker rv">${t('s2_kick')}</div>
       <div class="bignum rv">${fmt(st.hours)}</div>
-      <div class="unit rv">hours · about ${fmt(st.hours/24)} full days</div>
-      <p class="lede rv">${st.hours>876?`That's the <b>top tier</b> of VRChat dedication — more than 2 hours a day, every day.`:`Real time, real presence. Every hour spent somewhere that doesn't exist.`}</p>`),
-    // 3 worlds
-    ()=>card('EXPLORER',3,T,`
-      <div class="kicker rv">Worlds you stepped into</div>
+      <div class="unit rv">${t('s2_unit',{d:fmt(st.hours/24)})}</div>
+      <p class="lede rv">${t('s2_lede')}</p>`),
+    ()=>card(t('s3_tag'),3,`
+      <div class="kicker rv">${t('s3_kick')}</div>
       <div class="bignum rv">${fmt(st.uniqueWorlds)}</div>
-      <div class="unit rv">unique worlds across ${fmt(st.sessions)} visits</div>
-      <p class="lede rv">From quiet lounges to chaos rooms — you wandered into <b>${fmt(st.uniqueWorlds)}</b> different corners of the metaverse this year.</p>`),
-    // 4 top world
-    ()=>card('HOME BASE',4,T,`
-      <div class="kicker rv">The place you kept coming back to</div>
-      <h2 class="headline rv" style="font-size:clamp(26px,7vw,46px)">${st.topWorlds[0]?st.topWorlds[0].n:'—'}</h2>
-      <p class="lede rv" style="margin-top:-4px">Your most-visited world — <b>${st.topWorlds[0]?fmt(st.topWorlds[0].v):0} times</b>. Everyone's got a spot that feels like home.</p>
+      <div class="unit rv">${t('s3_unit',{v:fmt(st.sessions)})}</div>
+      <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`),
+    ()=>card(t('s4_tag'),4,`
+      <div class="kicker rv">${t('s4_kick')}</div>
+      <h2 class="headline rv" style="font-size:clamp(24px,6.5vw,42px)">${st.topWorlds[0]?(st.topWorlds[0].id?`<a class="wlink" href="${worldUrl(st.topWorlds[0].id)}" target="_blank" rel="noopener">${esc(st.topWorlds[0].n)}</a>`:esc(st.topWorlds[0].n)):'—'}</h2>
+      <p class="lede rv" style="margin-top:-4px">${t('s4_lede',{v:st.topWorlds[0]?fmt(st.topWorlds[0].v):0})}</p>
       <div class="ranks rv" style="margin-top:6px">
-        ${st.topWorlds.map((w,i)=>`<div class="rank ${i===0?'top':''}"><span class="n">${i+1}</span><span class="nm">${w.n}</span><span class="v">${fmt(w.v)}×</span></div>`).join('')}
+        ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false)).join('')}
       </div>`),
-    // 5 people met
-    ()=>card('SOCIAL',5,T,`
-      <div class="kicker rv">Different people you crossed paths with</div>
+    ()=>card(t('s5_tag'),5,`
+      <div class="kicker rv">${t('s5_kick')}</div>
       <div class="bignum rv">${fmt(st.peopleMet)}</div>
-      <div class="unit rv">avatars met · ${fmt(st.encounters)} total encounters</div>
-      <p class="lede rv">Behind every avatar was a person. You shared a space with <b>${fmt(st.peopleMet)}</b> of them this year.</p>`),
-    // 6 squad
-    ()=>card('YOUR SQUAD',6,T,`
-      <div class="kicker rv">The people you spent the most time with</div>
-      <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">Squad</h2>
+      <div class="unit rv">${t('s5_unit',{e:fmt(st.encounters)})}</div>
+      <p class="lede rv">${t('s5_lede',{n:fmt(st.peopleMet)})}</p>`),
+    ()=>card(t('s6_tag'),6,`
+      <div class="kicker rv">${t('s6_kick')}</div>
+      <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">${t('s6_head')}</h2>
       <div class="ranks rv">
-        ${st.squad.length?st.squad.map((p,i)=>`<div class="rank ${i===0?'top':''}"><span class="n">${i+1}</span><span class="nm">${p.n}</span><span class="v">${fmt(p.v)} seen</span></div>`).join(''):'<p class="lede">Not enough join logs to name names — but they know who they are.</p>'}
+        ${st.squad.length?st.squad.map((p,i)=>rankRow(i,p.n,t('s6_seen',{n:fmt(p.v)}),p.uid?userUrl(p.uid):null,true)).join(''):`<p class="lede">${t('s6_empty')}</p>`}
       </div>`),
-    // 7 friends added
-    ()=>card('NEW BONDS',7,T,`
-      <div class="kicker rv">Friends you added in ${st.year}</div>
+    ()=>card(t('s7_tag'),7,`
+      <div class="kicker rv">${t('s7_kick')}</div>
       <div class="bignum rv">${fmt(st.friendsAdded)}</div>
-      <div class="unit rv">new friendships</div>
-      <p class="lede rv">${st.friendsAdded>0?`<b>${fmt(st.friendsAdded)}</b> people went from stranger to friend this year. The list keeps growing.`:`The real ones were already on the list. Quality over quantity.`}</p>`),
-    // 8 night owl
-    ()=>{
-      const mx=Math.max(...st.hours24,1),peak=st.hours24.indexOf(mx);
-      const bars=st.hours24.map((v,h)=>`<div class="b ${h===peak?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
-      const ph=peak%12===0?12:peak%12, ap=peak<12?'AM':'PM';
-      return card('RHYTHM',8,T,`
-        <div class="kicker rv">When you're really online</div>
-        <h2 class="headline rv" style="font-size:clamp(28px,7.5vw,48px)">${st.nightPct>=50?'Night<br><em>owl</em>':'Peak: <em>'+ph+ap+'</em>'}</h2>
-        <p class="lede rv"><b>${st.nightPct}%</b> of your sessions started after midnight. Your prime time is <b>${ph}${ap}</b>.</p>
+      <div class="unit rv">${t('s7_unit')}</div>
+      <p class="lede rv">${st.friendsAdded>0?t('s7_lede',{n:fmt(st.friendsAdded)}):t('s7_lede0')}</p>`),
+    ()=>{const mx=Math.max(...st.hours24,1);
+      const bars=st.hours24.map((v,h)=>`<div class="b ${h===peakH?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
+      return card(t('s8_tag'),8,`
+        <div class="kicker rv">${t('s8_kick')}</div>
+        <h2 class="headline rv" style="font-size:clamp(28px,7.5vw,48px)">${st.nightPct>=50?t('s8_owl'):t('s8_peak',{t:peakStr})}</h2>
+        <p class="lede rv">${t('s8_lede',{p:st.nightPct,t:peakStr})}</p>
         <div class="bars rv">${bars}</div>
-        <div class="axis rv"><span>12AM</span><span>6</span><span>12PM</span><span>6</span><span>11PM</span></div>`);
-    },
-    // 9 busiest month
-    ()=>card('MOMENTUM',9,T,`
-      <div class="kicker rv">Your busiest month</div>
-      <h2 class="headline rv">${st.busiestMonth}</h2>
-      <p class="lede rv">That's when you showed up the most. Something kept pulling you back in.</p>
+        <div class="axis rv"><span>00:00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>`);},
+    ()=>card(t('s9_tag'),9,`
+      <div class="kicker rv">${t('s9_kick')}</div>
+      <h2 class="headline rv">${busiest}</h2>
+      <p class="lede rv">${t('s9_lede')}</p>
       <div class="mini rv">
-        <div class="m"><div class="mv">${fmt(Math.max(...st.months))}</div><div class="ml">Visits that month</div></div>
-        <div class="m"><div class="mv">${fmt(st.sessions/12)}</div><div class="ml">Monthly average</div></div>
+        <div class="m"><div class="mv">${fmt(st.monthMax)}</div><div class="ml">${t('m_month_v')}</div></div>
+        <div class="m"><div class="mv">${fmt(st.sessions/Math.max(1,st.months.filter(x=>x).length))}</div><div class="ml">${t('m_month_avg')}</div></div>
       </div>`),
-    // 10 final card
-    ()=>`<div class="card" id="s-card">
-      <div class="card-top"><span class="tag">◢ COLLECT</span><span>10 / 10</span></div>
+    ()=>{const role=st.nightPct>=50?t('role_night'):st.hours>876?t('role_vet'):t('role_expl');
+      return `<div class="card" id="s-card">
+      <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>10 / 10</span></div>
       <div class="card-body">
-        <div class="kicker rv">Your ${st.year} VRChat card</div>
+        <div class="kicker rv">${t('s10_kick',{year:st.year})}</div>
         <div class="tcard rv" id="tcard">
+          <div class="holo"></div>
           <div class="tc-top"><span>CHECKPOINT ${st.year}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
-          <div class="tc-art" id="tc-art">P</div>
+          <div class="tc-art" id="tc-art" style="${avatarStyle('PLAYER')}">P</div>
           <div class="tc-name" id="tc-name">PLAYER</div>
-          <div class="tc-role">${st.nightPct>=50?'NIGHT WANDERER':st.hours>876?'WORLD VETERAN':'METAVERSE EXPLORER'}</div>
+          <div class="tc-role">${role}</div>
           <div class="tc-stats">
-            <div><b>${fmt(st.hours)}</b>hours</div>
-            <div><b>${fmt(st.uniqueWorlds)}</b>worlds</div>
-            <div><b>${fmt(st.peopleMet)}</b>met</div>
-            <div><b>${fmt(st.friendsAdded)}</b>friends</div>
+            <div><b>${fmt(st.hours)}</b>${t('tc_hours')}</div>
+            <div><b>${fmt(st.uniqueWorlds)}</b>${t('tc_worlds')}</div>
+            <div><b>${fmt(st.peopleMet)}</b>${t('tc_met')}</div>
+            <div><b>${fmt(st.friendsAdded)}</b>${t('tc_friends')}</div>
           </div>
-          <div class="tc-foot">VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE</div>
+          <div class="tc-foot">${t('tc_foot')}</div>
         </div>
-        <div class="name-in rv"><input id="nameInput" maxlength="14" placeholder="type your name" /></div>
-        <p class="lede rv" style="text-align:center;font-size:13px">Screenshot it. Share it. See you in ${st.year+1}.</p>
+        <div class="name-in rv"><input id="nameInput" maxlength="14" placeholder="${t('name_ph')}" /></div>
+        <div class="actions rv">
+          <button class="btn" id="dlBtn">${t('dl')}</button>
+          <button class="btn ghost" id="xBtn">${t('share_x')}</button>
+          <button class="btn ghost" id="shareBtn" style="display:none">${t('share')}</button>
+        </div>
+        <div class="cap rv">
+          <div class="cap-lbl">${t('cap_lbl')}</div>
+          <textarea id="capBox"></textarea>
+        </div>
+        <p class="lede rv" style="text-align:center;font-size:13px">${t('outro')}</p>
+        <a class="kofi rv" href="${KOFI}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2 5.5 5 5.5c1.8 0 3 .9 3.7 2.1C9.4 6.4 10.6 5.5 12.4 5.5c3 0 4.6 2.9 3 6.2C16.9 16.4 12 21 12 21z"/></svg>
+          ${t('support')}
+        </a>
       </div>
       <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▥ ▤</span></div>
-    </div>`
+    </div>`;}
   ];
-  S=st; YR=st.year;
-  // progress segments
+  S=st;YR=st.year;
   const pg=$('#progress');pg.innerHTML='';
-  for(let i=0;i<T;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
+  for(let i=0;i<10;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function worldUrl(id){return 'https://vrchat.com/home/world/'+encodeURIComponent(id);}
+function userUrl(id){return 'https://vrchat.com/home/user/'+encodeURIComponent(id);}
+function rankRow(i,name,val,url,round){
+  const inner=`<span class="n">${i+1}</span><span class="av ${round?'sq':''}" style="${avatarStyle(name)}">${initial(name)}</span><span class="nm">${esc(name)}</span><span class="v">${val}</span>`+(url?'<span class="ext">↗</span>':'');
+  return url?`<a class="rank ${i===0?'top':''}" href="${url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="rank ${i===0?'top':''}">${inner}</div>`;
 }
 
 function showSlide(i){
   idx=Math.max(0,Math.min(SLIDES.length-1,i));
   setAccent(ACCENTS[idx]||'--green');
-  const deck=$('#deck');
-  deck.innerHTML=`<section class="screen on">${SLIDES[idx]()}</section>`;
-  // progress
+  $('#deck').innerHTML=`<section class="screen on">${SLIDES[idx]()}</section>`;
   document.querySelectorAll('#progress .seg').forEach((s,k)=>{s.classList.toggle('done',k<idx);s.classList.toggle('active',k===idx);});
-  // final card wiring
-  if(idx===SLIDES.length-1){
-    const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art');
-    const ini=v=>(v.trim()[0]||'P').toUpperCase();
-    const saved=localStorage.getItem('vrcwrap_name');
-    if(saved){ni.value=saved;tn.textContent=saved.toUpperCase();ta.textContent=ini(saved);}
-    ni&&ni.addEventListener('input',e=>{const raw=e.target.value.trim();const v=raw||'PLAYER';tn.textContent=v.toUpperCase();ta.textContent=ini(raw);localStorage.setItem('vrcwrap_name',raw);});
-    // tilt
-    tc&&tc.addEventListener('pointermove',e=>{const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`perspective(700px) rotateY(${px*16}deg) rotateX(${-py*16}deg)`;});
-    tc&&tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
+  if(idx===SLIDES.length-1)wireCard();
+}
+function go(d){if(!SLIDES.length)return;if(idx+d<0||idx+d>SLIDES.length-1)return;showSlide(idx+d);}
+
+/* ---- final card wiring ---- */
+let CARD_NAME='';
+function captionText(){
+  const nm=CARD_NAME||'';
+  return (nm?nm+' — ':'')+t('caption',{h:fmt(S.hours),w:fmt(S.uniqueWorlds),p:fmt(S.peopleMet)})+'\n'+SITE+' #VRChat #VRChatWrap';
+}
+function wireCard(){
+  const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art'),cap=$('#capBox');
+  const refreshCap=()=>{if(cap)cap.value=captionText();};
+  const saved=localStorage.getItem('vrcwrap_name')||'';
+  if(saved){ni.value=saved;CARD_NAME=saved;tn.textContent=saved.toUpperCase();ta.textContent=initial(saved);ta.style.cssText=avatarStyle(saved);}
+  refreshCap();
+  ni.addEventListener('input',e=>{const raw=e.target.value.trim();CARD_NAME=raw;const v=raw||'PLAYER';tn.textContent=v.toUpperCase();ta.textContent=initial(raw||'P');ta.style.cssText=avatarStyle(raw||'PLAYER');localStorage.setItem('vrcwrap_name',raw);refreshCap();});
+  tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`perspective(700px) rotateY(${px*14}deg) rotateX(${-py*14}deg)`;});
+  tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
+
+  $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
+  $('#xBtn').addEventListener('click',async()=>{
+    const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');
+    const txt=encodeURIComponent((cap?cap.value:captionText()));
+    window.open('https://twitter.com/intent/tweet?text='+txt,'_blank','noopener');
+  });
+  // native share (mobile) with image file
+  if(navigator.canShare){
+    const sb=$('#shareBtn');sb.style.display='';
+    sb.addEventListener('click',async()=>{
+      const b=await cardBlob();if(!b)return;
+      const file=new File([b],'vrchat-wrap.png',{type:'image/png'});
+      try{ if(navigator.canShare({files:[file]})) await navigator.share({files:[file],text:(cap?cap.value:captionText())});
+        else await navigator.share({text:(cap?cap.value:captionText()),url:SITE}); }catch(e){}
+    });
   }
 }
+async function cardBlob(){
+  const el=$('#tcard');if(!el||!window.html2canvas)return null;
+  const tf=el.style.transform;el.style.transform='';
+  try{
+    const cv=await html2canvas(el,{backgroundColor:'#0a0a16',scale:Math.min(3,(window.devicePixelRatio||1)*2),logging:false,useCORS:true,
+      onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});const c=doc.getElementById('tcard');if(c)c.style.transform='none';}});
+    el.style.transform=tf;
+    return await new Promise(r=>cv.toBlob(r,'image/png'));
+  }catch(e){el.style.transform=tf;return null;}
+}
+function downloadBlob(b,name){const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
 
+/* ---- screen flow ---- */
 function enterDeck(){
-  $('#intake').classList.remove('on');
-  $('#loading').classList.remove('on');
-  $('#progress').style.display='flex';
-  $('#restart').style.display='block';
-  $('#swipe').style.display='block';
-  if(innerWidth>680){$('#prev').style.display='flex';$('#next').style.display='flex';$('#hint').style.display='flex';}
-  else {$('#hint').style.display='flex';}
+  $('#intake').classList.remove('on');$('#loading').classList.remove('on');
+  $('#progress').style.display='flex';$('#restart').style.display='block';$('#langSel').parentElement.style.display='none';
+  $('#hint').style.display='flex';
+  if(innerWidth>680){$('#prev').style.display='flex';$('#next').style.display='flex';}
   showSlide(0);
 }
 
-/* ---- navigation ---- */
-function go(d){ if(!SLIDES.length)return; if(idx+d<0)return; if(idx+d>SLIDES.length-1)return; showSlide(idx+d); }
-$('#next').onclick=()=>go(1); $('#prev').onclick=()=>go(-1);
-addEventListener('keydown',e=>{ if(!SLIDES.length)return; if(e.key==='ArrowRight'||e.key===' ')go(1); if(e.key==='ArrowLeft')go(-1);});
-$('#restart').onclick=()=>{location.reload();};
-// tap zones + swipe (mobile)
-let tsx=0,tsy=0;
-$('#swipe').addEventListener('pointerdown',e=>{tsx=e.clientX;tsy=e.clientY;});
-$('#swipe').addEventListener('pointerup',e=>{
-  const dx=e.clientX-tsx,dy=e.clientY-tsy;
-  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){go(dx<0?1:-1);return;}
-  if(Math.abs(dx)<10&&Math.abs(dy)<10){ // tap: right half next, left prev
-    go(e.clientX>innerWidth*0.32?1:-1);
-  }
-});
+/* ---- nav: arrows, buttons, swipe (ignores inputs/buttons) ---- */
+$('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
+$('#restart').onclick=()=>location.reload();
+addEventListener('keydown',e=>{if(!SLIDES.length)return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
+$('#tapnav').addEventListener('click',e=>{if(!SLIDES.length)return;go(e.clientX>innerWidth*0.4?1:-1);});
+let tsx=0,tsy=0,tracking=false;
+addEventListener('pointerdown',e=>{if(!SLIDES.length)return;if(e.target.closest('input,textarea,button,a,select'))return;tsx=e.clientX;tsy=e.clientY;tracking=true;});
+addEventListener('pointerup',e=>{if(!tracking)return;tracking=false;const dx=e.clientX-tsx,dy=e.clientY-tsy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1);});
 
-/* ============================= FILE INTAKE ============================= */
+/* ============================= INTAKE ============================= */
+let TF='year';
 function showErr(m){const e=$('#err');e.textContent='! '+m;e.style.display='block';}
-function startLoad(){ $('#intake').classList.remove('on'); $('#loading').classList.add('on'); }
+function startLoad(){$('#err').style.display='none';$('#intake').classList.remove('on');$('#loading').classList.add('on');}
 
 async function handleFile(file){
-  if(!file) return;
-  showErr.hide?.(); $('#err').style.display='none';
-  startLoad();
+  if(!file)return;startLoad();
   try{
     const buf=new Uint8Array(await file.arrayBuffer());
     const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`});
-    let db;
-    try{ db=new SQL.Database(buf); }catch(e){ throw new Error('That doesn\'t look like a valid SQLite file.'); }
-    const st=analyze(db);
-    if(!st.hasReal){ $('#loading').classList.remove('on'); $('#intake').classList.add('on'); showErr('No VRChat activity found in this database. Make sure it\'s your VRCX.sqlite with gamelog enabled.'); return; }
-    await new Promise(r=>setTimeout(r,650)); // let the moment breathe
-    build(st); enterDeck();
-  }catch(err){
-    $('#loading').classList.remove('on'); $('#intake').classList.add('on');
-    showErr(err.message||'Could not read that file.');
-  }
+    let db;try{db=new SQL.Database(buf);}catch(e){throw new Error(t('err_invalid'));}
+    const st=analyze(db,TF);
+    if(!st.hasReal){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(t('err_empty'));return;}
+    await new Promise(r=>setTimeout(r,650));
+    build(st);enterDeck();
+  }catch(err){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(err.message||t('err_read'));}
 }
-
 const drop=$('#drop'),file=$('#file');
 drop.onclick=()=>file.click();
 file.onchange=e=>handleFile(e.target.files[0]);
 ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
 drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
-addEventListener('dragover',e=>e.preventDefault());
-addEventListener('drop',e=>e.preventDefault());
+addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
+$('#demo').onclick=()=>{startLoad();setTimeout(()=>{build(demoStats(TF));enterDeck();},700);};
 
-$('#demo').onclick=()=>{ startLoad(); setTimeout(()=>{build(demoStats());enterDeck();},700); };
+$('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
-// fill current year on landing
-document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
+/* ---- language ---- */
+function initLang(){
+  const sel=$('#langSel');
+  sel.innerHTML=LANGS.map(l=>`<option value="${l}">${I18N[l].native}</option>`).join('');
+  LANG=pickLang();sel.value=LANG;applyLang();
+  document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
+  sel.addEventListener('change',()=>{LANG=sel.value;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());});
+}
+initLang();
 </script>
 </body>
 </html>
