@@ -125,8 +125,10 @@
   .ranks{display:flex;flex-direction:column;gap:9px}
   .rank{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025);transition:.3s}
   .rank .n{font-family:'Anton';font-size:20px;color:var(--accent);width:22px;text-align:center;flex:none}
-  .rank .av{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:'Anton';font-size:16px;color:#0a0a12;text-shadow:0 1px 0 rgba(255,255,255,.25)}
+  .rank .av{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:'Anton';font-size:16px;color:#0a0a12;text-shadow:0 1px 0 rgba(255,255,255,.25);overflow:hidden}
   .rank .av.sq{border-radius:50%}
+  .rank .av img{width:100%;height:100%;object-fit:cover;display:block}
+  .worldhero{width:100%;height:130px;object-fit:cover;border-radius:14px;border:1px solid var(--line);margin-bottom:2px;box-shadow:0 0 30px -14px var(--accent)}
   .rank .nm{flex:1;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rank .v{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);flex:none}
   .rank.top{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:color-mix(in srgb,var(--accent) 9%,transparent);box-shadow:0 0 26px -10px var(--accent)}
@@ -238,6 +240,9 @@
 /* ============================= I18N ============================= */
 const SITE='https://ardha27.github.io/vrchat-wrap/';
 const KOFI='https://ko-fi.com/ardhach';
+// Deploy worker.js to Cloudflare and paste its URL here to enable live world thumbnails.
+// Leave empty to fall back to generated color avatars. e.g. 'https://vrcwrap.you.workers.dev'
+const WORLD_PROXY='';
 const MONTHS={
   en:['January','February','March','April','May','June','July','August','September','October','November','December'],
   id:['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
@@ -563,10 +568,11 @@ function build(st){
       <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`),
     ()=>card(t('s4_tag'),4,`
       <div class="kicker rv">${t('s4_kick')}</div>
+      ${st.topWorlds[0]&&st.topWorlds[0].thumb?`<img class="worldhero rv" src="${esc(st.topWorlds[0].thumb)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
       <h2 class="headline rv" style="font-size:clamp(24px,6.5vw,42px)">${st.topWorlds[0]?(st.topWorlds[0].id?`<a class="wlink" href="${worldUrl(st.topWorlds[0].id)}" target="_blank" rel="noopener">${esc(st.topWorlds[0].n)}</a>`:esc(st.topWorlds[0].n)):'—'}</h2>
       <p class="lede rv" style="margin-top:-4px">${t('s4_lede',{v:st.topWorlds[0]?fmt(st.topWorlds[0].v):0})}</p>
       <div class="ranks rv" style="margin-top:6px">
-        ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false)).join('')}
+        ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false,w.thumb)).join('')}
       </div>`),
     ()=>card(t('s5_tag'),5,`
       <div class="kicker rv">${t('s5_kick')}</div>
@@ -644,9 +650,32 @@ function build(st){
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function worldUrl(id){return 'https://vrchat.com/home/world/'+encodeURIComponent(id);}
+async function fetchWorldThumb(id){
+  if(!WORLD_PROXY||!id)return null;
+  const ck='vrcw_thumb_'+id;
+  try{const c=localStorage.getItem(ck);if(c!=null)return c==='0'?null:c;}catch(e){}
+  try{
+    const sep=WORLD_PROXY.includes('?')?'&':'?';
+    const r=await fetch(WORLD_PROXY.replace(/\/$/,'')+sep+'id='+encodeURIComponent(id));
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    const u=j.thumbnailImageUrl||j.imageUrl||null;
+    try{localStorage.setItem(ck,u||'0');}catch(e){}
+    return u;
+  }catch(e){try{localStorage.setItem(ck,'0');}catch(_){}return null;}
+}
+async function loadThumbs(st){
+  if(!WORLD_PROXY||!st.topWorlds||!st.topWorlds.length)return;
+  $('#loadmsg').textContent='loading world thumbnails';
+  const job=Promise.all(st.topWorlds.map(async w=>{if(w.id)w.thumb=await fetchWorldThumb(w.id);}));
+  await Promise.race([job,new Promise(r=>setTimeout(r,7000))]);
+}
 function userUrl(id){return 'https://vrchat.com/home/user/'+encodeURIComponent(id);}
-function rankRow(i,name,val,url,round){
-  const inner=`<span class="n">${i+1}</span><span class="av ${round?'sq':''}" style="${avatarStyle(name)}">${initial(name)}</span><span class="nm">${esc(name)}</span><span class="v">${val}</span>`+(url?'<span class="ext">↗</span>':'');
+function rankRow(i,name,val,url,round,thumb){
+  const av=thumb
+    ? `<span class="av ${round?'sq':''}"><img src="${esc(thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${initial(name)}';this.parentElement.style.cssText='${avatarStyle(name)}'"></span>`
+    : `<span class="av ${round?'sq':''}" style="${avatarStyle(name)}">${initial(name)}</span>`;
+  const inner=`<span class="n">${i+1}</span>${av}<span class="nm">${esc(name)}</span><span class="v">${val}</span>`+(url?'<span class="ext">↗</span>':'');
   return url?`<a class="rank ${i===0?'top':''}" href="${url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="rank ${i===0?'top':''}">${inner}</div>`;
 }
 
@@ -735,7 +764,8 @@ async function handleFile(file){
     let db;try{db=new SQL.Database(buf);}catch(e){throw new Error(t('err_invalid'));}
     const st=analyze(db,TF);
     if(!st.hasReal){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(t('err_empty'));return;}
-    await new Promise(r=>setTimeout(r,650));
+    await loadThumbs(st);
+    await new Promise(r=>setTimeout(r,400));
     build(st);enterDeck();
   }catch(err){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(err.message||t('err_read'));}
 }
@@ -746,7 +776,7 @@ file.onchange=e=>handleFile(e.target.files[0]);
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
 drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
-$('#demo').onclick=()=>{startLoad();setTimeout(()=>{build(demoStats(TF));enterDeck();},700);};
+$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));build(st);enterDeck();})();};
 
 $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
