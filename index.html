@@ -312,6 +312,16 @@
     <div class="or rv" data-i="or"></div>
     <div class="rv" style="text-align:center"><button class="btn ghost" id="demo" data-i="demo"></button></div>
     <div class="privacy rv"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> <span data-i="privacy"></span></div>
+    <div class="rv" style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn ghost" id="homeGloBtn" style="font-size:11px;padding:9px 16px;gap:7px">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span data-i="home_glo"></span>
+      </button>
+      <button class="btn ghost" id="homeLbBtn" style="font-size:11px;padding:9px 16px;gap:7px">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+        <span data-i="home_lb"></span>
+      </button>
+    </div>
     <div class="err" id="err"></div>
   </section>
 
@@ -426,7 +436,17 @@ async function openLB(){
 }
 async function loadLBTab(){
   const cat=LB_CATS[LB_ACTIVE];
-  const rows=$('#lbRows');rows.innerHTML='<div class="lb-loading">Loading…</div>';
+  const rows=$('#lbRows');
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
+    rows.innerHTML=`<div class="lb-empty" style="padding:32px 20px">
+      <div style="font-size:28px;margin-bottom:12px">🔧</div>
+      <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">Leaderboard not configured</div>
+      <div style="font-size:11px;line-height:1.6">Set up a free Supabase project and add<br><code style="color:var(--accent)">SUPABASE_URL</code> + <code style="color:var(--accent)">SUPABASE_ANON_KEY</code><br>in index.html to enable global rankings.</div>
+    </div>`;
+    const mr=$('#lbMyRank');if(mr)mr.style.display='none';
+    return;
+  }
+  rows.innerHTML=`<div class="lb-loading"><div style="font-size:20px;margin-bottom:8px;opacity:.5">↻</div>Loading rankings…</div>`;
   let data;
   if(LB_CACHE[cat.id]){data=LB_CACHE[cat.id];}
   else{const r=await lbTop100(cat.col);data=r&&r.data||[];LB_CACHE[cat.id]=data;}
@@ -439,8 +459,15 @@ async function loadLBTab(){
   }
   const mr=$('#lbMyRank');
   if(myRank){mr.style.display='';mr.innerHTML=`Your rank in <b>${cat.label}</b>: <b>#${myRank}</b>${myRank<=100?' 🏆':' (not in top 100)'}`;}
-  else mr.style.display='none';
-  if(!data.length){rows.innerHTML='<div class="lb-empty">No entries yet. Be the first!</div>';return;}
+  else if(mr)mr.style.display='none';
+  if(!data.length){
+    rows.innerHTML=`<div class="lb-empty" style="padding:36px 20px">
+      <div style="font-size:32px;margin-bottom:12px">🏆</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px">No entries yet</div>
+      <div style="font-size:12px;line-height:1.6">Be the first to submit your stats<br>and claim the #1 spot in <b>${esc(cat.label)}</b>.<br><span style="color:var(--accent);font-size:11px">Only All Time submissions count.</span></div>
+    </div>`;
+    return;
+  }
   rows.innerHTML=data.map((r,i)=>{
     const rank=i+1;
     const isMe=CARD_NAME&&r.username.toLowerCase()===CARD_NAME.toLowerCase();
@@ -491,7 +518,9 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
   s10_tag:'Collect',s10_kick:'Your {year} VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
-  dl:'Download card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  dl:'Download trading card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  dl_hint:'saves the holographic card above · PNG · 16:9',
+  home_glo:'Role glossary',home_lb:'Leaderboard',
   outro:'Screenshot it. Share it. See you next time.',
   caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:',
   s_unfriended:'Friends lost',s_unit_unf:'people unfriended',s_lede_unf:'For every person who joined your life, someone walked away.',
@@ -530,7 +559,9 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
   s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
-  dl:'Unduh kartu',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  dl:'Unduh trading card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  dl_hint:'menyimpan kartu holografik di atas · PNG · 16:9',
+  home_glo:'Glosarium role',home_lb:'Leaderboard',
   outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
   caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:',
   s_unfriended:'Teman hilang',s_unit_unf:'orang di-unfriend',s_lede_unf:'Untuk setiap orang yang datang, ada yang pergi.',
@@ -1138,7 +1169,13 @@ function appendCardSlide(st, sadSt){
           ${roleAxesHTML(st,sadSt,roleKey)}
         </div>
         <div class="actions rv">
-          <button class="btn" id="dlBtn">${t('dl')}</button>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:5px;width:100%">
+            <button class="btn" id="dlBtn" style="width:100%;justify-content:center">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ${t('dl')}
+            </button>
+            <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);opacity:.7">${t('dl_hint')}</span>
+          </div>
           <button class="btn ghost" id="xBtn">${t('share_x')}</button>
           <button class="btn ghost" id="shareBtn" style="display:none">${t('share')}</button>
         </div>
@@ -1467,6 +1504,44 @@ function initLang(){
   sel.addEventListener('change',()=>{LANG=sel.value;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());});
 }
 initLang();
+
+// Home screen buttons: leaderboard + role glossary
+(function(){
+  // Glossary modal (reuse glo-list content but in a standalone modal)
+  const homeGlo=$('#homeGloBtn');
+  if(homeGlo) homeGlo.addEventListener('click',()=>{
+    // Build and show a standalone glossary modal
+    let m=document.getElementById('homeGloModal');
+    if(!m){
+      m=document.createElement('div');
+      m.id='homeGloModal';
+      m.className='lb-modal';
+      m.innerHTML=`<div class="lb-inner">
+        <div class="lb-head"><div class="lb-title">Role Glossary</div><button class="lb-close" id="homeGloClose">✕ Close</button></div>
+        <div class="lb-rows" style="padding:4px 0">${Object.entries(ROLES).map(([k,r])=>`
+          <div class="glo-entry">
+            <div class="glo-icon">${r.icon.replace('width="36" height="36"','width="24" height="24"')}</div>
+            <div class="glo-text">
+              <div class="glo-code">${r.code}</div>
+              <div class="glo-name">${esc(r.name)}</div>
+              <div class="glo-tag">"${esc(r.tag)}"</div>
+              <div class="glo-desc">${esc(r.desc)}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+      m.querySelector('#homeGloClose').addEventListener('click',()=>m.classList.remove('open'));
+      m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+    }
+    m.classList.add('open');
+  });
+  const homeLb=$('#homeLbBtn');
+  if(homeLb) homeLb.addEventListener('click',()=>{
+    // Open leaderboard modal (same as from card slide)
+    openLB();
+  });
+})();
 </script>
 </body>
 </html>
