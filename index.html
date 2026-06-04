@@ -266,6 +266,8 @@
   .lb-role{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.06em;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lb-val{font-family:'Anton';font-size:18px;color:var(--accent);white-space:nowrap}
   .lb-val.shame{color:var(--pink)}
+  .lb-cat-desc{padding:10px 18px 12px;font-size:12px;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--line);flex:none}
+  .lb-cat-desc b{color:var(--ink);font-weight:600}
   .lb-empty{text-align:center;padding:28px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
   .lb-loading{text-align:center;padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px}
   .lb-my-rank{padding:12px 18px;margin:6px;border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--accent) 6%,transparent);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);text-align:center;flex:none}
@@ -355,10 +357,14 @@
 <div class="lb-modal" id="lbModal">
   <div class="lb-inner">
     <div class="lb-head">
-      <div class="lb-title" id="lbModalTitle">Leaderboard</div>
-      <button class="lb-close" id="lbClose">✕ Close</button>
+      <div class="lb-title">Leaderboard</div>
+      <button class="lb-close" id="lbClose">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Close
+      </button>
     </div>
     <div class="lb-tabs" id="lbTabs"></div>
+    <div class="lb-cat-desc" id="lbCatDesc"></div>
     <div class="lb-my-rank" id="lbMyRank" style="display:none"></div>
     <div class="lb-rows" id="lbRows"><div class="lb-loading">Loading…</div></div>
   </div>
@@ -399,14 +405,22 @@ let ROLE_KEY=null; // set when card slide is built
 // create policy "public update" on leaderboard for update using (true) with check (true);
 
 const LB_CATS=[
-  {id:'hours',     label:'⏱ Time Lords',        col:'hours',          unit:'hrs',        good:true},
-  {id:'worlds',    label:'🗺 Cartographers',     col:'worlds',         unit:'worlds',     good:true},
-  {id:'people',    label:'👥 Social Magnets',    col:'people_met',     unit:'met',        good:true},
-  {id:'friends',   label:'🤝 Bond Builders',     col:'friends_added',  unit:'friends',    good:true},
-  {id:'solo',      label:'🌑 Lone Rangers',       col:'solo_pct',       unit:'% solo',     good:false},
-  {id:'ghosts',    label:'👻 Ghost Factory',      col:'one_time_people',unit:'ghosts',     good:false},
-  {id:'bridges',   label:'🔥 Bridge Burners',    col:'unfriended',     unit:'unfriended', good:false},
-  {id:'speed',     label:'⚡ Speedrunners',       col:'short_sessions', unit:'<1min',      good:false},
+  {id:'hours',   label:'Time Lords',     col:'hours',          unit:'hrs',        good:true,
+   desc:'Total hours spent inside VRChat worlds. Every minute in any world counts — from two-minute pop-ins to twelve-hour sessions.'},
+  {id:'worlds',  label:'Cartographers',  col:'worlds',         unit:'worlds',     good:true,
+   desc:'Number of distinct worlds ever visited. Each unique world ID counts once, regardless of how many times you returned.'},
+  {id:'people',  label:'Social Magnets', col:'people_met',     unit:'people met', good:true,
+   desc:'Count of different people whose join events appeared in your logs. Each person counted once, no matter how often your paths crossed.'},
+  {id:'friends', label:'Bond Builders',  col:'friends_added',  unit:'friends added', good:true,
+   desc:'Total friends added over all time, pulled from your friend log history. Everyone who went from stranger to friend list.'},
+  {id:'solo',    label:'Lone Rangers',   col:'solo_pct',       unit:'% solo days',good:false,
+   desc:'Percentage of active days with no join events recorded — days spent entirely alone in VRChat. Higher rank means more time without any company.'},
+  {id:'ghosts',  label:'Ghost Factory',  col:'one_time_people',unit:'one-time encounters', good:false,
+   desc:'People you encountered exactly once across your entire history. One session, possibly one conversation, never again. A count of connections that never had a second chance.'},
+  {id:'bridges', label:'Bridge Burners', col:'unfriended',     unit:'unfriended', good:false,
+   desc:'Total people unfriended over all time. Some connections end — these are the ones that ended deliberately, logged by VRCX as unfriend events.'},
+  {id:'speed',   label:'Speedrunners',   col:'short_sessions', unit:'sessions <1 min', good:false,
+   desc:'Sessions that lasted under sixty seconds. Log in, look around, log out — or change your mind before the world even loads. A count of incomplete arrivals.'},
 ];
 
 async function sbFetch(path,method='GET',body=null,extra={}){
@@ -448,23 +462,26 @@ async function lbMyRank(col,myVal){
 let LB_ACTIVE=0,LB_CACHE={};
 async function openLB(){
   const m=$('#lbModal');m.classList.add('open');
-  const tabs=$('#lbTabs');tabs.innerHTML=LB_CATS.map((c,i)=>`<button class="lb-tab${i===0?' active':''}${c.good?'':' shame'}" data-i="${i}">${c.label}</button>`).join('');
+  const tabs=$('#lbTabs');tabs.innerHTML=LB_CATS.map((c,i)=>`<button class="lb-tab${i===0?' active':''}${c.good?'':' shame'}" data-i="${i}">${esc(c.label)}</button>`).join('');
   tabs.querySelectorAll('.lb-tab').forEach(b=>b.addEventListener('click',()=>{LB_ACTIVE=+b.dataset.i;tabs.querySelectorAll('.lb-tab').forEach(x=>x.classList.toggle('active',x===b));loadLBTab();}));
   loadLBTab();
 }
 async function loadLBTab(){
   const cat=LB_CATS[LB_ACTIVE];
   const rows=$('#lbRows');
+  // update category description
+  const descEl=$('#lbCatDesc');
+  if(descEl){descEl.innerHTML=`<b>${esc(cat.label)}</b> — ${esc(cat.desc)}`;}
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
     rows.innerHTML=`<div class="lb-empty" style="padding:32px 20px">
-      <div style="font-size:28px;margin-bottom:12px">🔧</div>
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 14px;display:block;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">Leaderboard not configured</div>
       <div style="font-size:11px;line-height:1.6">Set up a free Supabase project and add<br><code style="color:var(--accent)">SUPABASE_URL</code> + <code style="color:var(--accent)">SUPABASE_ANON_KEY</code><br>in index.html to enable global rankings.</div>
     </div>`;
     const mr=$('#lbMyRank');if(mr)mr.style.display='none';
     return;
   }
-  rows.innerHTML=`<div class="lb-loading"><div style="font-size:20px;margin-bottom:8px;opacity:.5">↻</div>Loading rankings…</div>`;
+  rows.innerHTML=`<div class="lb-loading"><div style="opacity:.4;margin-bottom:8px;font-size:18px">—</div>Loading rankings…</div>`;
   let data;
   if(LB_CACHE[cat.id]){data=LB_CACHE[cat.id];}
   else{const r=await lbTop100(cat.col);data=r&&r.data||[];LB_CACHE[cat.id]=data;}
@@ -476,13 +493,13 @@ async function loadLBTab(){
     else if(myVal!=null){myRank=await lbMyRank(cat.col,myVal);}
   }
   const mr=$('#lbMyRank');
-  if(myRank){mr.style.display='';mr.innerHTML=`Your rank in <b>${cat.label}</b>: <b>#${myRank}</b>${myRank<=100?' 🏆':' (not in top 100)'}`;}
+  if(myRank){mr.style.display='';mr.innerHTML=`Your rank in <b>${esc(cat.label)}</b>: <b>#${myRank}</b>${myRank<=100?' — top 100':' — outside top 100'}`;}
   else if(mr)mr.style.display='none';
   if(!data.length){
     rows.innerHTML=`<div class="lb-empty" style="padding:36px 20px">
-      <div style="font-size:32px;margin-bottom:12px">🏆</div>
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;color:var(--muted)"><path d="M8 21h8M12 17v4M7 4h10l1 7a5 5 0 0 1-12 0L7 4z"/><path d="M5 8H3a2 2 0 0 0 2 2M19 8h2a2 2 0 0 1-2 2"/></svg>
       <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px">No entries yet</div>
-      <div style="font-size:12px;line-height:1.6">Be the first to submit your stats<br>and claim the #1 spot in <b>${esc(cat.label)}</b>.<br><span style="color:var(--accent);font-size:11px">Only All Time submissions count.</span></div>
+      <div style="font-size:12px;line-height:1.6;color:var(--muted)">Be the first to claim the #1 spot in<br><b style="color:var(--ink)">${esc(cat.label)}</b>.<br><span style="color:var(--accent);font-size:11px;letter-spacing:.06em">Only All Time submissions count.</span></div>
     </div>`;
     return;
   }
@@ -1398,10 +1415,6 @@ function wireCard(){
   const gb=$('#gloBtn'),gl=$('#gloList');
   if(gb&&gl)gb.addEventListener('click',()=>{gl.classList.toggle('open');gb.textContent=gl.classList.contains('open')?'✕ Close glossary':'☰ All '+Object.keys(ROLES).length+' personality types';});
 
-  // leaderboard modal close
-  $('#lbClose').addEventListener('click',()=>$('#lbModal').classList.remove('open'));
-  $('#lbModal').addEventListener('click',e=>{if(e.target===$('#lbModal'))$('#lbModal').classList.remove('open');});
-
   // view leaderboard button (always shown)
   const lbViewBtn=$('#lbViewBtn');
   if(lbViewBtn)lbViewBtn.addEventListener('click',()=>openLB());
@@ -1523,6 +1536,10 @@ function initLang(){
   sel.addEventListener('change',()=>{LANG=sel.value;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());});
 }
 initLang();
+
+// Leaderboard modal close — wired once globally so it works from home screen too
+$('#lbClose').addEventListener('click',()=>$('#lbModal').classList.remove('open'));
+$('#lbModal').addEventListener('click',e=>{if(e.target===$('#lbModal'))$('#lbModal').classList.remove('open');});
 
 // Fetch leaderboard player count and show on home screen
 (async function fetchLbCount(){
