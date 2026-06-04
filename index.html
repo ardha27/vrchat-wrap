@@ -322,6 +322,7 @@
         <span data-i="home_lb"></span>
       </button>
     </div>
+    <div id="lbCount" style="display:none;text-align:center;margin-top:10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--muted)"></div>
     <div class="err" id="err"></div>
   </section>
 
@@ -1504,6 +1505,23 @@ function initLang(){
   sel.addEventListener('change',()=>{LANG=sel.value;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());});
 }
 initLang();
+
+// Fetch leaderboard player count and show on home screen
+(async function fetchLbCount(){
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY)return;
+  try{
+    const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/leaderboard?select=id',{
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'count=exact','Range':'0-0'}
+    });
+    if(!r.ok)return;
+    const cr=r.headers.get('Content-Range');
+    const total=cr?parseInt(cr.split('/')[1]):0;
+    if(!isNaN(total)&&total>0){
+      const el=$('#lbCount');
+      if(el){el.style.display='';el.innerHTML=`<span style="color:var(--accent);font-weight:700">${total.toLocaleString('en-US')}</span> players worldwide on the leaderboard`;}
+    }
+  }catch(e){}
+})();
 
 // Home screen buttons: leaderboard + role glossary
 (function(){
