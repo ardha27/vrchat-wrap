@@ -151,30 +151,27 @@
   .axis{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
 
   #s-card .card-body{align-items:center;text-align:center;padding:8px 14px 10px}
-  .tcard{position:relative;width:min(400px,90vw);aspect-ratio:5/7;border-radius:24px;padding:20px 22px;background:linear-gradient(150deg,#15152a,#0a0a16);border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 30px 60px -24px #000;transform-style:preserve-3d;transition:transform .15s}
+  .tcard{position:relative;width:min(680px,92vw);aspect-ratio:16/9;border-radius:28px;padding:22px 28px;background:linear-gradient(150deg,#15152a,#0a0a16);border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 30px 60px -24px #000;transform-style:preserve-3d;transition:transform .15s}
   .tcard .holo{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(225,91,255,.3) 45%,rgba(52,214,255,.3) 55%,transparent 70%);background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.6;animation:holo 6s linear infinite;pointer-events:none}
   @keyframes holo{0%{background-position:0 0}100%{background-position:200% 200%}}
-  .tcard .tc-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);position:relative;z-index:2}
-  .tc-head{display:flex;align-items:center;gap:14px;margin:8px 0 0;position:relative;z-index:2}
-  .tc-avatar{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:32px;color:#0a0a12;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 0 30px -6px var(--accent);flex:none}
+  .tcard .tc-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);position:relative;z-index:2}
+  .tc-head{display:flex;align-items:center;gap:18px;margin:10px 0 0;position:relative;z-index:2}
+  .tc-avatar{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:36px;color:#0a0a12;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 0 36px -8px var(--accent);flex:none}
   .tc-meta{text-align:left}
-  .tc-name{font-family:'Anton';font-size:26px;text-transform:uppercase;line-height:1.05;word-break:break-word}
-  .tc-role{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-top:5px}
-  .tc-date{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--muted);margin-top:3px}
-  .tc-statgrid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
-  .tc-statgrid .s{border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 6px;background:rgba(255,255,255,.02)}
-  .tc-statgrid .s .sv{font-family:'Anton';font-size:clamp(18px,4.5vw,22px);color:var(--accent);line-height:1}
-  .tc-statgrid .s .sl{font-family:'Space Mono',monospace;font-size:7.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:3px}
-  .tc-lists{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;text-align:left}
-  .tc-list{border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:7px 9px;background:rgba(255,255,255,.02)}
-  .tc-list .tl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
-  .tc-list .ti{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .tc-name{font-family:'Anton';font-size:clamp(22px,4.2vw,34px);text-transform:uppercase;line-height:1.05;word-break:break-word}
+  .tc-role{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-top:5px}
+  .tc-date{font-family:'Space Mono',monospace;font-size:clamp(8px,1.5vw,10px);letter-spacing:.1em;color:var(--muted);margin-top:3px}
+  .tc-statgrid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .tc-statgrid .s{border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 8px;background:rgba(255,255,255,.02)}
+  .tc-statgrid .s .sv{font-family:'Anton';font-size:clamp(20px,5vw,28px);color:var(--accent);line-height:1}
+  .tc-statgrid .s .sl{font-family:'Space Mono',monospace;font-size:clamp(7.5px,1.4vw,9px);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:4px}
+  .tc-lists{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;text-align:left}
+  .tc-list{border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:8px 11px;background:rgba(255,255,255,.02)}
+  .tc-list .tl{font-family:'Space Mono',monospace;font-size:clamp(7px,1.2vw,8px);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+  .tc-list .ti{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:clamp(8px,1.4vw,10px);color:var(--muted);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
   .tc-list .ti:last-child{border-bottom:none}
-  .tc-list .ti .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;color:var(--ink)}
-  .tc-foot{position:relative;z-index:2;margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.1em;color:var(--muted);text-align:center;border-top:1px solid rgba(255,255,255,.06);padding-top:7px}
-  .name-in{margin-top:14px;display:flex;gap:8px;justify-content:center;width:100%}
-  .name-in input{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;padding:10px 12px;width:min(220px,70vw);text-align:center;letter-spacing:.06em}
-  .name-in input:focus{outline:none;border-color:var(--accent)}
+  .tc-list .ti .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:clamp(80px,14vw,140px);color:var(--ink)}
+  .tc-foot{position:relative;z-index:2;margin-top:auto;font-family:'Space Mono',monospace;font-size:clamp(7px,1.2vw,8px);letter-spacing:.1em;color:var(--muted);text-align:center;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
   .actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:6px;width:100%}
   .actions .btn{padding:12px 18px;font-size:12px}
   .cap{width:100%;max-width:340px;margin:4px auto 0}
@@ -281,7 +278,7 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
   s10_tag:'Collect',s10_kick:'Your {year} VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
-  name_ph:'type your name',dl:'Download card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  dl:'Download card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
   outro:'Screenshot it. Share it. See you next time.',
   caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:'},
 
@@ -304,7 +301,7 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
   s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
-  name_ph:'tulis namamu',dl:'Unduh kartu',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  dl:'Unduh kartu',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
   outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
   caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:'},
 
@@ -327,7 +324,7 @@ const I18N={
   s9_tag:'勢い',s9_kick:'最も忙しかった月',s9_lede:'その月に一番現れた。何かが引き戻し続けた。',m_month_v:'その月の訪問',m_month_avg:'月平均',
   s10_tag:'コレクト',s10_kick:'あなたの{year}年VRChatカード',role_night:'夜の放浪者',role_vet:'ワールド老兵',role_expl:'メタバース探検家',
   tc_hours:'時間',tc_worlds:'ワールド',tc_met:'遭遇',tc_friends:'フレンド',tc_foot:'VRCHAT WRAP · データはこの端末から出ていません',
-  name_ph:'名前を入力',dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',
+  dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',
   outro:'スクショして、シェアして、また会おう。',
   caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:'},
 
@@ -350,7 +347,7 @@ const I18N={
   s9_tag:'모멘텀',s9_kick:'가장 바빴던 달',s9_lede:'그달에 가장 많이 나타났죠. 무언가가 계속 당신을 끌어당겼습니다.',m_month_v:'그달 방문',m_month_avg:'월 평균',
   s10_tag:'컬렉트',s10_kick:'당신의 {year} VRChat 카드',role_night:'밤의 방랑자',role_vet:'월드 베테랑',role_expl:'메타버스 탐험가',
   tc_hours:'시간',tc_worlds:'월드',tc_met:'만남',tc_friends:'친구',tc_foot:'VRCHAT WRAP · 데이터는 이 기기를 떠나지 않았습니다',
-  name_ph:'이름 입력',dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',
+  dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',
   outro:'스크린샷하고, 공유하고, 다음에 또 만나요.',
   caption:'내 VRChat Wrap — {h}시간, 월드 {w}곳, {p}명과 만남. 당신도 만들어보세요:'},
 
@@ -373,7 +370,7 @@ const I18N={
   s9_tag:'势头',s9_kick:'你最忙的月份',s9_lede:'那个月你出现得最多。有什么一直把你拉回来。',m_month_v:'当月访问',m_month_avg:'月均',
   s10_tag:'收藏',s10_kick:'你的{year}年VRChat卡片',role_night:'夜行者',role_vet:'世界老兵',role_expl:'元宇宙探索者',
   tc_hours:'小时',tc_worlds:'世界',tc_met:'相遇',tc_friends:'好友',tc_foot:'VRCHAT WRAP · 数据从未离开此设备',
-  name_ph:'输入你的名字',dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',
+  dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',
   outro:'截图、分享、下次再见。',
   caption:'我的VRChat Wrap — {h}小时，{w}个世界，遇见{p}人。来做你的:'},
 
@@ -396,7 +393,7 @@ const I18N={
   s9_tag:'Impulso',s9_kick:'Tu mes más activo',s9_lede:'Ahí fue cuando más apareciste. Algo te seguía trayendo de vuelta.',m_month_v:'Visitas ese mes',m_month_avg:'Promedio mensual',
   s10_tag:'Colecciona',s10_kick:'Tu tarjeta VRChat {year}',role_night:'Errante Nocturno',role_vet:'Veterano de Mundos',role_expl:'Explorador del Metaverso',
   tc_hours:'horas',tc_worlds:'mundos',tc_met:'conocidos',tc_friends:'amigos',tc_foot:'VRCHAT WRAP · TUS DATOS NUNCA SALIERON DE ESTE DISPOSITIVO',
-  name_ph:'escribe tu nombre',dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',
+  dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',
   outro:'Captúrala. Compártela. Hasta la próxima.',
   caption:'Mi VRChat Wrap — {h}h en {w} mundos, {p} personas conocidas. Haz el tuyo:'},
 
@@ -419,7 +416,7 @@ const I18N={
   s9_tag:'Élan',s9_kick:'Ton mois le plus actif',s9_lede:'C\'est là que tu es le plus apparu. Quelque chose te ramenait sans cesse.',m_month_v:'Visites ce mois',m_month_avg:'Moyenne mensuelle',
   s10_tag:'Collection',s10_kick:'Ta carte VRChat {year}',role_night:'Vagabond Nocturne',role_vet:'Vétéran des Mondes',role_expl:'Explorateur du Métavers',
   tc_hours:'heures',tc_worlds:'mondes',tc_met:'rencontrés',tc_friends:'amis',tc_foot:'VRCHAT WRAP · TES DONNÉES N\'ONT JAMAIS QUITTÉ CET APPAREIL',
-  name_ph:'écris ton nom',dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',
+  dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',
   outro:'Capture-la. Partage-la. À la prochaine.',
   caption:'Mon VRChat Wrap — {h}h dans {w} mondes, {p} personnes rencontrées. Fais le tien :'}
 };
@@ -511,9 +508,10 @@ function analyze(db,range){
   jl=jl.map(r=>({d:parseTime(r.created_at),type:r.type,nm:r.display_name,uid:r.user_id})).filter(r=>inR(r.d)&&/join/i.test(r.type||''));
   // resolve self display name, then drop self from the people/squad stats
   if(selfId){const sr=jl.find(r=>r.uid===selfId);if(sr)selfName=sr.nm;}
-  jl=jl.filter(r=>r.uid!==selfId && (!selfName||r.nm!==selfName));
+  // keep self in squad (rank 1), drop from peopleMet count
   const pc={},pid={};jl.forEach(r=>{if(r.nm){pc[r.nm]=(pc[r.nm]||0)+1;if(!pid[r.nm]&&r.uid)pid[r.nm]=r.uid;}});
-  stats.peopleMet=Object.keys(pc).length;
+  stats.selfName=selfName;
+  stats.peopleMet=Object.keys(pc).filter(n=>n!==selfName).length;
   stats.encounters=jl.length;
   stats.squad=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v,uid:pid[n]}));
 
@@ -538,7 +536,7 @@ function demoStats(range){
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
     months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,
     topWorlds:b.tw.map(([n,v])=>({n,v})),peopleMet:b.p,encounters:b.e,
-    squad:b.sq.map(([n,v])=>({n,v})),friendsAdded:range==='all'?640:b.fa,hasReal:true,demo:true};
+    squad:b.sq.map(([n,v])=>({n,v})),selfName:range==='month'?'Nyx':'Nyx',friendsAdded:range==='all'?640:b.fa,hasReal:true,demo:true};
 }
 
 /* ============================= SLIDES ============================= */
@@ -654,7 +652,6 @@ function build(st){
           </div>
           <div class="tc-foot">${t('tc_foot')}</div>
         </div>
-        <div class="name-in rv"><input id="nameInput" maxlength="14" placeholder="${t('name_ph')}" /></div>
         <div class="actions rv">
           <button class="btn" id="dlBtn">${t('dl')}</button>
           <button class="btn ghost" id="xBtn">${t('share_x')}</button>
@@ -725,13 +722,11 @@ function captionText(){
   return (nm?nm+' — ':'')+t('caption',{h:fmt(S.hours),w:fmt(S.uniqueWorlds),p:fmt(S.peopleMet)})+'\n'+SITE+' #VRChat #VRChatWrap';
 }
 function wireCard(){
-  const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art'),cap=$('#capBox');
-  const refreshCap=()=>{if(cap)cap.value=captionText();};
-  const saved=localStorage.getItem('vrcwrap_name')||'';
-  if(saved){ni.value=saved;CARD_NAME=saved;tn.textContent=saved.toUpperCase();ta.textContent=initial(saved);ta.style.cssText=avatarStyle(saved);}
-  refreshCap();
-  ni.addEventListener('input',e=>{const raw=e.target.value.trim();CARD_NAME=raw;const v=raw||'PLAYER';tn.textContent=v.toUpperCase();ta.textContent=initial(raw||'P');ta.style.cssText=avatarStyle(raw||'PLAYER');localStorage.setItem('vrcwrap_name',raw);refreshCap();});
-  tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`perspective(700px) rotateY(${px*14}deg) rotateX(${-py*14}deg)`;});
+  const tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art'),cap=$('#capBox');
+  CARD_NAME=S&&S.selfName||'PLAYER';
+  if(tn){tn.textContent=CARD_NAME.toUpperCase();if(ta){ta.textContent=initial(CARD_NAME);ta.style.cssText=avatarStyle(CARD_NAME);}}
+  const refreshCap=()=>{if(cap)cap.value=captionText();};refreshCap();
+  if(tc)tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=perspective(700px) rotateY(${px*14}deg) rotateX(${-py*14}deg);});tc.addEventListener('pointerleave',()=>{tc.style.transform='';});};
   tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
 
   $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
