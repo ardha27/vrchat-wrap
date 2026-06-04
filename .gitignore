@@ -1,0 +1,13 @@
+# Private VRChat data — NEVER commit (contains personal logs)
+*.sqlite
+*.sqlite3
+*.db
+sample.sqlite
+
+# Local test artifacts
+shots/
+ref-images/
+sb.js
+
+# Internal notes (not for public repo)
+plan.md

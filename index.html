@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+<title>VRChat Wrap 2025 — Your Year in VR</title>
+<meta name="description" content="Drop your VRCX database and relive your VRChat year. 100% local, nothing leaves your device." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<style>
+  :root{
+    --bg:#070710;
+    --bg2:#0c0c18;
+    --panel:rgba(16,16,28,.66);
+    --line:rgba(255,255,255,.07);
+    --ink:#f4f5ff;
+    --muted:#8b8ca8;
+    --green:#27ff95;
+    --cyan:#34d6ff;
+    --magenta:#e15bff;
+    --orange:#ff9d3c;
+    --pink:#ff4d8d;
+    --accent:var(--green);
+    --accent2:var(--cyan);
+    --grid:rgba(255,255,255,.045);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Outfit',sans-serif;
+    overflow:hidden;
+    position:fixed;inset:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  canvas#fx{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
+  /* wireframe grid + glow atmosphere */
+  .atmos{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(120% 90% at 50% -10%, color-mix(in srgb,var(--accent) 16%, transparent), transparent 55%),
+      radial-gradient(90% 70% at 90% 110%, color-mix(in srgb,var(--accent2) 14%, transparent), transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    transition:background .8s ease;
+  }
+  .atmos::after{
+    content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);
+            mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);
+  }
+  /* grain */
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  .stage{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;padding:max(env(safe-area-inset-top),18px) 18px max(env(safe-area-inset-bottom),18px)}
+
+  /* ---------- HUD chrome ---------- */
+  .brand{position:fixed;top:max(env(safe-area-inset-top),16px);left:18px;z-index:6;display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.18em}
+  .brand .mk{width:22px;height:22px;border:1.5px solid var(--accent);border-radius:7px;display:grid;place-items:center;color:var(--accent);box-shadow:0 0 16px color-mix(in srgb,var(--accent) 50%,transparent);transition:.5s}
+  .brand .mk b{font-size:11px;line-height:1}
+  .brand span{opacity:.85}
+  .restart{position:fixed;top:max(env(safe-area-inset-top),14px);right:16px;z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;transition:.25s;display:none}
+  .restart:hover{color:var(--ink);border-color:var(--accent)}
+
+  /* progress segments */
+  .progress{position:fixed;top:max(env(safe-area-inset-top),52px);left:50%;transform:translateX(-50%);z-index:6;display:none;gap:5px;width:min(560px,82vw)}
+  .progress .seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+  .progress .seg i{display:block;height:100%;width:0;background:var(--accent);box-shadow:0 0 10px var(--accent);transition:width .35s}
+  .progress .seg.done i{width:100%}
+  .progress .seg.active i{width:100%}
+
+  /* nav arrows */
+  .nav{position:fixed;z-index:6;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.5);backdrop-filter:blur(6px);color:var(--ink);display:none;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:.25s}
+  .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
+  .nav.prev{left:14px}.nav.next{right:14px}
+  @media(max-width:680px){.nav{display:none!important}}
+
+  /* ---------- screens ---------- */
+  .screen{display:none;width:100%;max-width:720px}
+  .screen.on{display:block}
+
+  /* intake / landing */
+  #intake{text-align:center}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin-bottom:18px}
+  .hero-title{font-family:'Anton',sans-serif;font-weight:400;line-height:.86;letter-spacing:.01em;text-transform:uppercase;
+    font-size:clamp(52px,15vw,128px);
+    background:linear-gradient(180deg,#fff 30%,color-mix(in srgb,var(--accent) 70%,#fff));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 6px 30px color-mix(in srgb,var(--accent) 30%,transparent))}
+  .hero-sub{color:var(--muted);max-width:440px;margin:18px auto 30px;font-size:clamp(14px,2.4vw,17px);line-height:1.55}
+  .hero-sub b{color:var(--ink);font-weight:600}
+
+  .drop{position:relative;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:22px;padding:34px 22px;background:var(--panel);backdrop-filter:blur(10px);cursor:pointer;transition:.3s;max-width:480px;margin:0 auto;overflow:hidden}
+  .drop::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 0%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%);opacity:0;transition:.3s}
+  .drop:hover,.drop.hot{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 18px 50px -18px color-mix(in srgb,var(--accent) 60%,transparent)}
+  .drop:hover::before,.drop.hot::before{opacity:1}
+  .drop .ic{font-size:34px;margin-bottom:12px;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 60%,transparent))}
+  .drop h3{font-size:18px;font-weight:700;margin-bottom:6px}
+  .drop p{color:var(--muted);font-size:13px;line-height:1.5}
+  .drop .path{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);margin-top:12px;word-break:break-all;opacity:.9}
+
+  .or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:12px;letter-spacing:.2em;font-family:'Space Mono',monospace;margin:22px auto;max-width:480px;text-transform:uppercase}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:14px 26px;border-radius:14px;border:1px solid var(--accent);color:#04120a;background:var(--accent);cursor:pointer;transition:.25s;box-shadow:0 0 30px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 0 44px -4px color-mix(in srgb,var(--accent) 90%,transparent)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .privacy{margin-top:26px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:center;font-family:'Space Mono',monospace;letter-spacing:.06em}
+  .privacy b{color:var(--green)}
+
+  /* loading */
+  #loading{display:none;text-align:center}
+  .ring{width:70px;height:70px;margin:0 auto 24px;border-radius:50%;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);animation:spin 1s linear infinite;box-shadow:0 0 30px -6px var(--accent)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loading .lt{font-family:'Anton';font-size:clamp(28px,7vw,46px);text-transform:uppercase;letter-spacing:.02em}
+  #loading .ls{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;margin-top:10px;letter-spacing:.08em}
+
+  /* ---------- slide card ---------- */
+  .card{position:relative;width:100%;max-width:560px;margin:0 auto;border-radius:26px;border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(20,20,34,.86),rgba(10,10,20,.92));
+    backdrop-filter:blur(12px);overflow:hidden;
+    box-shadow:0 40px 90px -40px #000, inset 0 1px 0 rgba(255,255,255,.06);
+    min-height:clamp(420px,72vh,620px);display:flex;flex-direction:column}
+  .card::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(110% 80% at 50% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
+  .card::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
+  .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted)}
+  .card-top .tag{color:var(--accent)}
+  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px}
+  .card-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
+  .pix{display:flex;gap:5px;font-size:13px;opacity:.7}
+
+  .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--accent)}
+  .bignum{font-family:'Anton';font-weight:400;line-height:.82;text-transform:uppercase;letter-spacing:.005em;
+    font-size:clamp(74px,20vw,150px);
+    background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--accent) 75%,#fff));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 4px 22px color-mix(in srgb,var(--accent) 35%,transparent))}
+  .unit{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:-2px}
+  .headline{font-family:'Anton';font-weight:400;text-transform:uppercase;line-height:.92;font-size:clamp(30px,8vw,52px)}
+  .headline em{font-style:normal;color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent);padding:0 .12em;border-radius:6px}
+  .lede{color:var(--muted);font-size:clamp(14px,3.2vw,17px);line-height:1.55;max-width:42ch}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* rank list (squad / worlds) */
+  .ranks{display:flex;flex-direction:column;gap:9px}
+  .rank{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025);transition:.3s}
+  .rank .n{font-family:'Anton';font-size:22px;color:var(--accent);width:30px;text-align:center;flex:none}
+  .rank .nm{flex:1;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rank .v{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);flex:none}
+  .rank.top{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:color-mix(in srgb,var(--accent) 9%,transparent);box-shadow:0 0 26px -10px var(--accent)}
+  .rank.top .nm{color:#fff}
+
+  /* mini stat grid */
+  .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+  .mini .m{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}
+  .mini .m .mv{font-family:'Anton';font-size:clamp(26px,7vw,38px);color:var(--accent);line-height:1}
+  .mini .m .ml{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-top:6px}
+
+  /* clock bars (night owl) */
+  .bars{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:6px}
+  .bars .b{flex:1;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 25%,transparent));border-radius:3px 3px 0 0;min-height:3px;transition:height .6s cubic-bezier(.2,.8,.2,1);opacity:.85}
+  .bars .b.peak{background:linear-gradient(180deg,#fff,var(--accent));box-shadow:0 0 14px var(--accent)}
+  .axis{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
+
+  /* final trading card */
+  #s-card .card-body{align-items:center;text-align:center}
+  .tcard{position:relative;width:min(300px,78vw);aspect-ratio:3/4.2;border-radius:20px;padding:16px;
+    background:linear-gradient(150deg,#15152a,#0a0a16);
+    border:1px solid rgba(255,255,255,.14);overflow:hidden;
+    box-shadow:0 30px 60px -24px #000;
+    transform-style:preserve-3d;transition:transform .15s}
+  .tcard::before{content:"";position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 30%,color-mix(in srgb,var(--magenta) 35%,transparent) 45%,color-mix(in srgb,var(--cyan) 35%,transparent) 55%,transparent 70%);
+    background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.55;animation:holo 6s linear infinite}
+  @keyframes holo{0%{background-position:0% 0%}100%{background-position:200% 200%}}
+  .tcard .tc-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);position:relative;z-index:2}
+  .tc-art{position:relative;z-index:2;margin:14px auto;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:42px;
+    background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--accent) 60%,transparent),transparent 70%);
+    border:1.5px solid color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 0 30px -4px var(--accent)}
+  .tc-name{position:relative;z-index:2;font-family:'Anton';font-size:26px;text-transform:uppercase;line-height:1;margin-top:4px}
+  .tc-role{position:relative;z-index:2;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-top:6px}
+  .tc-stats{position:relative;z-index:2;margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;text-align:left;padding:0 6px}
+  .tc-stats div{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+  .tc-stats div b{display:block;font-family:'Outfit';font-weight:800;font-size:16px;color:#fff;letter-spacing:0}
+  .tc-foot{position:absolute;left:0;right:0;bottom:12px;z-index:2;font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--muted);text-align:center}
+  .name-in{margin-top:14px;display:flex;gap:8px;justify-content:center}
+  .name-in input{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;padding:9px 12px;width:160px;text-align:center;letter-spacing:.06em}
+  .name-in input:focus{outline:none;border-color:var(--accent)}
+
+  /* reveal animation */
+  .rv{opacity:0;transform:translateY(22px)}
+  .screen.on .rv{animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards}
+  .screen.on .rv:nth-child(1){animation-delay:.05s}
+  .screen.on .rv:nth-child(2){animation-delay:.15s}
+  .screen.on .rv:nth-child(3){animation-delay:.25s}
+  .screen.on .rv:nth-child(4){animation-delay:.35s}
+  .card .rv{animation-delay:.1s}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  .hint{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--muted);display:none;align-items:center;gap:8px;text-transform:uppercase}
+  .hint kbd{border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:10px}
+  .err{color:var(--pink);font-family:'Space Mono',monospace;font-size:13px;margin-top:18px;display:none;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5}
+  .glitch{position:relative}
+  .swipezone{position:fixed;inset:0;z-index:3;display:none}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="atmos"></div>
+<div class="grain"></div>
+
+<div class="brand"><span class="mk"><b>VR</b></span><span>VRCHAT&nbsp;WRAP</span></div>
+<button class="restart" id="restart">↺ RESTART</button>
+<div class="progress" id="progress"></div>
+<button class="nav prev" id="prev">‹</button>
+<button class="nav next" id="next">›</button>
+<div class="hint" id="hint"><kbd>←</kbd><kbd>→</kbd> or tap to move</div>
+<div class="swipezone" id="swipe"></div>
+
+<div class="stage">
+
+  <!-- LANDING -->
+  <section class="screen on" id="intake">
+    <div class="eyebrow rv">Checkpoint · 2025</div>
+    <h1 class="hero-title rv">VRChat<br>Wrap</h1>
+    <p class="hero-sub rv">A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, every friend, every late-night session of 2025.</p>
+    <div class="drop rv" id="drop">
+      <div class="ic">🛸</div>
+      <h3>Drop your VRCX.sqlite here</h3>
+      <p>or click to browse — the file never leaves your browser</p>
+      <div class="path">%AppData%\VRCX\VRCX.sqlite3</div>
+      <input type="file" id="file" accept=".sqlite,.db,.sqlite3" hidden />
+    </div>
+    <div class="or rv">or</div>
+    <div class="rv" style="text-align:center">
+      <button class="btn ghost" id="demo">▶ View demo with sample data</button>
+    </div>
+    <div class="privacy rv"><span>🔒</span> <span>100% local · <b>no upload</b> · no server · no tracking</span></div>
+    <div class="err" id="err"></div>
+  </section>
+
+  <!-- LOADING -->
+  <section class="screen" id="loading">
+    <div class="ring"></div>
+    <div class="lt">Reading your year…</div>
+    <div class="ls" id="loadmsg">parsing VRCX tables</div>
+  </section>
+
+  <!-- SLIDES injected here -->
+  <div id="deck"></div>
+
+</div>
+
+<script>
+/* ============================= ENGINE ============================= */
+const $ = s => document.querySelector(s);
+const fmt = n => (n==null||isNaN(n)) ? '0' : Math.round(n).toLocaleString('en-US');
+const fmt1 = n => (Math.round(n*10)/10).toLocaleString('en-US');
+
+/* ---- canvas particles + drifting grid ---- */
+(function fx(){
+  const c=$('#fx'),x=c.getContext('2d');let w,h,P=[];
+  function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=[];const n=Math.min(110,Math.floor(w*h/14000));for(let i=0;i<n;i++)P.push({x:Math.random()*w,y:Math.random()*h,z:Math.random()*.8+.2,vy:-(Math.random()*.3+.05)});}
+  rs();addEventListener('resize',rs);
+  (function loop(){
+    x.clearRect(0,0,w,h);
+    const col=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#27ff95';
+    for(const p of P){p.y+=p.vy;if(p.y<-2){p.y=h+2;p.x=Math.random()*w;}
+      x.globalAlpha=p.z*.6;x.fillStyle=col;x.beginPath();x.arc(p.x,p.y,p.z*1.7,0,7);x.fill();}
+    x.globalAlpha=1;requestAnimationFrame(loop);
+  })();
+})();
+
+/* ============================= VRCX PARSING ============================= */
+function parseTime(s){ // VRCX created_at variants
+  if(!s) return null;
+  let t=String(s).replace(' ','T');
+  if(!/[zZ]|[+\-]\d\d:?\d\d$/.test(t)) t+='Z';
+  const d=new Date(t); return isNaN(d)?null:d;
+}
+function detectYear(rows){
+  const years={};
+  rows.forEach(r=>{const d=parseTime(r); if(d){years[d.getUTCFullYear()]=(years[d.getUTCFullYear()]||0)+1;}});
+  let best=new Date().getFullYear(),mx=-1;
+  for(const y in years) if(years[y]>mx){mx=years[y];best=+y;}
+  return best;
+}
+
+function analyze(db){
+  const log=[];
+  const out=(m)=>{ $('#loadmsg').textContent=m; };
+  // discover tables
+  let tables=[];
+  try{ const r=db.exec("SELECT name FROM sqlite_master WHERE type='table'"); if(r[0]) tables=r[0].values.map(v=>v[0]); }catch(e){}
+  const has=n=>tables.includes(n);
+  const findSuffix=suf=>tables.filter(t=>t.toLowerCase().endsWith(suf));
+  const rowsOf=sql=>{ try{const r=db.exec(sql); if(!r[0])return[]; const cols=r[0].columns; return r[0].values.map(v=>{const o={};cols.forEach((c,i)=>o[c]=v[i]);return o;});}catch(e){return[];} };
+
+  // ---- pick year ----
+  out('detecting your active year');
+  let yearProbe=[];
+  if(has('gamelog_location')) yearProbe=rowsOf("SELECT created_at FROM gamelog_location").map(r=>r.created_at);
+  if(!yearProbe.length){ const t=findSuffix('feed_gps')[0]; if(t) yearProbe=rowsOf(`SELECT created_at FROM "${t}"`).map(r=>r.created_at); }
+  const YEAR=yearProbe.length?detectYear(yearProbe):new Date().getFullYear();
+  const inYear=d=>d&&d.getUTCFullYear()===YEAR;
+
+  const stats={year:YEAR};
+
+  // ---- worlds (gamelog_location) ----
+  out('counting worlds');
+  let loc=has('gamelog_location')?rowsOf("SELECT created_at,world_name,world_id,time FROM gamelog_location"):[];
+  loc=loc.map(r=>({d:parseTime(r.created_at),name:r.world_name||'Unknown World',id:r.world_id,time:+r.time||0})).filter(r=>inYear(r.d));
+  stats.sessions=loc.length;
+  stats.uniqueWorlds=new Set(loc.map(r=>r.id||r.name)).size;
+  stats.hours=loc.reduce((a,r)=>a+r.time,0)/3600000;
+  // top worlds by visit count
+  const wc={};loc.forEach(r=>{wc[r.name]=(wc[r.name]||0)+1;});
+  stats.topWorlds=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v}));
+  // hour-of-day histogram (local)
+  const hours=new Array(24).fill(0);
+  loc.forEach(r=>{if(r.d)hours[r.d.getHours()]++;});
+  stats.hours24=hours;
+  const night=hours.slice(0,6).reduce((a,b)=>a+b,0);
+  stats.nightPct=loc.length?Math.round(night/loc.length*100):0;
+  // months
+  const mo=new Array(12).fill(0);loc.forEach(r=>{if(r.d)mo[r.d.getUTCMonth()]++;});
+  stats.months=mo;
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  stats.busiestMonth=mo.some(x=>x)?MN[mo.indexOf(Math.max(...mo))]:'—';
+  // distinct active days
+  stats.activeDays=new Set(loc.map(r=>r.d&&r.d.toISOString().slice(0,10))).size;
+
+  // ---- people (gamelog_join_leave) ----
+  out('remembering the people');
+  let jl=has('gamelog_join_leave')?rowsOf("SELECT created_at,type,display_name FROM gamelog_join_leave"):[];
+  jl=jl.map(r=>({d:parseTime(r.created_at),type:r.type,nm:r.display_name})).filter(r=>inYear(r.d)&&(/join/i.test(r.type||'')));
+  const pc={};jl.forEach(r=>{if(r.nm)pc[r.nm]=(pc[r.nm]||0)+1;});
+  stats.peopleMet=Object.keys(pc).length;
+  stats.encounters=jl.length;
+  stats.squad=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v}));
+
+  // ---- friends added (friend_log_history) ----
+  out('tallying friendships');
+  const flt=findSuffix('friend_log_history')[0];
+  let added=0;
+  if(flt){ const fl=rowsOf(`SELECT created_at,type FROM "${flt}"`); added=fl.map(r=>({d:parseTime(r.created_at),type:r.type})).filter(r=>inYear(r.d)&&/^friend$/i.test(r.type||'')).length; }
+  stats.friendsAdded=added;
+
+  stats.hasReal = (loc.length+jl.length)>0;
+  return stats;
+}
+
+/* ============================= DEMO DATA ============================= */
+function demoStats(){
+  return {year:2025,sessions:1287,uniqueWorlds:342,hours:1645,activeDays:228,nightPct:61,
+    busiestMonth:'October',
+    hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
+    months:[88,76,91,84,99,103,112,108,121,138,96,71],
+    topWorlds:[{n:'The Black Cat',v:142},{n:'Murder 4',v:97},{n:'Prismic Lounge',v:73},{n:'Movie & Chill',v:58},{n:'Just Hangout',v:44}],
+    peopleMet:3914,encounters:14820,
+    squad:[{n:'Nyx',v:412},{n:'Kuma_VR',v:388},{n:'Pixel',v:301},{n:'Aurora',v:264},{n:'Volt',v:198}],
+    friendsAdded:127,hasReal:true,demo:true};
+}
+
+/* ============================= SLIDE BUILDER ============================= */
+const ACCENTS=['--green','--cyan','--magenta','--orange','--pink','--green','--cyan','--magenta','--green'];
+let SLIDES=[],S=null,idx=0;
+
+function setAccent(varname){
+  const v=getComputedStyle(document.documentElement).getPropertyValue(varname);
+  document.documentElement.style.setProperty('--accent',v);
+  const map={'--green':'--cyan','--cyan':'--green','--magenta':'--pink','--orange':'--pink','--pink':'--magenta'};
+  document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[varname]||'--cyan'));
+}
+
+function card(tag,page,total,bodyHTML,footL){
+  return `<div class="card">
+    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${String(page).padStart(2,'0')} / ${String(total).padStart(2,'0')}</span></div>
+    <div class="card-body">${bodyHTML}</div>
+    <div class="card-foot"><span>${footL||'VRCHAT WRAP · 2025'}</span><span class="pix">▦ ▤ ☻</span></div>
+  </div>`;
+}
+
+function build(st){
+  const T=10;
+  SLIDES=[
+    // 1 intro
+    ()=>card('CHECKPOINT',1,T,`
+      <div class="kicker rv">Your year in VR · ${st.year}</div>
+      <h2 class="headline rv">Let's replay<br>your <em>${st.year}</em>.</h2>
+      <p class="lede rv">You logged in. You stayed up too late. You met strangers who became regulars. Here's the proof — pulled straight from your own logs.</p>
+      <div class="mini rv" style="margin-top:6px">
+        <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">World visits</div></div>
+        <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">Days online</div></div>
+      </div>`),
+    // 2 hours
+    ()=>card('TIME LIVED',2,T,`
+      <div class="kicker rv">Hours spent in-world</div>
+      <div class="bignum rv">${fmt(st.hours)}</div>
+      <div class="unit rv">hours · about ${fmt(st.hours/24)} full days</div>
+      <p class="lede rv">${st.hours>876?`That's the <b>top tier</b> of VRChat dedication — more than 2 hours a day, every day.`:`Real time, real presence. Every hour spent somewhere that doesn't exist.`}</p>`),
+    // 3 worlds
+    ()=>card('EXPLORER',3,T,`
+      <div class="kicker rv">Worlds you stepped into</div>
+      <div class="bignum rv">${fmt(st.uniqueWorlds)}</div>
+      <div class="unit rv">unique worlds across ${fmt(st.sessions)} visits</div>
+      <p class="lede rv">From quiet lounges to chaos rooms — you wandered into <b>${fmt(st.uniqueWorlds)}</b> different corners of the metaverse this year.</p>`),
+    // 4 top world
+    ()=>card('HOME BASE',4,T,`
+      <div class="kicker rv">The place you kept coming back to</div>
+      <h2 class="headline rv" style="font-size:clamp(26px,7vw,46px)">${st.topWorlds[0]?st.topWorlds[0].n:'—'}</h2>
+      <p class="lede rv" style="margin-top:-4px">Your most-visited world — <b>${st.topWorlds[0]?fmt(st.topWorlds[0].v):0} times</b>. Everyone's got a spot that feels like home.</p>
+      <div class="ranks rv" style="margin-top:6px">
+        ${st.topWorlds.map((w,i)=>`<div class="rank ${i===0?'top':''}"><span class="n">${i+1}</span><span class="nm">${w.n}</span><span class="v">${fmt(w.v)}×</span></div>`).join('')}
+      </div>`),
+    // 5 people met
+    ()=>card('SOCIAL',5,T,`
+      <div class="kicker rv">Different people you crossed paths with</div>
+      <div class="bignum rv">${fmt(st.peopleMet)}</div>
+      <div class="unit rv">avatars met · ${fmt(st.encounters)} total encounters</div>
+      <p class="lede rv">Behind every avatar was a person. You shared a space with <b>${fmt(st.peopleMet)}</b> of them this year.</p>`),
+    // 6 squad
+    ()=>card('YOUR SQUAD',6,T,`
+      <div class="kicker rv">The people you spent the most time with</div>
+      <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">Squad</h2>
+      <div class="ranks rv">
+        ${st.squad.length?st.squad.map((p,i)=>`<div class="rank ${i===0?'top':''}"><span class="n">${i+1}</span><span class="nm">${p.n}</span><span class="v">${fmt(p.v)} seen</span></div>`).join(''):'<p class="lede">Not enough join logs to name names — but they know who they are.</p>'}
+      </div>`),
+    // 7 friends added
+    ()=>card('NEW BONDS',7,T,`
+      <div class="kicker rv">Friends you added in ${st.year}</div>
+      <div class="bignum rv">${fmt(st.friendsAdded)}</div>
+      <div class="unit rv">new friendships</div>
+      <p class="lede rv">${st.friendsAdded>0?`<b>${fmt(st.friendsAdded)}</b> people went from stranger to friend this year. The list keeps growing.`:`The real ones were already on the list. Quality over quantity.`}</p>`),
+    // 8 night owl
+    ()=>{
+      const mx=Math.max(...st.hours24,1),peak=st.hours24.indexOf(mx);
+      const bars=st.hours24.map((v,h)=>`<div class="b ${h===peak?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
+      const ph=peak%12===0?12:peak%12, ap=peak<12?'AM':'PM';
+      return card('RHYTHM',8,T,`
+        <div class="kicker rv">When you're really online</div>
+        <h2 class="headline rv" style="font-size:clamp(28px,7.5vw,48px)">${st.nightPct>=50?'Night<br><em>owl</em>':'Peak: <em>'+ph+ap+'</em>'}</h2>
+        <p class="lede rv"><b>${st.nightPct}%</b> of your sessions started after midnight. Your prime time is <b>${ph}${ap}</b>.</p>
+        <div class="bars rv">${bars}</div>
+        <div class="axis rv"><span>12AM</span><span>6</span><span>12PM</span><span>6</span><span>11PM</span></div>`);
+    },
+    // 9 busiest month
+    ()=>card('MOMENTUM',9,T,`
+      <div class="kicker rv">Your busiest month</div>
+      <h2 class="headline rv">${st.busiestMonth}</h2>
+      <p class="lede rv">That's when you showed up the most. Something kept pulling you back in.</p>
+      <div class="mini rv">
+        <div class="m"><div class="mv">${fmt(Math.max(...st.months))}</div><div class="ml">Visits that month</div></div>
+        <div class="m"><div class="mv">${fmt(st.sessions/12)}</div><div class="ml">Monthly average</div></div>
+      </div>`),
+    // 10 final card
+    ()=>`<div class="card" id="s-card">
+      <div class="card-top"><span class="tag">◢ COLLECT</span><span>10 / 10</span></div>
+      <div class="card-body">
+        <div class="kicker rv">Your ${st.year} VRChat card</div>
+        <div class="tcard rv" id="tcard">
+          <div class="tc-top"><span>CHECKPOINT ${st.year}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
+          <div class="tc-art">🛸</div>
+          <div class="tc-name" id="tc-name">PLAYER</div>
+          <div class="tc-role">${st.nightPct>=50?'NIGHT WANDERER':st.hours>876?'WORLD VETERAN':'METAVERSE EXPLORER'}</div>
+          <div class="tc-stats">
+            <div><b>${fmt(st.hours)}</b>hours</div>
+            <div><b>${fmt(st.uniqueWorlds)}</b>worlds</div>
+            <div><b>${fmt(st.peopleMet)}</b>met</div>
+            <div><b>${fmt(st.friendsAdded)}</b>friends</div>
+          </div>
+          <div class="tc-foot">VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE</div>
+        </div>
+        <div class="name-in rv"><input id="nameInput" maxlength="14" placeholder="type your name" /></div>
+        <p class="lede rv" style="text-align:center;font-size:13px">Screenshot it. Share it. See you in ${st.year+1}. 👋</p>
+      </div>
+      <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▤ ☻</span></div>
+    </div>`
+  ];
+  S=st;
+  // progress segments
+  const pg=$('#progress');pg.innerHTML='';
+  for(let i=0;i<T;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
+}
+
+function showSlide(i){
+  idx=Math.max(0,Math.min(SLIDES.length-1,i));
+  setAccent(ACCENTS[idx]||'--green');
+  const deck=$('#deck');
+  deck.innerHTML=`<section class="screen on">${SLIDES[idx]()}</section>`;
+  // progress
+  document.querySelectorAll('#progress .seg').forEach((s,k)=>{s.classList.toggle('done',k<idx);s.classList.toggle('active',k===idx);});
+  // final card wiring
+  if(idx===SLIDES.length-1){
+    const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard');
+    const saved=localStorage.getItem('vrcwrap_name');
+    if(saved){ni.value=saved;tn.textContent=saved.toUpperCase();}
+    ni&&ni.addEventListener('input',e=>{const v=e.target.value.trim()||'PLAYER';tn.textContent=v.toUpperCase();localStorage.setItem('vrcwrap_name',e.target.value.trim());});
+    // tilt
+    tc&&tc.addEventListener('pointermove',e=>{const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`perspective(700px) rotateY(${px*16}deg) rotateX(${-py*16}deg)`;});
+    tc&&tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
+  }
+}
+
+function enterDeck(){
+  $('#intake').classList.remove('on');
+  $('#loading').classList.remove('on');
+  $('#progress').style.display='flex';
+  $('#restart').style.display='block';
+  $('#swipe').style.display='block';
+  if(innerWidth>680){$('#prev').style.display='flex';$('#next').style.display='flex';$('#hint').style.display='flex';}
+  else {$('#hint').style.display='flex';}
+  showSlide(0);
+}
+
+/* ---- navigation ---- */
+function go(d){ if(!SLIDES.length)return; if(idx+d<0)return; if(idx+d>SLIDES.length-1)return; showSlide(idx+d); }
+$('#next').onclick=()=>go(1); $('#prev').onclick=()=>go(-1);
+addEventListener('keydown',e=>{ if(!SLIDES.length)return; if(e.key==='ArrowRight'||e.key===' ')go(1); if(e.key==='ArrowLeft')go(-1);});
+$('#restart').onclick=()=>{location.reload();};
+// tap zones + swipe (mobile)
+let tsx=0,tsy=0;
+$('#swipe').addEventListener('pointerdown',e=>{tsx=e.clientX;tsy=e.clientY;});
+$('#swipe').addEventListener('pointerup',e=>{
+  const dx=e.clientX-tsx,dy=e.clientY-tsy;
+  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){go(dx<0?1:-1);return;}
+  if(Math.abs(dx)<10&&Math.abs(dy)<10){ // tap: right half next, left prev
+    go(e.clientX>innerWidth*0.32?1:-1);
+  }
+});
+
+/* ============================= FILE INTAKE ============================= */
+function showErr(m){const e=$('#err');e.textContent='⚠ '+m;e.style.display='block';}
+function startLoad(){ $('#intake').classList.remove('on'); $('#loading').classList.add('on'); }
+
+async function handleFile(file){
+  if(!file) return;
+  showErr.hide?.(); $('#err').style.display='none';
+  startLoad();
+  try{
+    const buf=new Uint8Array(await file.arrayBuffer());
+    const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`});
+    let db;
+    try{ db=new SQL.Database(buf); }catch(e){ throw new Error('That doesn\'t look like a valid SQLite file.'); }
+    const st=analyze(db);
+    if(!st.hasReal){ $('#loading').classList.remove('on'); $('#intake').classList.add('on'); showErr('No VRChat activity found in this database. Make sure it\'s your VRCX.sqlite with gamelog enabled.'); return; }
+    await new Promise(r=>setTimeout(r,650)); // let the moment breathe
+    build(st); enterDeck();
+  }catch(err){
+    $('#loading').classList.remove('on'); $('#intake').classList.add('on');
+    showErr(err.message||'Could not read that file.');
+  }
+}
+
+const drop=$('#drop'),file=$('#file');
+drop.onclick=()=>file.click();
+file.onchange=e=>handleFile(e.target.files[0]);
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>e.preventDefault());
+
+$('#demo').onclick=()=>{ startLoad(); setTimeout(()=>{build(demoStats());enterDeck();},700); };
+</script>
+</body>
+</html>

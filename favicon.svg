@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="50%" stop-color="#00F593"/>
+      <stop offset="100%" stop-color="#FFB800"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#00F593"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="46" fill="#0B0D17" stroke="url(#g)" stroke-width="2"/>
+  <!-- Stylized W letter -->
+  <path d="M22 65 L30 30 L38 50 L50 28 L62 50 L70 30 L78 65" 
+        fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Small star accent -->
+  <circle cx="50" cy="18" r="3" fill="#00E5FF" opacity="0.6"/>
+  <circle cx="82" cy="35" r="2" fill="#00F593" opacity="0.4"/>
+  <circle cx="18" cy="35" r="2" fill="#FFB800" opacity="0.4"/>
+</svg>
