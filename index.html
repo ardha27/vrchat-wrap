@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
-<title>VRChat Wrap 2025 — Your Year in VR</title>
+<title>VRChat Wrap — Your Year in VR</title>
 <meta name="description" content="Drop your VRCX database and relive your VRChat year. 100% local, nothing leaves your device." />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,7 +100,8 @@
   .drop::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 0%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%);opacity:0;transition:.3s}
   .drop:hover,.drop.hot{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 18px 50px -18px color-mix(in srgb,var(--accent) 60%,transparent)}
   .drop:hover::before,.drop.hot::before{opacity:1}
-  .drop .ic{font-size:34px;margin-bottom:12px;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 60%,transparent))}
+  .drop .ic{color:var(--accent);margin-bottom:12px;line-height:0;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 60%,transparent))}
+  .privacy svg{color:var(--green);flex:none}
   .drop h3{font-size:18px;font-weight:700;margin-bottom:6px}
   .drop p{color:var(--muted);font-size:13px;line-height:1.5}
   .drop .path{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);margin-top:12px;word-break:break-all;opacity:.9}
@@ -230,11 +231,11 @@
 
   <!-- LANDING -->
   <section class="screen on" id="intake">
-    <div class="eyebrow rv">Checkpoint · 2025</div>
+    <div class="eyebrow rv">Checkpoint · <span class="curYear"></span></div>
     <h1 class="hero-title rv">VRChat<br>Wrap</h1>
-    <p class="hero-sub rv">A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, every friend, every late-night session of 2025.</p>
+    <p class="hero-sub rv">A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, every friend, every late-night session of <span class="curYear"></span>.</p>
     <div class="drop rv" id="drop">
-      <div class="ic">🛸</div>
+      <div class="ic"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></div>
       <h3>Drop your VRCX.sqlite here</h3>
       <p>or click to browse — the file never leaves your browser</p>
       <div class="path">%AppData%\VRCX\VRCX.sqlite3</div>
@@ -244,7 +245,7 @@
     <div class="rv" style="text-align:center">
       <button class="btn ghost" id="demo">▶ View demo with sample data</button>
     </div>
-    <div class="privacy rv"><span>🔒</span> <span>100% local · <b>no upload</b> · no server · no tracking</span></div>
+    <div class="privacy rv"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> <span>100% local · <b>no upload</b> · no server · no tracking</span></div>
     <div class="err" id="err"></div>
   </section>
 
@@ -361,7 +362,7 @@ function analyze(db){
 
 /* ============================= DEMO DATA ============================= */
 function demoStats(){
-  return {year:2025,sessions:1287,uniqueWorlds:342,hours:1645,activeDays:228,nightPct:61,
+  return {year:new Date().getFullYear(),sessions:1287,uniqueWorlds:342,hours:1645,activeDays:228,nightPct:61,
     busiestMonth:'October',
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
     months:[88,76,91,84,99,103,112,108,121,138,96,71],
@@ -373,7 +374,7 @@ function demoStats(){
 
 /* ============================= SLIDE BUILDER ============================= */
 const ACCENTS=['--green','--cyan','--magenta','--orange','--pink','--green','--cyan','--magenta','--green'];
-let SLIDES=[],S=null,idx=0;
+let SLIDES=[],S=null,idx=0,YR=new Date().getFullYear();
 
 function setAccent(varname){
   const v=getComputedStyle(document.documentElement).getPropertyValue(varname);
@@ -386,7 +387,7 @@ function card(tag,page,total,bodyHTML,footL){
   return `<div class="card">
     <div class="card-top"><span class="tag">◢ ${tag}</span><span>${String(page).padStart(2,'0')} / ${String(total).padStart(2,'0')}</span></div>
     <div class="card-body">${bodyHTML}</div>
-    <div class="card-foot"><span>${footL||'VRCHAT WRAP · 2025'}</span><span class="pix">▦ ▤ ☻</span></div>
+    <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
   </div>`;
 }
 
@@ -469,7 +470,7 @@ function build(st){
         <div class="kicker rv">Your ${st.year} VRChat card</div>
         <div class="tcard rv" id="tcard">
           <div class="tc-top"><span>CHECKPOINT ${st.year}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
-          <div class="tc-art">🛸</div>
+          <div class="tc-art" id="tc-art">P</div>
           <div class="tc-name" id="tc-name">PLAYER</div>
           <div class="tc-role">${st.nightPct>=50?'NIGHT WANDERER':st.hours>876?'WORLD VETERAN':'METAVERSE EXPLORER'}</div>
           <div class="tc-stats">
@@ -481,12 +482,12 @@ function build(st){
           <div class="tc-foot">VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE</div>
         </div>
         <div class="name-in rv"><input id="nameInput" maxlength="14" placeholder="type your name" /></div>
-        <p class="lede rv" style="text-align:center;font-size:13px">Screenshot it. Share it. See you in ${st.year+1}. 👋</p>
+        <p class="lede rv" style="text-align:center;font-size:13px">Screenshot it. Share it. See you in ${st.year+1}.</p>
       </div>
-      <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▤ ☻</span></div>
+      <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▥ ▤</span></div>
     </div>`
   ];
-  S=st;
+  S=st; YR=st.year;
   // progress segments
   const pg=$('#progress');pg.innerHTML='';
   for(let i=0;i<T;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
@@ -501,10 +502,11 @@ function showSlide(i){
   document.querySelectorAll('#progress .seg').forEach((s,k)=>{s.classList.toggle('done',k<idx);s.classList.toggle('active',k===idx);});
   // final card wiring
   if(idx===SLIDES.length-1){
-    const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard');
+    const ni=$('#nameInput'),tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art');
+    const ini=v=>(v.trim()[0]||'P').toUpperCase();
     const saved=localStorage.getItem('vrcwrap_name');
-    if(saved){ni.value=saved;tn.textContent=saved.toUpperCase();}
-    ni&&ni.addEventListener('input',e=>{const v=e.target.value.trim()||'PLAYER';tn.textContent=v.toUpperCase();localStorage.setItem('vrcwrap_name',e.target.value.trim());});
+    if(saved){ni.value=saved;tn.textContent=saved.toUpperCase();ta.textContent=ini(saved);}
+    ni&&ni.addEventListener('input',e=>{const raw=e.target.value.trim();const v=raw||'PLAYER';tn.textContent=v.toUpperCase();ta.textContent=ini(raw);localStorage.setItem('vrcwrap_name',raw);});
     // tilt
     tc&&tc.addEventListener('pointermove',e=>{const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`perspective(700px) rotateY(${px*16}deg) rotateX(${-py*16}deg)`;});
     tc&&tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
@@ -539,7 +541,7 @@ $('#swipe').addEventListener('pointerup',e=>{
 });
 
 /* ============================= FILE INTAKE ============================= */
-function showErr(m){const e=$('#err');e.textContent='⚠ '+m;e.style.display='block';}
+function showErr(m){const e=$('#err');e.textContent='! '+m;e.style.display='block';}
 function startLoad(){ $('#intake').classList.remove('on'); $('#loading').classList.add('on'); }
 
 async function handleFile(file){
@@ -571,6 +573,9 @@ addEventListener('dragover',e=>e.preventDefault());
 addEventListener('drop',e=>e.preventDefault());
 
 $('#demo').onclick=()=>{ startLoad(); setTimeout(()=>{build(demoStats());enterDeck();},700); };
+
+// fill current year on landing
+document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
 </script>
 </body>
 </html>
