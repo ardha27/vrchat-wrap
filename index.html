@@ -18,7 +18,7 @@
     --bg:#070710;--bg2:#0c0c18;--panel:rgba(16,16,28,.66);--line:rgba(255,255,255,.07);
     --ink:#f4f5ff;--muted:#8b8ca8;
     --green:#27ff95;--cyan:#34d6ff;--magenta:#e15bff;--orange:#ff9d3c;--pink:#ff4d8d;
-    --accent:var(--green);--accent2:var(--cyan);--grid:rgba(255,255,255,.045);
+    --accent:var(--green);--accent2:var(--cyan);--accent-sad:#b453b4;--accent2-sad:#6b5b95;--grid:rgba(255,255,255,.045);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -105,12 +105,12 @@
 
   .card{position:relative;width:100%;max-width:560px;margin:0 auto;border-radius:26px;border:1px solid var(--line);
     background:linear-gradient(180deg,rgba(20,20,34,.86),rgba(10,10,20,.92));backdrop-filter:blur(12px);overflow:hidden;
-    box-shadow:0 40px 90px -40px #000,inset 0 1px 0 rgba(255,255,255,.06);min-height:clamp(420px,72vh,620px);display:flex;flex-direction:column}
+    box-shadow:0 40px 90px -40px #000,inset 0 1px 0 rgba(255,255,255,.06);min-height:clamp(380px,70vh,560px);max-height:calc(100dvh - 120px);display:flex;flex-direction:column}
   .card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(110% 80% at 50% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
   .card::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
   .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted)}
   .card-top .tag{color:var(--accent)}
-  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px}
+  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .card-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
   .pix{display:flex;gap:5px;font-size:13px;opacity:.7}
   .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
@@ -187,6 +187,7 @@
   .screen.on .rv:nth-child(3){animation-delay:.21s}.screen.on .rv:nth-child(4){animation-delay:.29s}
   .card .rv{animation-delay:.1s}
   @keyframes rise{to{opacity:1;transform:none}}
+  .screen.on .rv.slow{animation:rise 1s cubic-bezier(.2,.8,.2,1) forwards}
   .hint{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);display:none;align-items:center;gap:8px;text-transform:uppercase;text-align:center}
   .hint kbd{border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:10px}
   .err{color:var(--pink);font-family:'Space Mono',monospace;font-size:13px;margin-top:18px;display:none;max-width:430px;margin:18px auto 0;line-height:1.5}
@@ -280,7 +281,20 @@ const I18N={
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
   dl:'Download card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
   outro:'Screenshot it. Share it. See you next time.',
-  caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:'},
+  caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:',
+  s_unfriended:'Friends lost',s_unit_unf:'people unfriended',s_lede_unf:'For every person who joined your life, someone walked away.',
+  s_abandoned:'Abandoned worlds',s_unit_abn:'places visited once',s_lede_abn:'You stepped in. Looked around. Never came back.',
+  s_onetime:'Ghosts',s_unit_otp:'people met once',s_lede_otp:'One conversation. One wave. Never again.',
+  s_am:'Dawn patrol',s_unit_am:'sessions at 4-7 AM',s_lede_am:'When the world was asleep, you were somewhere else.',
+  s_avatar:'Who are you',s_unit_av:'avatar changes',s_lede_av:'How many versions until you found the right one?',
+  s_transit:'Passing through',s_unit_tr:'transit worlds',s_lede_tr:'You visited often but never stayed. Just passing through.',
+  s_short:'Blink',s_unit_sh:'sessions under 1 minute',s_lede_sh:'In and out. Changed your mind before you arrived.',
+  s_solo:'Solo',s_unit_so:'of your days were completely alone',s_lede_so:'No friends. No strangers. Just you and the empty world.',
+  s_span:'Your arc',s_unit_sp:'day journey',s_lede_sp:'From {first} to {last}. What changed?',
+  s_net:'Balance',s_unit_net:'net friendships',s_lede_net_neg:'You ended the year with fewer friends than you started.',s_lede_net_pos:'You ended the year with more friends. The lonely nights paid off.',
+  si_tag:'Start',si_kick:'Your {year} in VR · {label}',si_head:'Ready to<br>relive <em>{year}?</em>',si_lede:'Ten highlights. Ten hard truths. Everything pulled from your own logs — nothing fabricated, nothing held back.',si_m_visits:'Total visits',si_m_days:'Days online',
+  str_tag:'Flip side',str_head:'Now for the<br><em>other half</em>.',str_lede:"Your year wasn't just highlights. Here's what no algorithm would put in an ad — the real numbers, unfiltered.",
+  sha_tag:'Dedication',sha_kick:'Days you actually showed up',sha_unit:'active days out of {total}',sha_lede:'You were present on <b>{n}</b> different days — <b>{pct}%</b> of the window. Consistency is its own kind of showing up.'},
 
  id:{native:'Indonesia',restart:'Ulangi',
   sub:'Satu tahun di dalam metaverse, diputar ulang. Taruh <b>database VRCX</b> kamu dan kenang lagi tiap world, teman, dan sesi tengah malam.',
@@ -303,7 +317,20 @@ const I18N={
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
   dl:'Unduh kartu',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
   outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
-  caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:'},
+  caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:',
+  s_unfriended:'Teman hilang',s_unit_unf:'orang di-unfriend',s_lede_unf:'Untuk setiap orang yang datang, ada yang pergi.',
+  s_abandoned:'World terlantar',s_unit_abn:'world dikunjungi sekali',s_lede_abn:'Kamu masuk. Lihat-lihat. Tak pernah kembali.',
+  s_onetime:'Hantu',s_unit_otp:'orang ketemu sekali',s_lede_otp:'Satu percakapan. Satu lambaian. Tak pernah lagi.',
+  s_am:'Patroli subuh',s_unit_am:'sesi jam 4-7 pagi',s_lede_am:'Saat dunia tidur, kamu ada di tempat lain.',
+  s_avatar:'Siapa kamu',s_unit_av:'kali ganti avatar',s_lede_av:'Berapa versi sampai kamu menemukan yang tepat?',
+  s_transit:'Mampir',s_unit_tr:'world transit',s_lede_tr:'Sering mampir tapi tak pernah singgah.',
+  s_short:'Sekejap',s_unit_sh:'sesi di bawah 1 menit',s_lede_sh:'Masuk. Langsung keluar. Berubah pikiran.',
+  s_solo:'Sendiri',s_unit_so:'harimu benar-benar sendiri',s_lede_so:'Tanpa teman. Tanpa orang asing. Hanya kamu dan world kosong.',
+  s_span:'Perjalananmu',s_unit_sp:'hari perjalanan',s_lede_sp:'Dari {first} hingga {last}. Apa yang berubah?',
+  s_net:'Neraca',s_unit_net:'net pertemanan',s_lede_net_neg:'Kamu mengakhiri tahun dengan lebih sedikit teman.',s_lede_net_pos:'Kamu mengakhiri tahun dengan lebih banyak teman.',
+  si_tag:'Mulai',si_kick:'Tahun {year} kamu di VR · {label}',si_head:'Siap putar ulang<br><em>{year}?</em>',si_lede:'Sepuluh highlight. Sepuluh kebenaran pahit. Semua langsung dari log kamu — tanpa rekayasa, tanpa filter.',si_m_visits:'Total kunjungan',si_m_days:'Hari aktif',
+  str_tag:'Sisi lain',str_head:'Sekarang,<br><em>sisi lainnya</em>.',str_lede:'Tahunmu bukan cuma highlight. Ini yang tidak akan dimasukkan ke iklan mana pun — angka yang sebenarnya.',
+  sha_tag:'Dedikasi',sha_kick:'Hari kamu benar-benar muncul',sha_unit:'hari aktif dari {total}',sha_lede:'Kamu hadir di <b>{n}</b> hari berbeda — <b>{pct}%</b> dari total rentang. Konsistensi adalah bentuk kehadiran tersendiri.'},
 
  ja:{native:'日本語',restart:'最初から',
   sub:'メタバースで過ごした一年を振り返ろう。<b>VRCXデータベース</b>をドロップして、訪れたワールド、出会った人、夜更かしの記録を見よう。',
@@ -326,7 +353,17 @@ const I18N={
   tc_hours:'時間',tc_worlds:'ワールド',tc_met:'遭遇',tc_friends:'フレンド',tc_visits:'訪問',tc_days:'日間',tc_topw:'トップワールド',tc_squad:'トップ仲間',tc_foot:'VRCHAT WRAP · データはこの端末から出ていません',
   dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',
   outro:'スクショして、シェアして、また会おう。',
-  caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:'},
+  caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:',
+  s_unfriended:'失った友達',s_unit_unf:'人のフレンド解除',s_lede_unf:'誰かがあなたの人生に入るたびに、誰かが去っていった。',
+  s_abandoned:'放棄されたワールド',s_unit_abn:'回だけ訪れたワールド',s_lede_abn:'足を踏み入れて、眺めて、二度と戻らなかった。',
+  s_onetime:'幽霊',s_unit_otp:'一度だけ会った人',s_lede_otp:'一度会って、手を振って、二度と。',
+  s_am:'夜明けのパトロール',s_unit_am:'朝4-7時の記録',s_lede_am:'世界が眠っている間、あなたはどこか別の場所にいた。',
+  s_avatar:'自分探し',s_unit_av:'回アバター変更',s_lede_av:'正しいものを見つけるまで何バージョン？',
+  s_transit:'通過点',s_unit_tr:'通過したワールド',s_lede_tr:'何度も立ち寄ったが、留まることはなかった。',
+  s_short:'瞬間',s_unit_sh:'1分未満のセッション',s_lede_sh:'入ってすぐ出た。心変わり。',
+  s_solo:'孤独',s_unit_so:'完全に一人だった日',s_lede_so:'友達もいない。他人もいない。あなたと空っぽのワールドだけ。',
+  s_span:'軌跡',s_unit_sp:'日間の旅',s_lede_sp:'{first} から {last} まで。何が変わった？',
+  s_net:'収支',s_unit_net:'純フレンド数',s_lede_net_neg:'今年は失った友達の方が多かった。',s_lede_net_pos:'今年は増えた。孤独な夜は報われた。'},
 
  ko:{native:'한국어',restart:'다시',
   sub:'메타버스에서 보낸 한 해를 다시 재생하세요. <b>VRCX 데이터베이스</b>를 올려 모든 월드, 친구, 늦은 밤 세션을 되돌아보세요.',
@@ -539,8 +576,89 @@ function demoStats(range){
     squad:b.sq.map(([n,v])=>({n,v})),selfName:range==='month'?'Nyx':'Nyx',friendsAdded:range==='all'?640:b.fa,hasReal:true,demo:true};
 }
 
+function demoSadStats(range){
+  const y=new Date().getFullYear();const now=new Date();
+  const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
+  return{year:y,range,startDate:dstart,endDate:now,hasReal:true,demo:true,
+    unfriended:22,abandonedWorlds:393,oneTimePeople:824,amSessions:120,avatarChanges:136,
+    transitWorlds:27,shortSessions:48,soloPct:34,activitySpan:186,
+    firstDate:fmtDate(dstart),lastDate:fmtDate(now),friendNet:-5};
+}
+
+function analyzeSad(db,range){
+  let tables=[];try{const r=db.exec("SELECT name FROM sqlite_master WHERE type='table'");if(r[0])tables=r[0].values.map(v=>v[0]);}catch(e){}
+  const has=n=>tables.includes(n);
+  const findSuffix=suf=>tables.filter(t=>t.toLowerCase().endsWith(suf));
+  const rowsOf=sql=>{try{const r=db.exec(sql);if(!r[0])return[];const cols=r[0].columns;return r[0].values.map(v=>{const o={};cols.forEach((c,i)=>o[c]=v[i]);return o;});}catch(e){return[];}};
+  let loc=has('gamelog_location')?rowsOf("SELECT created_at,world_name,world_id,time FROM gamelog_location"):[];
+  loc=loc.map(r=>({d:parseTime(r.created_at),name:r.world_name||'Unknown World',id:r.world_id,time:+r.time||0})).filter(r=>r.d);
+  const allDates=loc.map(r=>r.d);
+  const end=allDates.length?new Date(Math.max(...allDates.map(d=>d.getTime()))):new Date();
+  let start;
+  if(range==='month')start=new Date(end.getTime()-30*864e5);
+  else if(range==='year')start=new Date(end.getTime()-365*864e5);
+  else start=new Date(0);
+  const inR=d=>d&&d>=start&&d<=end;
+  loc=loc.filter(r=>inR(r.d));
+  const wc={};loc.forEach(r=>wc[r.name]=(wc[r.name]||0)+1);
+  const abandonedWorlds=Object.values(wc).filter(v=>v===1).length;
+  const transitWorlds=Object.values(wc).filter(v=>v>=2&&v<=5).length;
+  const shortSessions=loc.filter(r=>r.time>0&&r.time<60000).length;
+  const amSessions=loc.filter(r=>r.d&&r.d.getHours()>=4&&r.d.getHours()<7).length;
+  const locTs=loc.map(r=>r.d.getTime());
+  const activitySpan=locTs.length>1?Math.round((Math.max(...locTs)-Math.min(...locTs))/864e5):0;
+  const firstDate=locTs.length?fmtDate(new Date(Math.min(...locTs))):'—';
+  const lastDate=locTs.length?fmtDate(new Date(Math.max(...locTs))):'—';
+  const ut=tables.find(x=>/^usr[0-9a-f]{32}_/i.test(x));
+  let selfId=null;
+  if(ut){const hx=ut.match(/^usr([0-9a-f]{32})_/i)[1];selfId='usr_'+hx.slice(0,8)+'-'+hx.slice(8,12)+'-'+hx.slice(12,16)+'-'+hx.slice(16,20)+'-'+hx.slice(20);}
+  let jl=has('gamelog_join_leave')?rowsOf("SELECT created_at,type,display_name,user_id FROM gamelog_join_leave"):[];
+  jl=jl.map(r=>({d:parseTime(r.created_at),type:r.type,nm:r.display_name,uid:r.user_id})).filter(r=>inR(r.d)&&/join/i.test(r.type||''));
+  if(selfId)jl=jl.filter(r=>r.uid!==selfId);
+  const pc={};jl.forEach(r=>{if(r.nm)pc[r.nm]=(pc[r.nm]||0)+1;});
+  const oneTimePeople=Object.values(pc).filter(v=>v===1).length;
+  const activeDaySet=new Set(loc.map(r=>r.d&&r.d.toISOString().slice(0,10)));
+  const daysWithPeople=new Set(jl.map(r=>r.d&&r.d.toISOString().slice(0,10)));
+  const soloDays=[...activeDaySet].filter(d=>d&&!daysWithPeople.has(d)).length;
+  const soloPct=activeDaySet.size?Math.round(soloDays/activeDaySet.size*100):0;
+  const flt=findSuffix('friend_log_history')[0];
+  let friendsAdded=0,unfriended=0;
+  if(flt){const fl=rowsOf(`SELECT created_at,type FROM "${flt}"`);const filt=fl.map(r=>({d:parseTime(r.created_at),type:r.type})).filter(r=>inR(r.d));friendsAdded=filt.filter(r=>/^friend$/i.test(r.type||'')).length;unfriended=filt.filter(r=>/^unfriend$/i.test(r.type||'')).length;}
+  const friendNet=friendsAdded-unfriended;
+  let avatarChanges=0;
+  const avTbl=tables.find(t=>/(gamelog_avatar|change_avatar)/i.test(t));
+  if(avTbl){const rows=rowsOf(`SELECT created_at FROM "${avTbl}"`);avatarChanges=rows.filter(r=>inR(parseTime(r.created_at))).length;}
+  return{year:end.getFullYear(),range,startDate:start,endDate:end,hasReal:loc.length>0,
+    unfriended,abandonedWorlds,oneTimePeople,amSessions,avatarChanges,
+    transitWorlds,shortSessions,soloPct,activitySpan,firstDate,lastDate,friendNet};
+}
+
 /* ============================= SLIDES ============================= */
-const ACCENTS=['--green','--cyan','--magenta','--orange','--pink','--green','--cyan','--magenta','--green'];
+const ACCENTS=[
+  '--cyan',     // 0  intro
+  '--green',    // 1  h1 checkpoint
+  '--cyan',     // 2  h2 hours
+  '--magenta',  // 3  h3 worlds
+  '--orange',   // 4  h4 home base
+  '--pink',     // 5  h5 people
+  '--green',    // 6  h6 squad
+  '--cyan',     // 7  h7 friends
+  '--magenta',  // 8  h8 rhythm
+  '--green',    // 9  h9 busiest month
+  '--pink',     // 10 h10 dedication
+  '--magenta',  // 11 transition
+  '--magenta',  // 12 sad1 unfriended
+  '--pink',     // 13 sad2 abandoned
+  '--magenta',  // 14 sad3 ghosts
+  '--pink',     // 15 sad4 solo
+  '--magenta',  // 16 sad5 net
+  '--pink',     // 17 sad6 dawn
+  '--magenta',  // 18 sad7 avatar
+  '--pink',     // 19 sad8 transit
+  '--magenta',  // 20 sad9 short sessions
+  '--pink',     // 21 sad10 span
+  '--green',    // 22 card/outro
+];
 let SLIDES=[],S=null,idx=0,YR=new Date().getFullYear();
 function setAccent(v){const val=getComputedStyle(document.documentElement).getPropertyValue(v);
   document.documentElement.style.setProperty('--accent',val);
@@ -548,77 +666,71 @@ function setAccent(v){const val=getComputedStyle(document.documentElement).getPr
   document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[v]||'--cyan'));}
 function card(tag,page,bodyHTML,footL){
   return `<div class="card">
-    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${S?fmtDate(S.startDate)+' - '+fmtDate(S.endDate):''}<span style="margin:0 8px;opacity:.2">|</span>${String(page).padStart(2,'0')} / 10</span></div>
+    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${S?fmtDate(S.startDate)+' - '+fmtDate(S.endDate):''}<span style="margin:0 8px;opacity:.2">|</span>${String(page).padStart(2,'0')} / ${SLIDES.length}</span></div>
     <div class="card-body">${bodyHTML}</div>
     <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
   </div>`;}
 
-function build(st){
-  const busiest = st.busiestMonthIdx>=0?monthName(LANG,st.busiestMonthIdx):'—';
-  const peakH=(()=>{const mx=Math.max(...st.hours24,1);return st.hours24.indexOf(mx);})();
-  const peakStr=String(peakH).padStart(2,'0')+':00';
-  SLIDES=[
-    ()=>card(t('s1_tag'),1,`
-      <div class="kicker rv">${t('s1_kick',{label:st.label})}</div>
-      <h2 class="headline rv">${t('s1_head',{year:st.year})}</h2>
-      <p class="lede rv">${t('s1_lede')}</p>
-      <div class="mini rv" style="margin-top:6px">
-        <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('m_visits')}</div></div>
-        <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('m_days')}</div></div>
-      </div>`),
-    ()=>card(t('s2_tag'),2,`
-      <div class="kicker rv">${t('s2_kick')}</div>
-      <div class="bignum rv">${fmt(st.hours)}</div>
-      <div class="unit rv">${t('s2_unit',{d:fmt(st.hours/24)})}</div>
-      <p class="lede rv">${t('s2_lede')}</p>`),
-    ()=>card(t('s3_tag'),3,`
-      <div class="kicker rv">${t('s3_kick')}</div>
-      <div class="bignum rv">${fmt(st.uniqueWorlds)}</div>
-      <div class="unit rv">${t('s3_unit',{v:fmt(st.sessions)})}</div>
-      <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`),
-    ()=>card(t('s4_tag'),4,`
-      <div class="kicker rv">${t('s4_kick')}</div>
-      ${st.topWorlds[0]&&st.topWorlds[0].thumb?`<img class="worldhero rv" src="${esc(st.topWorlds[0].thumb)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
-      <h2 class="headline rv" style="font-size:clamp(24px,6.5vw,42px)">${st.topWorlds[0]?(st.topWorlds[0].id?`<a class="wlink" href="${worldUrl(st.topWorlds[0].id)}" target="_blank" rel="noopener">${esc(st.topWorlds[0].n)}</a>`:esc(st.topWorlds[0].n)):'—'}</h2>
-      <p class="lede rv" style="margin-top:-4px">${t('s4_lede',{v:st.topWorlds[0]?fmt(st.topWorlds[0].v):0})}</p>
-      <div class="ranks rv" style="margin-top:6px">
-        ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false,w.thumb)).join('')}
-      </div>`),
-    ()=>card(t('s5_tag'),5,`
-      <div class="kicker rv">${t('s5_kick')}</div>
-      <div class="bignum rv">${fmt(st.peopleMet)}</div>
-      <div class="unit rv">${t('s5_unit',{e:fmt(st.encounters)})}</div>
-      <p class="lede rv">${t('s5_lede',{n:fmt(st.peopleMet)})}</p>`),
-    ()=>card(t('s6_tag'),6,`
-      <div class="kicker rv">${t('s6_kick')}</div>
-      <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">${t('s6_head')}</h2>
-      <div class="ranks rv">
-        ${st.squad.length?st.squad.map((p,i)=>rankRow(i,p.n,t('s6_seen',{n:fmt(p.v)}),p.uid?userUrl(p.uid):null,true)).join(''):`<p class="lede">${t('s6_empty')}</p>`}
-      </div>`),
-    ()=>card(t('s7_tag'),7,`
-      <div class="kicker rv">${t('s7_kick')}</div>
-      <div class="bignum rv">${fmt(st.friendsAdded)}</div>
-      <div class="unit rv">${t('s7_unit')}</div>
-      <p class="lede rv">${st.friendsAdded>0?t('s7_lede',{n:fmt(st.friendsAdded)}):t('s7_lede0')}</p>`),
-    ()=>{const mx=Math.max(...st.hours24,1);
-      const bars=st.hours24.map((v,h)=>`<div class="b ${h===peakH?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
-      return card(t('s8_tag'),8,`
-        <div class="kicker rv">${t('s8_kick')}</div>
-        <h2 class="headline rv" style="font-size:clamp(28px,7.5vw,48px)">${st.nightPct>=50?t('s8_owl'):t('s8_peak',{t:peakStr})}</h2>
-        <p class="lede rv">${t('s8_lede',{p:st.nightPct,t:peakStr})}</p>
-        <div class="bars rv">${bars}</div>
-        <div class="axis rv"><span>00:00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>`);},
-    ()=>card(t('s9_tag'),9,`
-      <div class="kicker rv">${t('s9_kick')}</div>
-      <h2 class="headline rv">${busiest}</h2>
-      <p class="lede rv">${t('s9_lede')}</p>
-      <div class="mini rv">
-        <div class="m"><div class="mv">${fmt(st.monthMax)}</div><div class="ml">${t('m_month_v')}</div></div>
-        <div class="m"><div class="mv">${fmt(st.sessions/Math.max(1,st.months.filter(x=>x).length))}</div><div class="ml">${t('m_month_avg')}</div></div>
-      </div>`),
-    ()=>{const role=st.nightPct>=50?t('role_night'):st.hours>876?t('role_vet'):t('role_expl');
-      return `<div class="card" id="s-card">
-      <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>10 / 10</span></div>
+function buildSad(sadSt){
+  const N=SLIDES.length;
+  SLIDES.push(
+    ()=>card('UNFRIENDED',N+1,`
+      <div class="kicker rv slow">${t('s_unfriended')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.unfriended)}</div>
+      <div class="unit rv slow">${t('s_unit_unf')}</div>
+      <p class="lede rv slow">${t('s_lede_unf')}</p>`),
+    ()=>card('ALONE',N+2,`
+      <div class="kicker rv slow">${t('s_abandoned')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.abandonedWorlds)}</div>
+      <div class="unit rv slow">${t('s_unit_abn')}</div>
+      <p class="lede rv slow">${t('s_lede_abn')}</p>`),
+    ()=>card('GHOSTS',N+3,`
+      <div class="kicker rv slow">${t('s_onetime')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.oneTimePeople)}</div>
+      <div class="unit rv slow">${t('s_unit_otp')}</div>
+      <p class="lede rv slow">${t('s_lede_otp')}</p>`),
+    ()=>card('SOLO',N+4,`
+      <div class="kicker rv slow">${t('s_solo')}</div>
+      <div class="bignum rv slow">${sadSt.soloPct}<span style="font-size:.35em;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">%</span></div>
+      <div class="unit rv slow">${t('s_unit_so')}</div>
+      <p class="lede rv slow">${t('s_lede_so')}</p>`),
+    ()=>card('NET',N+5,`
+      <div class="kicker rv slow">${t('s_net')}</div>
+      <div class="bignum rv slow" style="color:${sadSt.friendNet<0?'var(--magenta)':'var(--accent)'}">${sadSt.friendNet>=0?'+':''}${fmt(sadSt.friendNet)}</div>
+      <div class="unit rv slow">${t('s_unit_net')}</div>
+      <p class="lede rv slow">${sadSt.friendNet<0?t('s_lede_net_neg'):t('s_lede_net_pos')}</p>`),
+    ()=>card('DAWN',N+6,`
+      <div class="kicker rv slow">${t('s_am')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.amSessions)}</div>
+      <div class="unit rv slow">${t('s_unit_am')}</div>
+      <p class="lede rv slow">${t('s_lede_am')}</p>`),
+    ()=>card('IDENTITY',N+7,`
+      <div class="kicker rv slow">${t('s_avatar')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.avatarChanges)}</div>
+      <div class="unit rv slow">${t('s_unit_av')}</div>
+      <p class="lede rv slow">${t('s_lede_av')}</p>`),
+    ()=>card('TRANSIT',N+8,`
+      <div class="kicker rv slow">${t('s_transit')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.transitWorlds)}</div>
+      <div class="unit rv slow">${t('s_unit_tr')}</div>
+      <p class="lede rv slow">${t('s_lede_tr')}</p>`),
+    ()=>card('BLINK',N+9,`
+      <div class="kicker rv slow">${t('s_short')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.shortSessions)}</div>
+      <div class="unit rv slow">${t('s_unit_sh')}</div>
+      <p class="lede rv slow">${t('s_lede_sh')}</p>`),
+    ()=>card('SPAN',N+10,`
+      <div class="kicker rv slow">${t('s_span')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.activitySpan)}</div>
+      <div class="unit rv slow">${t('s_unit_sp',{})}</div>
+      <p class="lede rv slow">${t('s_lede_sp',{first:sadSt.firstDate||'—',last:sadSt.lastDate||'—'})}</p>`)
+  );
+}
+function appendCardSlide(st){
+  const role=st.nightPct>=50?t('role_night'):st.hours>876?t('role_vet'):t('role_expl');
+  const N=SLIDES.length;
+  SLIDES.push(()=>`<div class="card" id="s-card">
+      <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>${N+1} / ${N+1}</span></div>
       <div class="card-body">
         <div class="kicker rv">${t('s10_kick',{year:st.year})}</div>
         <div class="tcard rv" id="tcard">
@@ -668,11 +780,116 @@ function build(st){
         </a>
       </div>
       <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▥ ▤</span></div>
-    </div>`;}
-  ];
+    </div>`);
+}
+function buildIntro(st){
+  const N=SLIDES.length;
+  const totalDays=Math.max(1,Math.round((st.endDate-st.startDate)/864e5));
+  SLIDES.push(()=>card(t('si_tag'),N+1,`
+    <div class="kicker rv">${t('si_kick',{year:st.year,label:st.label})}</div>
+    <h2 class="headline rv">${t('si_head',{year:st.year})}</h2>
+    <p class="lede rv">${t('si_lede')}</p>
+    <div class="mini rv" style="margin-top:6px">
+      <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('si_m_visits')}</div></div>
+      <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('si_m_days')}</div></div>
+    </div>`));
+}
+function buildTransition(){
+  const N=SLIDES.length;
+  SLIDES.push(()=>`<div class="card">
+    <div class="card-top"><span class="tag">◢ ${t('str_tag').toUpperCase()}</span><span>${String(N+1).padStart(2,'0')} / ${SLIDES.length}</span></div>
+    <div class="card-body" style="align-items:center;text-align:center;justify-content:center;gap:20px">
+      <div class="kicker rv slow" style="font-size:13px;letter-spacing:.3em">— — —</div>
+      <h2 class="headline rv slow" style="font-size:clamp(32px,9vw,58px);line-height:.9">${t('str_head')}</h2>
+      <p class="lede rv slow" style="max-width:36ch;text-align:center">${t('str_lede')}</p>
+    </div>
+    <div class="card-foot"><span>VRCHAT WRAP · ${YR}</span><span class="pix">▦ ▥ ▤</span></div>
+  </div>`);
+}
+function buildAll(st, sadSt){
+  SLIDES=[];
+  buildIntro(st);
+  build(st);
+  buildTransition();
+  buildSad(sadSt);
+  appendCardSlide(st);
   S=st;YR=st.year;
   const pg=$('#progress');pg.innerHTML='';
-  for(let i=0;i<10;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
+  for(let i=0;i<SLIDES.length;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
+}
+function build(st){
+  const BASE=SLIDES.length;
+  const busiest=st.busiestMonthIdx>=0?monthName(LANG,st.busiestMonthIdx):'—';
+  const peakH=(()=>{const mx=Math.max(...st.hours24,1);return st.hours24.indexOf(mx);})();
+  const peakStr=String(peakH).padStart(2,'0')+':00';
+  const totalDays=Math.max(1,Math.round((st.endDate-st.startDate)/864e5));
+  const activePct=Math.round(st.activeDays/totalDays*100);
+  SLIDES.push(
+    ()=>card(t('s1_tag'),BASE+1,`
+      <div class="kicker rv">${t('s1_kick',{label:st.label})}</div>
+      <h2 class="headline rv">${t('s1_head',{year:st.year})}</h2>
+      <p class="lede rv">${t('s1_lede')}</p>
+      <div class="mini rv" style="margin-top:6px">
+        <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('m_visits')}</div></div>
+        <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('m_days')}</div></div>
+      </div>`),
+    ()=>card(t('s2_tag'),BASE+2,`
+      <div class="kicker rv">${t('s2_kick')}</div>
+      <div class="bignum rv">${fmt(st.hours)}</div>
+      <div class="unit rv">${t('s2_unit',{d:fmt(st.hours/24)})}</div>
+      <p class="lede rv">${t('s2_lede')}</p>`),
+    ()=>card(t('s3_tag'),BASE+3,`
+      <div class="kicker rv">${t('s3_kick')}</div>
+      <div class="bignum rv">${fmt(st.uniqueWorlds)}</div>
+      <div class="unit rv">${t('s3_unit',{v:fmt(st.sessions)})}</div>
+      <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`),
+    ()=>card(t('s4_tag'),BASE+4,`
+      <div class="kicker rv">${t('s4_kick')}</div>
+      ${st.topWorlds[0]&&st.topWorlds[0].thumb?`<img class="worldhero rv" src="${esc(st.topWorlds[0].thumb)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+      <h2 class="headline rv" style="font-size:clamp(24px,6.5vw,42px)">${st.topWorlds[0]?(st.topWorlds[0].id?`<a class="wlink" href="${worldUrl(st.topWorlds[0].id)}" target="_blank" rel="noopener">${esc(st.topWorlds[0].n)}</a>`:esc(st.topWorlds[0].n)):'—'}</h2>
+      <p class="lede rv" style="margin-top:-4px">${t('s4_lede',{v:st.topWorlds[0]?fmt(st.topWorlds[0].v):0})}</p>
+      <div class="ranks rv" style="margin-top:6px">
+        ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false,w.thumb)).join('')}
+      </div>`),
+    ()=>card(t('s5_tag'),BASE+5,`
+      <div class="kicker rv">${t('s5_kick')}</div>
+      <div class="bignum rv">${fmt(st.peopleMet)}</div>
+      <div class="unit rv">${t('s5_unit',{e:fmt(st.encounters)})}</div>
+      <p class="lede rv">${t('s5_lede',{n:fmt(st.peopleMet)})}</p>`),
+    ()=>card(t('s6_tag'),BASE+6,`
+      <div class="kicker rv">${t('s6_kick')}</div>
+      <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">${t('s6_head')}</h2>
+      <div class="ranks rv">
+        ${st.squad.length?st.squad.map((p,i)=>rankRow(i,p.n,t('s6_seen',{n:fmt(p.v)}),p.uid?userUrl(p.uid):null,true)).join(''):`<p class="lede">${t('s6_empty')}</p>`}
+      </div>`),
+    ()=>card(t('s7_tag'),BASE+7,`
+      <div class="kicker rv">${t('s7_kick')}</div>
+      <div class="bignum rv">${fmt(st.friendsAdded)}</div>
+      <div class="unit rv">${t('s7_unit')}</div>
+      <p class="lede rv">${st.friendsAdded>0?t('s7_lede',{n:fmt(st.friendsAdded)}):t('s7_lede0')}</p>`),
+    ()=>{const mx=Math.max(...st.hours24,1);
+      const bars=st.hours24.map((v,h)=>`<div class="b ${h===peakH?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
+      return card(t('s8_tag'),BASE+8,`
+        <div class="kicker rv">${t('s8_kick')}</div>
+        <h2 class="headline rv" style="font-size:clamp(28px,7.5vw,48px)">${st.nightPct>=50?t('s8_owl'):t('s8_peak',{t:peakStr})}</h2>
+        <p class="lede rv">${t('s8_lede',{p:st.nightPct,t:peakStr})}</p>
+        <div class="bars rv">${bars}</div>
+        <div class="axis rv"><span>00:00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>`);},
+    ()=>card(t('s9_tag'),BASE+9,`
+      <div class="kicker rv">${t('s9_kick')}</div>
+      <h2 class="headline rv">${busiest}</h2>
+      <p class="lede rv">${t('s9_lede')}</p>
+      <div class="mini rv">
+        <div class="m"><div class="mv">${fmt(st.monthMax)}</div><div class="ml">${t('m_month_v')}</div></div>
+        <div class="m"><div class="mv">${fmt(st.sessions/Math.max(1,st.months.filter(x=>x).length))}</div><div class="ml">${t('m_month_avg')}</div></div>
+      </div>`),
+    ()=>card(t('sha_tag'),BASE+10,`
+      <div class="kicker rv">${t('sha_kick')}</div>
+      <div class="bignum rv">${fmt(st.activeDays)}</div>
+      <div class="unit rv">${t('sha_unit',{total:fmt(totalDays)})}</div>
+      <p class="lede rv">${t('sha_lede',{n:fmt(st.activeDays),pct:activePct})}</p>`)
+  );
+  S=st;YR=st.year;
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function worldUrl(id){return 'https://vrchat.com/home/world/'+encodeURIComponent(id);}
@@ -788,9 +1005,10 @@ async function handleFile(file){
     let db;try{db=new SQL.Database(buf);}catch(e){throw new Error(t('err_invalid'));}
     const st=analyze(db,TF);
     if(!st.hasReal){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(t('err_empty'));return;}
+    const sadSt=analyzeSad(db,TF);
     await loadThumbs(st);
     await new Promise(r=>setTimeout(r,400));
-    build(st);enterDeck();
+    buildAll(st,sadSt);enterDeck();
   }catch(err){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(err.message||t('err_read'));}
 }
 const drop=$('#drop'),file=$('#file');
@@ -800,7 +1018,7 @@ file.onchange=e=>handleFile(e.target.files[0]);
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
 drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
-$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));build(st);enterDeck();})();};
+$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);const sadSt=demoSadStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));buildAll(st,sadSt);enterDeck();})();};
 
 $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
