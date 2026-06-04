@@ -473,6 +473,7 @@ function analyze(db,range){
 
   const stats={year:end.getFullYear(),range};
   stats.label = range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all');
+  stats.startDate=start;stats.endDate=end;
 
   // self user id, reconstructed from the VRCX per-user table prefix (usr<32hex>_...)
   let selfId=null,selfName=null;
@@ -521,8 +522,9 @@ function demoStats(range){
     year:{s:1287,w:342,h:1645,d:228,p:3914,e:14820,fa:127,sq:[['Nyx',412],['Kuma_VR',388],['Pixel',301],['Aurora',264],['Volt',198]],tw:[['The Black Cat',142],['Murder 4',97],['Prismic Lounge',73],['Movie & Chill',58],['Just Hangout',44]]},
     all:{s:3120,w:760,h:4210,d:540,p:8800,e:36500,fa:640,sq:[['Nyx',980],['Kuma_VR',870],['Pixel',640],['Aurora',520],['Volt',410]],tw:[['The Black Cat',330],['Murder 4',210],['Prismic Lounge',180],['Movie & Chill',150],['Just Hangout',120]]}};
   const b=base[range]||base.year;
+  const now=new Date();const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
   return {year:y,range,label:range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all'),
-    sessions:b.s,uniqueWorlds:b.w,hours:b.h,activeDays:b.d,nightPct:61,
+    startDate:dstart,endDate:now,sessions:b.s,uniqueWorlds:b.w,hours:b.h,activeDays:b.d,nightPct:61,
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
     months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,
     topWorlds:b.tw.map(([n,v])=>({n,v})),peopleMet:b.p,encounters:b.e,
@@ -538,7 +540,7 @@ function setAccent(v){const val=getComputedStyle(document.documentElement).getPr
   document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[v]||'--cyan'));}
 function card(tag,page,bodyHTML,footL){
   return `<div class="card">
-    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${String(page).padStart(2,'0')} / 10</span></div>
+    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${S?fmtDate(S.startDate)+' - '+fmtDate(S.endDate):''}<span style="margin:0 8px;opacity:.2">|</span>${String(page).padStart(2,'0')} / 10</span></div>
     <div class="card-body">${bodyHTML}</div>
     <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
   </div>`;}
@@ -650,6 +652,7 @@ function build(st){
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function worldUrl(id){return 'https://vrchat.com/home/world/'+encodeURIComponent(id);}
+function fmtDate(d){const m=d.toLocaleString(LANG,{month:'short'});return m+' '+d.getFullYear();}
 async function fetchWorldThumb(id){
   if(!WORLD_PROXY||!id)return null;
   const ck='vrcw_thumb_'+id;
