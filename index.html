@@ -108,10 +108,26 @@
     box-shadow:0 40px 90px -40px #000,inset 0 1px 0 rgba(255,255,255,.06);min-height:clamp(380px,70vh,560px);max-height:calc(100dvh - 120px);display:flex;flex-direction:column}
   .card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(110% 80% at 50% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
   .card::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
-  .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted)}
-  .card-top .tag{color:var(--accent)}
+  .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);gap:8px}
+  .card-top .tag{color:var(--accent);flex:none}
+  .card-top .ct-right{white-space:nowrap;flex:none;display:flex;align-items:center;gap:0}
+  .card-top .ct-date{opacity:.55;font-size:10px}
+  .card-top .ct-sep{margin:0 7px;opacity:.2}
+  .card-top .ct-num{font-size:11px}
+  @media(max-width:420px){.card-top .ct-date{display:none}.card-top .ct-sep{display:none}}
   .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
   .card{touch-action:pan-y}
+  /* layout variants */
+  .card.lv-billboard .bignum{font-size:clamp(100px,28vw,190px);line-height:.78;letter-spacing:-.02em}
+  .card.lv-hero .headline{font-size:clamp(52px,15vw,110px);line-height:.82}
+  .card.lv-center .card-body{align-items:center;text-align:center}
+  .card.lv-center .lede{text-align:center}
+  .card.lv-side .card-body{flex-direction:row;align-items:center;gap:22px}
+  .card.lv-side .side-num{flex:none}
+  .card.lv-side .side-text{flex:1;min-width:0}
+  .card.lv-intro .card-body{justify-content:space-between;padding:16px 26px 20px}
+  .intro-dates{font-family:'Space Mono',monospace;font-size:clamp(10px,2.5vw,12px);letter-spacing:.14em;color:var(--muted);text-transform:uppercase;border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+  .intro-dates b{color:var(--accent)}
   .card-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
   .pix{display:flex;gap:5px;font-size:13px;opacity:.7}
   .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
@@ -487,9 +503,12 @@ const I18N={
   s_short:'Blink',s_unit_sh:'sessions under 1 minute',s_lede_sh:'In and out. Changed your mind before you arrived.',
   s_solo:'Solo',s_unit_so:'of your days were completely alone',s_lede_so:'No friends. No strangers. Just you and the empty world.',
   s_span:'Your arc',s_unit_sp:'day journey',s_lede_sp:'From {first} to {last}. What changed?',
-  s_net:'Balance',s_unit_net:'net friendships',s_lede_net_neg:'You ended the year with fewer friends than you started.',s_lede_net_pos:'You ended the year with more friends. The lonely nights paid off.',
+  s_streak:'The streak',s_unit_str:'consecutive days without missing one',s_lede_str:"Your longest unbroken run — {n} days straight without skipping. That's either habit, dedication, or something you probably shouldn't examine too closely.",
+  s_marathon:'The long haul',s_unit_mar:'hour single session',s_lede_mar:"You stayed for {n} hours straight once. That wasn't a session — that was a commitment. Only you know what kept you in there.",
+  s_absent:'The empty stretch',s_unit_abs:'days without logging in',s_lede_abs:'The longest you disappeared from VRChat entirely — {n} days. Something kept you away. Or something pulled you back in.',
+  s_deep:'Darkest hours',s_unit_deep:'sessions between midnight and 4 AM',s_lede_deep:"Not night-owl hours — these are the hours after the night owls go to sleep. You were in VRChat at {n} of those sessions. Whatever was happening, it wasn't about socializing.",
   si_tag:'Start',si_kick:'Your {year} in VR · {label}',si_head:'Ready to<br>relive <em>{year}?</em>',si_lede:'Ten highlights. Ten hard truths. Everything pulled from your own logs — nothing fabricated, nothing held back.',si_m_visits:'Total visits',si_m_days:'Days online',
-  str_tag:'Flip side',str_head:'Now for the<br><em>other half</em>.',str_lede:"Your year wasn't just highlights. Here's what no algorithm would put in an ad — the real numbers, unfiltered.",
+  str_tag:'Warning',str_head:'Now for the<br><em>dark side</em>.',str_lede:"Every wrap glosses over the hard parts. This one doesn't. The next ten slides are what you don't screenshot and share.",
   sha_tag:'Dedication',sha_kick:'Days you actually showed up',sha_unit:'active days out of {total}',sha_lede:'You were present on <b>{n}</b> different days — <b>{pct}%</b> of the window. Consistency is its own kind of showing up.'},
 
  id:{native:'Indonesia',restart:'Ulangi',
@@ -523,9 +542,12 @@ const I18N={
   s_short:'Sekejap',s_unit_sh:'sesi di bawah 1 menit',s_lede_sh:'Masuk. Langsung keluar. Berubah pikiran.',
   s_solo:'Sendiri',s_unit_so:'harimu benar-benar sendiri',s_lede_so:'Tanpa teman. Tanpa orang asing. Hanya kamu dan world kosong.',
   s_span:'Perjalananmu',s_unit_sp:'hari perjalanan',s_lede_sp:'Dari {first} hingga {last}. Apa yang berubah?',
-  s_net:'Neraca',s_unit_net:'net pertemanan',s_lede_net_neg:'Kamu mengakhiri tahun dengan lebih sedikit teman.',s_lede_net_pos:'Kamu mengakhiri tahun dengan lebih banyak teman.',
+  s_streak:'Streak',s_unit_str:'hari berturut-turut tanpa skip',s_lede_str:'Rekor panjang kamu tanpa absen sehari pun — {n} hari berturut. Entah itu kebiasaan, dedikasi, atau sesuatu yang mungkin tidak perlu diteliti terlalu dalam.',
+  s_marathon:'Sesi terpanjang',s_unit_mar:'jam dalam satu sesi',s_lede_mar:'Kamu bertahan {n} jam nonstop sekali. Itu bukan sesi biasa — itu komitmen. Hanya kamu yang tahu apa yang membuat kamu betah.',
+  s_absent:'Jeda terpanjang',s_unit_abs:'hari tanpa login',s_lede_abs:'Sekian hari kamu menghilang total dari VRChat — {n} hari. Sesuatu menahanmu. Atau ada yang akhirnya menarikmu kembali.',
+  s_deep:'Jam paling gelap',s_unit_deep:'sesi antara tengah malam dan jam 4 pagi',s_lede_deep:'Bukan night owl biasa — ini jam setelah si night owl pun tidur. Kamu masih di VRChat {n} kali di jam-jam itu. Apapun yang terjadi di sana, bukan soal bersosialisasi.',
   si_tag:'Mulai',si_kick:'Tahun {year} kamu di VR · {label}',si_head:'Siap putar ulang<br><em>{year}?</em>',si_lede:'Sepuluh highlight. Sepuluh kebenaran pahit. Semua langsung dari log kamu — tanpa rekayasa, tanpa filter.',si_m_visits:'Total kunjungan',si_m_days:'Hari aktif',
-  str_tag:'Sisi lain',str_head:'Sekarang,<br><em>sisi lainnya</em>.',str_lede:'Tahunmu bukan cuma highlight. Ini yang tidak akan dimasukkan ke iklan mana pun — angka yang sebenarnya.',
+  str_tag:'Peringatan',str_head:'Sekarang,<br><em>sisi gelapnya</em>.',str_lede:'Setiap wrap menutup-nutupi bagian sulitnya. Yang ini tidak. Sepuluh slide berikut adalah yang tidak kamu screenshot dan bagikan.',
   sha_tag:'Dedikasi',sha_kick:'Hari kamu benar-benar muncul',sha_unit:'hari aktif dari {total}',sha_lede:'Kamu hadir di <b>{n}</b> hari berbeda — <b>{pct}%</b> dari total rentang. Konsistensi adalah bentuk kehadiran tersendiri.'},
 
  ja:{native:'日本語',restart:'最初から',
@@ -777,8 +799,8 @@ function demoSadStats(range){
   const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
   return{year:y,range,startDate:dstart,endDate:now,hasReal:true,demo:true,
     unfriended:22,abandonedWorlds:393,oneTimePeople:824,amSessions:120,avatarChanges:136,
-    transitWorlds:27,shortSessions:48,soloPct:34,activitySpan:186,
-    firstDate:fmtDate(dstart),lastDate:fmtDate(now),friendNet:-5};
+    soloPct:34,activitySpan:186,firstDate:fmtDate(dstart),lastDate:fmtDate(now),
+    longestSession:14.3,longestGap:23,deepNightSessions:87,longestStreak:18};
 }
 
 function analyzeSad(db,range){
@@ -799,12 +821,22 @@ function analyzeSad(db,range){
   const wc={};loc.forEach(r=>wc[r.name]=(wc[r.name]||0)+1);
   const abandonedWorlds=Object.values(wc).filter(v=>v===1).length;
   const transitWorlds=Object.values(wc).filter(v=>v>=2&&v<=5).length;
-  const shortSessions=loc.filter(r=>r.time>0&&r.time<60000).length;
   const amSessions=loc.filter(r=>r.d&&r.d.getHours()>=4&&r.d.getHours()<7).length;
-  const locTs=loc.map(r=>r.d.getTime());
-  const activitySpan=locTs.length>1?Math.round((Math.max(...locTs)-Math.min(...locTs))/864e5):0;
-  const firstDate=locTs.length?fmtDate(new Date(Math.min(...locTs))):'—';
-  const lastDate=locTs.length?fmtDate(new Date(Math.max(...locTs))):'—';
+  const locTs=loc.map(r=>r.d.getTime()).sort((a,b)=>a-b);
+  const activitySpan=locTs.length>1?Math.round((locTs[locTs.length-1]-locTs[0])/864e5):0;
+  const firstDate=locTs.length?fmtDate(new Date(locTs[0])):'—';
+  const lastDate=locTs.length?fmtDate(new Date(locTs[locTs.length-1])):'—';
+  // longest single session in hours
+  const longestSession=loc.length?Math.max(...loc.map(r=>r.time||0))/3600000:0;
+  // longest gap between consecutive sessions in days
+  let longestGap=0;
+  if(locTs.length>1){for(let i=1;i<locTs.length;i++){const g=Math.round((locTs[i]-locTs[i-1])/864e5);if(g>longestGap)longestGap=g;}}
+  // sessions between midnight and 4 AM (distinct from amSessions which is 4-7 AM)
+  const deepNightSessions=loc.filter(r=>r.d&&r.d.getHours()<4).length;
+  // longest consecutive-day streak
+  const dateSorted=[...new Set(loc.map(r=>r.d&&r.d.toISOString().slice(0,10)).filter(Boolean))].sort();
+  let longestStreak=dateSorted.length?1:0,curStr=1;
+  for(let i=1;i<dateSorted.length;i++){const diff=(new Date(dateSorted[i])-new Date(dateSorted[i-1]))/864e5;if(diff===1){curStr++;if(curStr>longestStreak)longestStreak=curStr;}else curStr=1;}
   const ut=tables.find(x=>/^usr[0-9a-f]{32}_/i.test(x));
   let selfId=null;
   if(ut){const hx=ut.match(/^usr([0-9a-f]{32})_/i)[1];selfId='usr_'+hx.slice(0,8)+'-'+hx.slice(8,12)+'-'+hx.slice(12,16)+'-'+hx.slice(16,20)+'-'+hx.slice(20);}
@@ -826,7 +858,7 @@ function analyzeSad(db,range){
   if(avTbl){const rows=rowsOf(`SELECT created_at FROM "${avTbl}"`);avatarChanges=rows.filter(r=>inR(parseTime(r.created_at))).length;}
   return{year:end.getFullYear(),range,startDate:start,endDate:end,hasReal:loc.length>0,
     unfriended,abandonedWorlds,oneTimePeople,amSessions,avatarChanges,
-    transitWorlds,shortSessions,soloPct,activitySpan,firstDate,lastDate,friendNet};
+    soloPct,activitySpan,firstDate,lastDate,longestSession,longestGap,deepNightSessions,longestStreak};
 }
 
 /* ============================= ROLE SYSTEM ============================= */
@@ -983,9 +1015,9 @@ function setAccent(v){const val=getComputedStyle(document.documentElement).getPr
   document.documentElement.style.setProperty('--accent',val);
   const map={'--green':'--cyan','--cyan':'--green','--magenta':'--pink','--orange':'--pink','--pink':'--magenta'};
   document.documentElement.style.setProperty('--accent2',getComputedStyle(document.documentElement).getPropertyValue(map[v]||'--cyan'));}
-function card(tag,page,bodyHTML,footL){
-  return `<div class="card">
-    <div class="card-top"><span class="tag">◢ ${tag}</span><span>${S?fmtDate(S.startDate)+' - '+fmtDate(S.endDate):''}<span style="margin:0 8px;opacity:.2">|</span>${String(page).padStart(2,'0')} / ${SLIDES.length}</span></div>
+function card(tag,page,bodyHTML,footL,layout=''){
+  return `<div class="card${layout?' '+layout:''}">
+    <div class="card-top"><span class="tag">◢ ${tag}</span><span class="ct-right"><span class="ct-date">${S?fmtDate(S.startDate)+' – '+fmtDate(S.endDate):''}</span><span class="ct-sep">|</span><span class="ct-num">${String(page).padStart(2,'0')} / ${SLIDES.length}</span></span></div>
     <div class="card-body">${bodyHTML}</div>
     <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
   </div>`;}
@@ -1013,11 +1045,11 @@ function buildSad(sadSt){
       <div class="bignum rv slow">${sadSt.soloPct}<span style="font-size:.35em;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">%</span></div>
       <div class="unit rv slow">${t('s_unit_so')}</div>
       <p class="lede rv slow">${t('s_lede_so')}</p>`),
-    ()=>card('NET',N+5,`
-      <div class="kicker rv slow">${t('s_net')}</div>
-      <div class="bignum rv slow" style="color:${sadSt.friendNet<0?'var(--magenta)':'var(--accent)'}">${sadSt.friendNet>=0?'+':''}${fmt(sadSt.friendNet)}</div>
-      <div class="unit rv slow">${t('s_unit_net')}</div>
-      <p class="lede rv slow">${sadSt.friendNet<0?t('s_lede_net_neg'):t('s_lede_net_pos')}</p>`),
+    ()=>card('STREAK',N+5,`
+      <div class="kicker rv slow">${t('s_streak')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.longestStreak)}</div>
+      <div class="unit rv slow">${t('s_unit_str')}</div>
+      <p class="lede rv slow">${t('s_lede_str',{n:fmt(sadSt.longestStreak)})}</p>`),
     ()=>card('DAWN',N+6,`
       <div class="kicker rv slow">${t('s_am')}</div>
       <div class="bignum rv slow">${fmt(sadSt.amSessions)}</div>
@@ -1028,21 +1060,21 @@ function buildSad(sadSt){
       <div class="bignum rv slow">${fmt(sadSt.avatarChanges)}</div>
       <div class="unit rv slow">${t('s_unit_av')}</div>
       <p class="lede rv slow">${t('s_lede_av')}</p>`),
-    ()=>card('TRANSIT',N+8,`
-      <div class="kicker rv slow">${t('s_transit')}</div>
-      <div class="bignum rv slow">${fmt(sadSt.transitWorlds)}</div>
-      <div class="unit rv slow">${t('s_unit_tr')}</div>
-      <p class="lede rv slow">${t('s_lede_tr')}</p>`),
-    ()=>card('BLINK',N+9,`
-      <div class="kicker rv slow">${t('s_short')}</div>
-      <div class="bignum rv slow">${fmt(sadSt.shortSessions)}</div>
-      <div class="unit rv slow">${t('s_unit_sh')}</div>
-      <p class="lede rv slow">${t('s_lede_sh')}</p>`),
-    ()=>card('SPAN',N+10,`
-      <div class="kicker rv slow">${t('s_span')}</div>
-      <div class="bignum rv slow">${fmt(sadSt.activitySpan)}</div>
-      <div class="unit rv slow">${t('s_unit_sp',{})}</div>
-      <p class="lede rv slow">${t('s_lede_sp',{first:sadSt.firstDate||'—',last:sadSt.lastDate||'—'})}</p>`)
+    ()=>card('MARATHON',N+8,`
+      <div class="kicker rv slow">${t('s_marathon')}</div>
+      <div class="bignum rv slow">${fmt1(sadSt.longestSession)}</div>
+      <div class="unit rv slow">${t('s_unit_mar')}</div>
+      <p class="lede rv slow">${t('s_lede_mar',{n:fmt1(sadSt.longestSession)})}</p>`),
+    ()=>card('ABSENT',N+9,`
+      <div class="kicker rv slow">${t('s_absent')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.longestGap)}</div>
+      <div class="unit rv slow">${t('s_unit_abs')}</div>
+      <p class="lede rv slow">${t('s_lede_abs',{n:fmt(sadSt.longestGap)})}</p>`),
+    ()=>card('DARKEST HOUR',N+10,`
+      <div class="kicker rv slow">${t('s_deep')}</div>
+      <div class="bignum rv slow">${fmt(sadSt.deepNightSessions)}</div>
+      <div class="unit rv slow">${t('s_unit_deep')}</div>
+      <p class="lede rv slow">${t('s_lede_deep',{n:fmt(sadSt.deepNightSessions)})}</p>`)
   );
 }
 function appendCardSlide(st, sadSt){
@@ -1134,26 +1166,25 @@ function appendCardSlide(st, sadSt){
 }
 function buildIntro(st){
   const N=SLIDES.length;
-  const totalDays=Math.max(1,Math.round((st.endDate-st.startDate)/864e5));
   SLIDES.push(()=>card(t('si_tag'),N+1,`
     <div class="kicker rv">${t('si_kick',{year:st.year,label:st.label})}</div>
-    <h2 class="headline rv">${t('si_head',{year:st.year})}</h2>
+    <h2 class="headline rv" style="font-size:clamp(40px,11vw,82px)">${t('si_head',{year:st.year})}</h2>
     <p class="lede rv">${t('si_lede')}</p>
-    <div class="mini rv" style="margin-top:6px">
-      <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('si_m_visits')}</div></div>
-      <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('si_m_days')}</div></div>
-    </div>`));
+    <div class="intro-dates rv">
+      <b>${fmtDate(st.startDate)}</b> &mdash; <b>${fmtDate(st.endDate)}</b>
+    </div>`,'','lv-intro'));
 }
 function buildTransition(){
   const N=SLIDES.length;
-  SLIDES.push(()=>`<div class="card">
-    <div class="card-top"><span class="tag">◢ ${t('str_tag').toUpperCase()}</span><span>${String(N+1).padStart(2,'0')} / ${SLIDES.length}</span></div>
-    <div class="card-body" style="align-items:center;text-align:center;justify-content:center;gap:20px">
-      <div class="kicker rv slow" style="font-size:13px;letter-spacing:.3em">— — —</div>
-      <h2 class="headline rv slow" style="font-size:clamp(32px,9vw,58px);line-height:.9">${t('str_head')}</h2>
-      <p class="lede rv slow" style="max-width:36ch;text-align:center">${t('str_lede')}</p>
+  SLIDES.push(()=>`<div class="card" style="border-color:rgba(225,91,255,.35);background:linear-gradient(180deg,rgba(28,10,34,.95),rgba(10,6,16,.98))">
+    <div class="card-top"><span class="tag" style="color:var(--magenta)">◢ WARNING</span><span class="ct-right"><span class="ct-num">${String(N+1).padStart(2,'0')} / ${SLIDES.length}</span></span></div>
+    <div class="card-body" style="align-items:center;text-align:center;justify-content:center;gap:24px">
+      <div class="rv slow" style="font-family:'Space Mono',monospace;font-size:clamp(28px,8vw,46px);color:var(--magenta);letter-spacing:.06em;line-height:1.1;filter:drop-shadow(0 0 20px rgba(225,91,255,.6))">⚠</div>
+      <h2 class="headline rv slow" style="font-size:clamp(30px,8.5vw,54px);line-height:.9;color:#fff">${t('str_head')}</h2>
+      <p class="lede rv slow" style="max-width:36ch;text-align:center;color:rgba(255,255,255,.6)">${t('str_lede')}</p>
+      <div class="rv slow" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--magenta);opacity:.7;text-transform:uppercase">the other side of your year</div>
     </div>
-    <div class="card-foot"><span>VRCHAT WRAP · ${YR}</span><span class="pix">▦ ▥ ▤</span></div>
+    <div class="card-foot" style="border-color:rgba(225,91,255,.2)"><span style="color:rgba(255,255,255,.3)">VRCHAT WRAP · ${YR}</span><span class="pix" style="color:var(--magenta);opacity:.5">▦ ▥ ▤</span></div>
   </div>`);
 }
 function buildAll(st, sadSt){
@@ -1175,6 +1206,7 @@ function build(st){
   const totalDays=Math.max(1,Math.round((st.endDate-st.startDate)/864e5));
   const activePct=Math.round(st.activeDays/totalDays*100);
   SLIDES.push(
+    // s1 Checkpoint — split: headline + mini-grid (unique, data intro)
     ()=>card(t('s1_tag'),BASE+1,`
       <div class="kicker rv">${t('s1_kick',{label:st.label})}</div>
       <h2 class="headline rv">${t('s1_head',{year:st.year})}</h2>
@@ -1183,16 +1215,19 @@ function build(st){
         <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('m_visits')}</div></div>
         <div class="m"><div class="mv">${fmt(st.activeDays)}</div><div class="ml">${t('m_days')}</div></div>
       </div>`),
+    // s2 Hours — billboard: enormous number dominates
     ()=>card(t('s2_tag'),BASE+2,`
       <div class="kicker rv">${t('s2_kick')}</div>
       <div class="bignum rv">${fmt(st.hours)}</div>
       <div class="unit rv">${t('s2_unit',{d:fmt(st.hours/24)})}</div>
-      <p class="lede rv">${t('s2_lede')}</p>`),
+      <p class="lede rv">${t('s2_lede')}</p>`,'','lv-billboard'),
+    // s3 Worlds — centered: stat + orbit feel
     ()=>card(t('s3_tag'),BASE+3,`
       <div class="kicker rv">${t('s3_kick')}</div>
       <div class="bignum rv">${fmt(st.uniqueWorlds)}</div>
       <div class="unit rv">${t('s3_unit',{v:fmt(st.sessions)})}</div>
-      <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`),
+      <p class="lede rv">${t('s3_lede',{n:fmt(st.uniqueWorlds)})}</p>`,'','lv-center'),
+    // s4 Home Base — rank list with world image (already unique)
     ()=>card(t('s4_tag'),BASE+4,`
       <div class="kicker rv">${t('s4_kick')}</div>
       ${st.topWorlds[0]&&st.topWorlds[0].thumb?`<img class="worldhero rv" src="${esc(st.topWorlds[0].thumb)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
@@ -1201,22 +1236,26 @@ function build(st){
       <div class="ranks rv" style="margin-top:6px">
         ${st.topWorlds.map((w,i)=>rankRow(i,w.n,fmt(w.v)+'×',w.id?worldUrl(w.id):null,false,w.thumb)).join('')}
       </div>`),
+    // s5 People — billboard large
     ()=>card(t('s5_tag'),BASE+5,`
       <div class="kicker rv">${t('s5_kick')}</div>
       <div class="bignum rv">${fmt(st.peopleMet)}</div>
       <div class="unit rv">${t('s5_unit',{e:fmt(st.encounters)})}</div>
-      <p class="lede rv">${t('s5_lede',{n:fmt(st.peopleMet)})}</p>`),
+      <p class="lede rv">${t('s5_lede',{n:fmt(st.peopleMet)})}</p>`,'','lv-billboard'),
+    // s6 Squad — avatar rank list (already unique)
     ()=>card(t('s6_tag'),BASE+6,`
       <div class="kicker rv">${t('s6_kick')}</div>
       <h2 class="headline rv" style="font-size:clamp(26px,7vw,44px)">${t('s6_head')}</h2>
       <div class="ranks rv">
         ${st.squad.length?st.squad.map((p,i)=>rankRow(i,p.n,t('s6_seen',{n:fmt(p.v)}),p.uid?userUrl(p.uid):null,true)).join(''):`<p class="lede">${t('s6_empty')}</p>`}
       </div>`),
+    // s7 Friends — centered with large number
     ()=>card(t('s7_tag'),BASE+7,`
       <div class="kicker rv">${t('s7_kick')}</div>
       <div class="bignum rv">${fmt(st.friendsAdded)}</div>
       <div class="unit rv">${t('s7_unit')}</div>
-      <p class="lede rv">${st.friendsAdded>0?t('s7_lede',{n:fmt(st.friendsAdded)}):t('s7_lede0')}</p>`),
+      <p class="lede rv">${st.friendsAdded>0?t('s7_lede',{n:fmt(st.friendsAdded)}):t('s7_lede0')}</p>`,'','lv-center'),
+    // s8 Rhythm — bar chart (already unique)
     ()=>{const mx=Math.max(...st.hours24,1);
       const bars=st.hours24.map((v,h)=>`<div class="b ${h===peakH?'peak':''}" style="height:${Math.max(3,v/mx*100)}%"></div>`).join('');
       return card(t('s8_tag'),BASE+8,`
@@ -1225,6 +1264,7 @@ function build(st){
         <p class="lede rv">${t('s8_lede',{p:st.nightPct,t:peakStr})}</p>
         <div class="bars rv">${bars}</div>
         <div class="axis rv"><span>00:00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>`);},
+    // s9 Month — hero: giant month name headline
     ()=>card(t('s9_tag'),BASE+9,`
       <div class="kicker rv">${t('s9_kick')}</div>
       <h2 class="headline rv">${busiest}</h2>
@@ -1232,11 +1272,15 @@ function build(st){
       <div class="mini rv">
         <div class="m"><div class="mv">${fmt(st.monthMax)}</div><div class="ml">${t('m_month_v')}</div></div>
         <div class="m"><div class="mv">${fmt(st.sessions/Math.max(1,st.months.filter(x=>x).length))}</div><div class="ml">${t('m_month_avg')}</div></div>
-      </div>`),
+      </div>`,'','lv-hero'),
+    // sha Dedication — percentage + progress bar
     ()=>card(t('sha_tag'),BASE+10,`
       <div class="kicker rv">${t('sha_kick')}</div>
-      <div class="bignum rv">${fmt(st.activeDays)}</div>
+      <div class="bignum rv">${activePct}<span style="font-size:.35em;font-family:'Space Mono',monospace;color:var(--muted);margin-left:6px">%</span></div>
       <div class="unit rv">${t('sha_unit',{total:fmt(totalDays)})}</div>
+      <div style="height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-top:4px" class="rv">
+        <div style="height:100%;width:${Math.min(100,activePct)}%;background:var(--accent);border-radius:6px;box-shadow:0 0 12px var(--accent);transition:width 1s ease"></div>
+      </div>
       <p class="lede rv">${t('sha_lede',{n:fmt(st.activeDays),pct:activePct})}</p>`)
   );
   S=st;YR=st.year;
