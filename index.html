@@ -229,7 +229,7 @@
   <section class="screen on" id="intake">
     <div class="eyebrow rv">Checkpoint · <span class="curYear"></span></div>
     <div class="lang-pills rv" id="langPills"><span class="lp sel" data-lang="en">EN</span><span class="lp" data-lang="id">ID</span><span class="lp" data-lang="ko">한국어</span><span class="lp" data-lang="zh">中文</span><span class="lp" data-lang="ja">日本語</span></div>
-    <div class="wrap-mode rv"><button class="sel" data-mode="happy">Happy</button><button data-mode="sad">Sad</button></div>
+    
     <div class="wrap-mode rv" id="wrapMode">
       <div class="wm sel" data-mode="happy"><div>Happy</div><div class="wml">your best moments</div></div>
       <div class="wm" data-mode="sad"><div>Sad</div><div class="wml">the other side</div></div>
@@ -624,9 +624,9 @@ function t(key,vars){ let s=(I18N[LANG]&&I18N[LANG][key])!=null?I18N[LANG][key]:
   if(vars) for(const k in vars) s=s.replaceAll('{'+k+'}',vars[k]); return s; }
 function applyLang(){
   document.documentElement.lang=LANG;
-  document.querySelectorAll('[data-i]').forEach(el=>{ el.innerHTML=t(el.getAttribute('data-i')); });
-  $('#loadmsg').textContent=t('load_msg');
-  $('#hint').innerHTML=t('hint');
+  document.querySelectorAll('[data-i]').forEach(el=>{ if(el)el.innerHTML=t(el.getAttribute('data-i')); });
+  const lm=$('#loadmsg');if(lm)lm.textContent=t('load_msg');
+  const hi=$('#hint');if(hi)hi.innerHTML=t('hint');
 }
 
 /* ============================= ENGINE ============================= */
@@ -714,65 +714,61 @@ function analyze(db,range){
 
 /* ============================= DEMO ============================= */
 function buildSad(st){
-  const SLIDES=[
+  SLIDES=[
     ()=>card('UNFRIENDED',1,`
-      <div class="kicker rv">${t('s_unfriended')}</div>
-      <div class="bignum rv">${fmt(st.unfriended)}</div>
-      <div class="unit rv">${t('s_unit_unf')}</div>
-      <p class="lede rv">${t('s_lede_unf')}</p>`),
+      <div class="kicker rv slow">${t('s_unfriended')}</div>
+      <div class="bignum rv slow">${fmt(st.unfriended)}</div>
+      <div class="unit rv slow">${t('s_unit_unf')}</div>
+      <p class="lede rv slow">${t('s_lede_unf')}</p>`),
     ()=>card('ALONE',2,`
-      <div class="kicker rv">${t('s_abandoned')}</div>
-      <div class="bignum rv">${fmt(st.abandonedWorlds)}</div>
-      <div class="unit rv">${t('s_unit_abn')}</div>
-      <p class="lede rv">${t('s_lede_abn')}</p>`),
+      <div class="kicker rv slow">${t('s_abandoned')}</div>
+      <div class="bignum rv slow">${fmt(st.abandonedWorlds)}</div>
+      <div class="unit rv slow">${t('s_unit_abn')}</div>
+      <p class="lede rv slow">${t('s_lede_abn')}</p>`),
     ()=>card('STRANGERS',3,`
-      <div class="kicker rv">${t('s_onetime')}</div>
-      <div class="bignum rv">${fmt(st.oneTimePeople)}</div>
-      <div class="unit rv">${t('s_unit_otp')}</div>
-      <p class="lede rv">${t('s_lede_otp')}</p>`),
+      <div class="kicker rv slow">${t('s_onetime')}</div>
+      <div class="bignum rv slow">${fmt(st.oneTimePeople)}</div>
+      <div class="unit rv slow">${t('s_unit_otp')}</div>
+      <p class="lede rv slow">${t('s_lede_otp')}</p>`),
     ()=>card('DAWN PATROL',4,`
-      <div class="kicker rv">${t('s_am')}</div>
-      <div class="bignum rv">${fmt(st.amSessions)}</div>
-      <div class="unit rv">${t('s_unit_am')}</div>
-      <p class="lede rv">${t('s_lede_am')}</p>`),
+      <div class="kicker rv slow">${t('s_am')}</div>
+      <div class="bignum rv slow">${fmt(st.amSessions)}</div>
+      <div class="unit rv slow">${t('s_unit_am')}</div>
+      <p class="lede rv slow">${t('s_lede_am')}</p>`),
     ()=>card('WHO ARE YOU',5,`
-      <div class="kicker rv">${t('s_avatar')}</div>
-      <div class="bignum rv">${fmt(st.avatarChanges)}</div>
-      <div class="unit rv">${t('s_unit_av')}</div>
-      <p class="lede rv">${t('s_lede_av')}</p>`),
+      <div class="kicker rv slow">${t('s_avatar')}</div>
+      <div class="bignum rv slow">${fmt(st.avatarChanges)}</div>
+      <div class="unit rv slow">${t('s_unit_av')}</div>
+      <p class="lede rv slow">${t('s_lede_av')}</p>`),
     ()=>card('PASSING THROUGH',6,`
-      <div class="kicker rv">${t('s_transit')}</div>
-      <div class="bignum rv">${fmt(st.transitWorlds)}</div>
-      <div class="unit rv">${t('s_unit_tr')}</div>
-      <p class="lede rv">${t('s_lede_tr')}</p>`),
+      <div class="kicker rv slow">${t('s_transit')}</div>
+      <div class="bignum rv slow">${fmt(st.transitWorlds)}</div>
+      <div class="unit rv slow">${t('s_unit_tr')}</div>
+      <p class="lede rv slow">${t('s_lede_tr')}</p>`),
     ()=>card('BLINK',7,`
-      <div class="kicker rv">${t('s_short')}</div>
-      <div class="bignum rv">${fmt(st.shortSessions)}</div>
-      <div class="unit rv">${t('s_unit_sh')}</div>
-      <p class="lede rv">${t('s_lede_sh')}</p>`),
+      <div class="kicker rv slow">${t('s_short')}</div>
+      <div class="bignum rv slow">${fmt(st.shortSessions)}</div>
+      <div class="unit rv slow">${t('s_unit_sh')}</div>
+      <p class="lede rv slow">${t('s_lede_sh')}</p>`),
     ()=>card('SOLO',8,`
-      <div class="kicker rv">${t('s_solo')}</div>
-      <div class="bignum rv">${st.soloPct}<span style="font-size:.35em;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">%</span></div>
-      <div class="unit rv">${t('s_unit_so')}</div>
-      <p class="lede rv">${t('s_lede_so')}</p>`),
+      <div class="kicker rv slow">${t('s_solo')}</div>
+      <div class="bignum rv slow">${st.soloPct}<span style="font-size:.35em;font-family:'Space Mono',monospace;color:var(--muted);margin-left:4px">%</span></div>
+      <div class="unit rv slow">${t('s_unit_so')}</div>
+      <p class="lede rv slow">${t('s_lede_so')}</p>`),
     ()=>card('ARC',9,`
-      <div class="kicker rv">${t('s_span')}</div>
-      <div class="bignum rv">${fmt(st.activitySpan)}</div>
-      <div class="unit rv">${t('s_unit_sp')}</div>
-      <p class="lede rv">${t('s_lede_sp',{first:st.firstDate,last:st.lastDate})}</p>`),
+      <div class="kicker rv slow">${t('s_span')}</div>
+      <div class="bignum rv slow">${fmt(st.activitySpan)}</div>
+      <div class="unit rv slow">${t('s_unit_sp')}</div>
+      <p class="lede rv slow">${t('s_lede_sp',{first:st.firstDate,last:st.lastDate})}</p>`),
     ()=>card('NET',10,`
-      <div class="kicker rv">${t('s_net')}</div>
-      <div class="bignum rv" style="color:${st.friendNet<0?'var(--magenta)':'var(--accent)'}">${st.friendNet>=0?'+':''}${fmt(st.friendNet)}</div>
-      <div class="unit rv">${t('s_unit_net')}</div>
-      <p class="lede rv">${st.friendNet<0?t('s_lede_net_neg'):t('s_lede_net_pos')}</p>`),
+      <div class="kicker rv slow">${t('s_net')}</div>
+      <div class="bignum rv slow" style="color:${st.friendNet<0?'var(--magenta)':'var(--accent)'}">${st.friendNet>=0?'+':''}${fmt(st.friendNet)}</div>
+      <div class="unit rv slow">${t('s_unit_net')}</div>
+      <p class="lede rv slow">${st.friendNet<0?t('s_lede_net_neg'):t('s_lede_net_pos')}</p>`),
   ];
-  S=st;const YR=st.year;
+  S=st;YR=st.year;
   const pg=$('#progress');pg.innerHTML='';
   for(let i=0;i<10;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
-  const sadAccents=['--magenta','--pink','--cyan','--magenta','--pink','--cyan','--magenta','--pink','--cyan','--magenta'];
-  // override global idx handler for sad palette
-  window._sadAccents=sadAccents;
-  showSlide(0);
 }
 function demoSadStats(range){
   const y=new Date().getFullYear();const now=new Date();
@@ -1044,7 +1040,7 @@ function wireCard(){
   CARD_NAME=S&&S.selfName||'PLAYER';
   if(tn){tn.textContent=CARD_NAME.toUpperCase();if(ta){ta.textContent=initial(CARD_NAME);ta.style.cssText=avatarStyle(CARD_NAME);}}
   const refreshCap=()=>{if(cap)cap.value=captionText();};refreshCap();
-  if(tc)tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=perspective(700px) rotateY(${px*14}deg) rotateX(${-py*14}deg);});tc.addEventListener('pointerleave',()=>{tc.style.transform='';});};
+  if(tc)tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=perspective(700px) rotateY(${px*14}deg) rotateX(${-py*14}deg);});
   tc.addEventListener('pointerleave',()=>{tc.style.transform='';});
 
   $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
@@ -1123,22 +1119,22 @@ $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if
 
 /* ---- mode toggle ---- */
 WRAP_MODE=localStorage.getItem('vrcwrap_mode')||'happy';
-document.querySelectorAll('.wrap-mode button').forEach(b=>{
+document.querySelectorAll('.wrap-mode [data-mode]').forEach(b=>{
   b.classList.toggle('sel',b.dataset.mode===WRAP_MODE);
-  b.addEventListener('click',()=>{WRAP_MODE=b.dataset.mode;localStorage.setItem('vrcwrap_mode',WRAP_MODE);document.querySelectorAll('.wrap-mode button').forEach(x=>x.classList.toggle('sel',x===b));});
+  b.addEventListener('click',()=>{WRAP_MODE=b.dataset.mode;localStorage.setItem('vrcwrap_mode',WRAP_MODE);document.querySelectorAll('.wrap-mode [data-mode]').forEach(x=>x.classList.toggle('sel',x===b));});
 });
 
 /* ---- language ---- */
 function initLang(){
   LANG=pickLang();applyLang();
-  document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
+  document.querySelectorAll('.curYear').forEach(el=>{if(el)el.textContent=new Date().getFullYear()});
   const lp=document.getElementById('langPills');if(!lp)return;
   lp.querySelectorAll('.lp').forEach(p=>{
     p.classList.toggle('sel',p.dataset.lang===LANG);
-    p.addEventListener('click',()=>{LANG=p.dataset.lang;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());document.querySelectorAll('#langPills .lp').forEach(x=>x.classList.toggle('sel',x.dataset.lang===LANG));});
+    p.addEventListener('click',()=>{LANG=p.dataset.lang;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>{if(el)el.textContent=new Date().getFullYear()});document.querySelectorAll('#langPills .lp').forEach(x=>x.classList.toggle('sel',x.dataset.lang===LANG));});
   });
 }
-initLang();
+document.addEventListener('DOMContentLoaded',initLang);
 </script>
 </body>
 </html>
