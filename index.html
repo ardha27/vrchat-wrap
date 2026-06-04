@@ -864,7 +864,7 @@ function demoSadStats(range){
   const y=new Date().getFullYear();const now=new Date();
   const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
   return{year:y,range,startDate:dstart,endDate:now,hasReal:true,demo:true,
-    unfriended:22,abandonedWorlds:393,oneTimePeople:824,amSessions:120,avatarChanges:136,
+    sessions:1287,unfriended:22,abandonedWorlds:393,oneTimePeople:824,amSessions:120,avatarChanges:136,
     soloPct:34,activitySpan:186,firstDate:fmtDate(dstart),lastDate:fmtDate(now),
     longestSession:14.3,longestGap:23,deepNightSessions:87,longestStreak:18};
 }
@@ -922,8 +922,9 @@ function analyzeSad(db,range){
   let avatarChanges=0;
   const avTbl=tables.find(t=>/(gamelog_avatar|change_avatar)/i.test(t));
   if(avTbl){const rows=rowsOf(`SELECT created_at FROM "${avTbl}"`);avatarChanges=rows.filter(r=>inR(parseTime(r.created_at))).length;}
+  const sadSessions=loc.length;
   return{year:end.getFullYear(),range,startDate:start,endDate:end,hasReal:loc.length>0,
-    unfriended,abandonedWorlds,oneTimePeople,amSessions,avatarChanges,
+    sessions:sadSessions,unfriended,abandonedWorlds,oneTimePeople,amSessions,avatarChanges,
     soloPct,activitySpan,firstDate,lastDate,longestSession,longestGap,deepNightSessions,longestStreak};
 }
 
@@ -1116,11 +1117,13 @@ function buildSad(sadSt){
       <div class="bignum rv slow">${fmt(sadSt.longestStreak)}</div>
       <div class="unit rv slow">${t('s_unit_str')}</div>
       <p class="lede rv slow">${t('s_lede_str',{n:fmt(sadSt.longestStreak)})}</p>`),
-    ()=>card('DAWN',N+6,`
+    ()=>{const amPct=sadSt.sessions?Math.round(sadSt.amSessions/sadSt.sessions*100):0;
+      return card('DAWN',N+6,`
       <div class="kicker rv slow">${t('s_am')}</div>
       <div class="bignum rv slow">${fmt(sadSt.amSessions)}</div>
       <div class="unit rv slow">${t('s_unit_am')}</div>
-      <p class="lede rv slow">${t('s_lede_am')}</p>`),
+      <div class="rv slow" style="font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);margin-top:-6px">${amPct}% of all your sessions</div>
+      <p class="lede rv slow">${t('s_lede_am')}</p>`);},
     ()=>card('IDENTITY',N+7,`
       <div class="kicker rv slow">${t('s_avatar')}</div>
       <div class="bignum rv slow">${fmt(sadSt.avatarChanges)}</div>
