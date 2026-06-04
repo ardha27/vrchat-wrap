@@ -33,9 +33,18 @@ The final card has a name field, an auto-filled caption with the site link and h
 
 English, Indonesian, Japanese, Korean, Chinese, Spanish, and French. It picks your browser language by default and remembers your choice.
 
-### A note on world and friend images
+### Live world thumbnails (optional)
 
-VRChat thumbnails and profile pictures aren't shown. The VRChat API needs a login and blocks browser requests (CORS), and VRCX's offline image cache is usually empty and stores nothing for friends. Instead, worlds and friends get generated color avatars so the lists still read well, and both link out to VRChat where you can see the real thing.
+World thumbnails are disabled by default because the VRChat API doesn't send CORS headers, so a static site can't read world data from the browser. You can fix this with a **Cloudflare Worker** (free):
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → Workers & Pages → Create → Worker.
+2. Copy the contents of [`worker.js`](worker.js) and paste it in. Deploy.
+3. Copy your worker URL (e.g. `https://vrcwrap.<you>.workers.dev`).
+4. Open `index.html`, find `const WORLD_PROXY=''`, and paste the URL inside the quotes.
+
+The worker is minimal — it validates the world id, fetches the API server-side (where CORS doesn't apply), and returns only the thumbnail fields. World ids are not logged or stored.
+
+Friend profile pictures still aren't available — the user API requires a VRChat login and returns 401 without one. Squad members and world ranks without images fall back to their gradient avatars.
 
 ## Run locally
 
