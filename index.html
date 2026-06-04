@@ -110,7 +110,8 @@
   .card::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);mask-image:radial-gradient(100% 80% at 50% 100%,#000,transparent 75%);opacity:.6}
   .card-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted)}
   .card-top .tag{color:var(--accent)}
-  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  .card{touch-action:pan-y}
   .card-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
   .pix{display:flex;gap:5px;font-size:13px;opacity:.7}
   .kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
@@ -159,8 +160,33 @@
   .tc-avatar{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:36px;color:#0a0a12;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 0 36px -8px var(--accent);flex:none}
   .tc-meta{text-align:left}
   .tc-name{font-family:'Anton';font-size:clamp(22px,4.2vw,34px);text-transform:uppercase;line-height:1.05;word-break:break-word}
-  .tc-role{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-top:5px}
+  .tc-role-code{font-family:'Anton';font-size:clamp(18px,4vw,26px);color:var(--accent);letter-spacing:.12em;line-height:1;margin-top:4px;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 60%,transparent))}
+  .tc-role{font-family:'Space Mono',monospace;font-size:clamp(7.5px,1.3vw,10px);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:3px;line-height:1.2}
   .tc-date{font-family:'Space Mono',monospace;font-size:clamp(8px,1.5vw,10px);letter-spacing:.1em;color:var(--muted);margin-top:3px}
+  .role-reveal{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:20px;padding:20px 22px;background:color-mix(in srgb,var(--accent) 6%,rgba(10,10,20,.6));margin-top:12px;text-align:left}
+  .rr-code{font-family:'Anton';font-size:32px;color:var(--accent);letter-spacing:.14em;line-height:1;filter:drop-shadow(0 0 16px color-mix(in srgb,var(--accent) 50%,transparent))}
+  .rr-icon{color:var(--accent);line-height:0;margin-bottom:8px}
+  .rr-name{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:6px 0 4px}
+  .rr-tag{font-size:clamp(14px,3.5vw,18px);font-weight:700;color:var(--ink);line-height:1.2}
+  .rr-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-top:10px}
+  .rr-axes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+  .rr-axis{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+  .rr-axis .ax-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .rr-axis .ax-val{font-family:'Anton';font-size:16px;color:var(--accent)}
+  .rr-axis .ax-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .glo-wrap{margin-top:14px}
+  .glo-btn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer;display:block;width:100%;text-align:center;transition:.25s}
+  .glo-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .glo-list{display:none;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:4px 0;overflow:hidden}
+  .glo-list.open{display:block}
+  .glo-entry{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+  .glo-entry:last-child{border-bottom:none}
+  .glo-icon{color:var(--accent);flex:none;line-height:0;margin-top:2px}
+  .glo-text{flex:1}
+  .glo-code{font-family:'Anton';font-size:18px;color:var(--accent);letter-spacing:.12em}
+  .glo-name{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:2px 0 5px}
+  .glo-tag{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+  .glo-desc{font-size:12px;color:var(--muted);line-height:1.55}
   .tc-statgrid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
   .tc-statgrid .s{border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 8px;background:rgba(255,255,255,.02)}
   .tc-statgrid .s .sv{font-family:'Anton';font-size:clamp(20px,5vw,28px);color:var(--accent);line-height:1}
@@ -633,6 +659,129 @@ function analyzeSad(db,range){
     transitWorlds,shortSessions,soloPct,activitySpan,firstDate,lastDate,friendNet};
 }
 
+/* ============================= ROLE SYSTEM ============================= */
+// 4 axes: E/I (Explorer/Inhabitant), S/L (Social/Lone), N/D (Night/Day), B/R (Binge/Regular)
+// Each axis is determined from actual stats → 16 base types + special overrides
+const ROLES={
+  ESNB:{code:'ESNB',name:'The Phantom Cartographer',tag:'Everywhere at once, then nowhere',
+    desc:"You explore relentlessly, collect people like timestamps, burn the night, and disappear for days-long marathons. The metaverse is a puzzle and you're solving it — aggressively, at 2 AM, with an overflowing join log and a map that never repeats itself.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 0-4-10 15 15 0 0 0 4-10z"/><polygon points="12 8 14 11 17 8 15 12 18 14 14 13 13 17 11 13 8 15 10 12 7 10 11 11"/></svg>`},
+  ESNR:{code:'ESNR',name:'The Midnight Connector',tag:'Social after dark, always present',
+    desc:"Night is your prime time and you spend it with people — new ones, old ones, anyone who's still online. You show up consistently, not binge-style, but reliably. The regulars in your favorite late-night worlds know your name.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><line x1="8" y1="13.5" x2="16" y2="17.5"/><line x1="16" y1="6.5" x2="8" y2="10.5"/></svg>`},
+  ESDB:{code:'ESDB',name:'The Social Cartographer',tag:'Daylight explorer, deep in crowds',
+    desc:"You cover ground during waking hours and you never do it alone. Your sessions are long and wide — new worlds, new people, high mileage. You're the person who discovers places and immediately wants to bring everyone there.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10"/><circle cx="12" cy="8" r="2.5"/><path d="M8 16c0-2.2 1.8-4 4-4s4 1.8 4 4"/></svg>`},
+  ESDR:{code:'ESDR',name:'The Wandering Socialite',tag:'Wide range, warm presence',
+    desc:"You explore broadly, you connect freely, and you do it at a pace that suggests VRChat is part of your life rather than a destination. You drift between worlds and conversations with the ease of someone who feels comfortable anywhere.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12c3-5 6-5 9 0s6 5 9 0"/><path d="M3 6c3-5 6-5 9 0s6 5 9 0"/><path d="M3 18c3-5 6-5 9 0s6 5 9 0"/><circle cx="12" cy="12" r="2"/></svg>`},
+  ELNB:{code:'ELNB',name:'The Night Nomad',tag:'Alone in unfamiliar worlds, after midnight',
+    desc:"You explore in the dark and you do it solo. The combination of high world variety, low social contact, nocturnal timing, and binge sessions paints a specific picture: someone who uses VRChat as personal space for long, quiet, wandering nights.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M8 16l2-2M14 10l2-2"/><circle cx="12" cy="12" r="2"/><path d="M10 12h-4M14 12h4"/></svg>`},
+  ELNR:{code:'ELNR',name:'The Ghost Wanderer',tag:'Appears. Explores. Leaves no trace',
+    desc:"You move through VRChat like fog — present in many places, attached to none, active after dark, and never for too long in one sitting. The join logs show you were there. Little else does.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2a6 6 0 0 0-6 6v12l3-3 3 3 3-3 3 3V8a6 6 0 0 0-6-6z"/><path d="M9 10h.01M15 10h.01"/><line x1="8" y1="14" x2="10" y2="14"/></svg>`},
+  ELDB:{code:'ELDB',name:'The Daytime Drifter',tag:'Solo, exploratory, and going deep',
+    desc:"You're out there during the day, covering ground alone in long dedicated sessions. You don't need a crowd to justify a world visit. Each session is its own expedition, and you emerge from it knowing another corner of the metaverse that most people overlook.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><path d="M5.64 18.36 4.22 19.78M18.36 5.64l1.42-1.42"/><path d="M7 17l-2 5M17 7l2-5"/></svg>`},
+  ELDR:{code:'ELDR',name:'The Wandering Soul',tag:'Drifting solo through quiet worlds',
+    desc:"You cover diverse worlds, stay solo, play in daylight, and never overstay your sessions. VRChat for you is a reflective space — visited, explored, and left behind without drama. The variety suggests curiosity. The solitude suggests intention.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 3 9 15M21 3h-6M21 3v6"/><path d="M3 21l9-9M3 21h6M3 21v-6"/></svg>`},
+  ISNB:{code:'ISNB',name:'The Home Party Host',tag:'Known by name in one world',
+    desc:"You found your world, claimed it, and you host there — repeatedly, socially, at night, in long dedicated sessions. There's a specific lobby that lights up when you arrive. You are the reason some worlds feel alive.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12" r="3"/><path d="M9 21v-6a3 3 0 0 1 6 0v6"/></svg>`},
+  ISNR:{code:'ISNR',name:'The Night Owl Resident',tag:'Loyal to one world, after dark',
+    desc:"You have a home in the metaverse, you visit it at night, and you do it consistently rather than in binges. There's a rhythm to how you show up — regular enough that you're expected, nocturnal enough that the timing's yours.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M17.66 8A8 8 0 1 0 8 17.66"/><path d="M12 6v2M12 16v2M6 12H4M20 12h-2"/></svg>`},
+  ISDB:{code:'ISDB',name:'The Community Pillar',tag:'Present, social, reliable, deep',
+    desc:"You don't wander — you build. You commit to places and the people in them, you show up during the day, and when you're there, you're really there. Long sessions in familiar worlds with people who've started to expect you. This is what the metaverse was built for.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="4" height="20" rx="1"/><rect x="10" y="6" width="4" height="16" rx="1"/><rect x="16" y="10" width="4" height="12" rx="1"/></svg>`},
+  ISDR:{code:'ISDR',name:'The Squad Leader',tag:'Your crew. Your world. Every time',
+    desc:"You return to the same spaces with the same people, consistently, during normal hours, at a sustainable pace. Your join logs read like a regular schedule. People don't just expect you — they coordinate around you. That's not luck. That's presence.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>`},
+  ILNB:{code:'ILNB',name:'The Sleepless Hermit',tag:'Alone in familiar darkness',
+    desc:"You have a world you keep returning to. You go alone. You go late. And when you go, you stay for hours. Whatever's in that world for you, it clearly delivers — even without company, even after midnight, even in sessions that outlast everyone else's bedtime.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`},
+  ILNR:{code:'ILNR',name:'The Nocturnal Resident',tag:'Same world, same hours, same silence',
+    desc:"Your home world, at night, with no one around, at a steady low-key pace. You're not hiding exactly — you're just in a world that happens to be yours, at hours that happen to work for you. The metaverse accommodates everyone. You've built yours for solitude.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M10 20v-6h4v6"/><path d="M4 20v-8l8-6 8 6v8"/></svg>`},
+  ILDB:{code:'ILDB',name:'The Echo Chamber',tag:'Same loop, different day',
+    desc:"Same world. Alone. Daytime. Long sessions. Your data has a very consistent shape — you know where you're going, you don't need company to make it worth it, and you stay until the session ends naturally. There's a whole private experience happening in there.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>`},
+  ILDR:{code:'ILDR',name:'The Constant',tag:'Quiet, steady, always somewhere',
+    desc:"No dramatic spikes. No extreme solitude either — just a person with a home world, daylight hours, moderate sessions, and enough consistency that the pattern holds week after week. You're the most reliable person in VRChat and you probably don't know it.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`},
+
+  // Special override types for extreme stats
+  LEGEND:{code:'★★★★',name:'The Legend',tag:'The numbers no longer need explaining',
+    desc:"Hours in the thousands. People met well past a thousand. At some point the stats stop describing behavior and start describing identity. VRChat isn't something you do. It's somewhere you live. Somewhere you've always lived.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`},
+  SHAPESHIFTER:{code:'∞∞∞∞',name:'The Shapeshifter',tag:'Identity is a costume, worn and retired',
+    desc:"The avatar change frequency in your logs is unusual. You haven't settled on who you are in VRChat — or maybe you settled and kept moving. Each new avatar is a choice. You've made a lot of them.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`},
+  BURNING_BRIDGE:{code:'/////',name:'The Burning Bridge',tag:'More exits than entrances',
+    desc:"The math is unambiguous: you ended more friendships than you started. Whether by choice, circumstance, or something harder to name — the net is negative and the unfriend count is notable. Some connections don't last. Apparently, many of yours didn't.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`},
+  PHANTOM:{code:'░░░░',name:'The Phantom',tag:'Observed by many, known by none',
+    desc:"The proportion of people you met exactly once and never again is striking. You pass through social spaces without leaving a thread. Whether this is intentional or structural, the pattern holds: you appear, encounter, disappear. A consistent ghost.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2a6 6 0 0 0-6 6v12l3-3 3 3 3-3 3 3V8a6 6 0 0 0-6-6z"/><path d="M9 10h.01M15 10h.01"/><path d="M10 14c.5.5 3.5.5 4 0"/></svg>`},
+  SLEEPLESS_ARCHITECT:{code:'4AM+',name:'The Sleepless Architect',tag:'Built something out there, at 4 AM',
+    desc:"Forty-plus sessions in the 4-7 AM window, and hundreds of hours total. You operate when everyone else has logged off. The quieter lobbies, the empty worlds — that's when you do your real work in VRChat. Nobody knows what you're building. The timestamps know.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`},
+  SPEEDRUNNER:{code:'///>',name:'The Speedrunner',tag:'In. Out. Repeat.',
+    desc:"A high fraction of your sessions lasted under sixty seconds. This is not casual browsing — it's a reflex. You log in to check something, realize something, or decide something, and you're gone before the world finishes loading. VRChat as a notification panel.",
+    icon:`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`}
+};
+
+function assignRole(st, sadSt){
+  const sad=sadSt||{};
+  const sessions=Math.max(1,st.sessions);
+  const h=st.hours;
+  const uniqueW=st.uniqueWorlds;
+  const topWV=(st.topWorlds&&st.topWorlds[0]?st.topWorlds[0].v:0)/sessions;
+  const soloPct=sad.soloPct||0;
+  const unfriended=sad.unfriended||0;
+  const amSessions=sad.amSessions||0;
+  const avatarChanges=sad.avatarChanges||0;
+  const shortS=sad.shortSessions||0;
+  const oneTime=sad.oneTimePeople||0;
+  const friendNet=sad.friendNet||0;
+  const peopleMet=st.peopleMet;
+  const activeDays=Math.max(1,st.activeDays);
+  // special overrides (most extreme conditions first)
+  if(h>1000&&peopleMet>800)return'LEGEND';
+  if(amSessions>40&&h>200)return'SLEEPLESS_ARCHITECT';
+  if(avatarChanges>0&&avatarChanges/sessions>0.5)return'SHAPESHIFTER';
+  if(unfriended>15&&friendNet<-10)return'BURNING_BRIDGE';
+  if(shortS/sessions>0.4&&sessions>50)return'SPEEDRUNNER';
+  if(oneTime/Math.max(1,peopleMet)>0.8&&peopleMet>50)return'PHANTOM';
+  // 4-axis system
+  const axisE=uniqueW/sessions>0.4; // Explorer vs Inhabitant
+  const axisS=(peopleMet/sessions>1.5)&&soloPct<55; // Social vs Lone
+  const axisN=st.nightPct>50; // Night vs Day
+  const axisB=h/activeDays>5; // Binge vs Regular
+  const code=(axisE?'E':'I')+(axisS?'S':'L')+(axisN?'N':'D')+(axisB?'B':'R');
+  return code; // maps to one of the 16 base types
+}
+
+function roleAxesHTML(st, sadSt, roleKey){
+  const sad=sadSt||{};
+  const sessions=Math.max(1,st.sessions);
+  const activeDays=Math.max(1,st.activeDays);
+  const role=ROLES[roleKey];
+  if(!role||role.code.length!==4)return'';
+  const axisE=role.code[0]==='E';
+  const axisS=role.code[1]==='S';
+  const axisN=role.code[2]==='N';
+  const axisB=role.code[3]==='B';
+  return `<div class="rr-axes">
+    <div class="rr-axis"><div class="ax-label">World Style</div><div class="ax-val">${axisE?'E':'I'} — ${axisE?'Explorer':'Inhabitant'}</div><div class="ax-sub">${fmt(st.uniqueWorlds)} worlds / ${fmt(sessions)} sessions</div></div>
+    <div class="rr-axis"><div class="ax-label">Social Mode</div><div class="ax-val">${axisS?'S':'L'} — ${axisS?'Social':'Lone'}</div><div class="ax-sub">${sad.soloPct||0}% of days solo</div></div>
+    <div class="rr-axis"><div class="ax-label">Active Hours</div><div class="ax-val">${axisN?'N':'D'} — ${axisN?'Night':'Day'}</div><div class="ax-sub">${st.nightPct}% sessions post-midnight</div></div>
+    <div class="rr-axis"><div class="ax-label">Session Style</div><div class="ax-val">${axisB?'B':'R'} — ${axisB?'Binge':'Regular'}</div><div class="ax-sub">${fmt1(st.hours/activeDays)} hrs/active day</div></div>
+  </div>`;
+}
+
 /* ============================= SLIDES ============================= */
 const ACCENTS=[
   '--cyan',     // 0  intro
@@ -726,9 +875,20 @@ function buildSad(sadSt){
       <p class="lede rv slow">${t('s_lede_sp',{first:sadSt.firstDate||'—',last:sadSt.lastDate||'—'})}</p>`)
   );
 }
-function appendCardSlide(st){
-  const role=st.nightPct>=50?t('role_night'):st.hours>876?t('role_vet'):t('role_expl');
+function appendCardSlide(st, sadSt){
+  const roleKey=assignRole(st,sadSt);
+  const role=ROLES[roleKey]||ROLES.ILDR;
   const N=SLIDES.length;
+  const glossaryHTML=Object.entries(ROLES).map(([k,r])=>`
+    <div class="glo-entry">
+      <div class="glo-icon">${r.icon.replace('width="36" height="36"','width="24" height="24"')}</div>
+      <div class="glo-text">
+        <div class="glo-code">${r.code}</div>
+        <div class="glo-name">${esc(r.name)}</div>
+        <div class="glo-tag">${esc(r.tag)}</div>
+        <div class="glo-desc">${esc(r.desc)}</div>
+      </div>
+    </div>`).join('');
   SLIDES.push(()=>`<div class="card" id="s-card">
       <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>${N+1} / ${N+1}</span></div>
       <div class="card-body">
@@ -740,7 +900,8 @@ function appendCardSlide(st){
             <div class="tc-avatar" id="tc-art" style="${avatarStyle('PLAYER')}">P</div>
             <div class="tc-meta">
               <div class="tc-name" id="tc-name">PLAYER</div>
-              <div class="tc-role">${role}</div>
+              <div class="tc-role-code">${esc(role.code)}</div>
+              <div class="tc-role">${esc(role.name)}</div>
               <div class="tc-date">${fmtDate(st.startDate)} &mdash; ${fmtDate(st.endDate)}</div>
             </div>
           </div>
@@ -764,6 +925,14 @@ function appendCardSlide(st){
           </div>
           <div class="tc-foot">${t('tc_foot')}</div>
         </div>
+        <div class="role-reveal rv">
+          <div class="rr-icon">${role.icon}</div>
+          <div class="rr-code">${esc(role.code)}</div>
+          <div class="rr-name">${esc(role.name)}</div>
+          <div class="rr-tag">"${esc(role.tag)}"</div>
+          <div class="rr-desc">${esc(role.desc)}</div>
+          ${roleAxesHTML(st,sadSt,roleKey)}
+        </div>
         <div class="actions rv">
           <button class="btn" id="dlBtn">${t('dl')}</button>
           <button class="btn ghost" id="xBtn">${t('share_x')}</button>
@@ -773,7 +942,11 @@ function appendCardSlide(st){
           <div class="cap-lbl">${t('cap_lbl')}</div>
           <textarea id="capBox"></textarea>
         </div>
-        <p class="lede rv" style="text-align:center;font-size:13px">${t('outro')}</p>
+        <div class="glo-wrap rv">
+          <button class="glo-btn" id="gloBtn">☰ All ${Object.keys(ROLES).length} personality types</button>
+          <div class="glo-list" id="gloList">${glossaryHTML}</div>
+        </div>
+        <p class="lede rv" style="text-align:center;font-size:13px;margin-top:6px">${t('outro')}</p>
         <a class="kofi rv" href="${KOFI}" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2 5.5 5 5.5c1.8 0 3 .9 3.7 2.1C9.4 6.4 10.6 5.5 12.4 5.5c3 0 4.6 2.9 3 6.2C16.9 16.4 12 21 12 21z"/></svg>
           ${t('support')}
@@ -812,7 +985,7 @@ function buildAll(st, sadSt){
   build(st);
   buildTransition();
   buildSad(sadSt);
-  appendCardSlide(st);
+  appendCardSlide(st, sadSt);
   S=st;YR=st.year;
   const pg=$('#progress');pg.innerHTML='';
   for(let i=0;i<SLIDES.length;i++){const s=document.createElement('div');s.className='seg';s.innerHTML='<i></i>';pg.appendChild(s);}
@@ -944,6 +1117,8 @@ function wireCard(){
   if(tn){tn.textContent=CARD_NAME.toUpperCase();if(ta){ta.textContent=initial(CARD_NAME);ta.style.cssText=avatarStyle(CARD_NAME);}}
   const refreshCap=()=>{if(cap)cap.value=captionText();};refreshCap();
   if(tc){tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg)`;});tc.addEventListener('pointerleave',()=>{tc.style.transform='';});}
+  const gb=$('#gloBtn'),gl=$('#gloList');
+  if(gb&&gl)gb.addEventListener('click',()=>{gl.classList.toggle('open');gb.textContent=gl.classList.contains('open')?'✕ Close glossary':'☰ All '+Object.keys(ROLES).length+' personality types';});
 
   $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
   $('#xBtn').addEventListener('click',async()=>{
@@ -990,6 +1165,7 @@ addEventListener('keydown',e=>{if(!SLIDES.length)return;if(e.key==='ArrowRight')
 $('#tapnav').addEventListener('click',e=>{if(!SLIDES.length)return;go(e.clientX>innerWidth*0.4?1:-1);});
 let tsx=0,tsy=0,tracking=false;
 addEventListener('pointerdown',e=>{if(!SLIDES.length)return;if(e.target.closest('input,textarea,button,a,select'))return;tsx=e.clientX;tsy=e.clientY;tracking=true;});
+addEventListener('pointercancel',()=>{tracking=false;});
 addEventListener('pointerup',e=>{if(!tracking)return;tracking=false;const dx=e.clientX-tsx,dy=e.clientY-tsy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1);});
 
 /* ============================= INTAKE ============================= */
