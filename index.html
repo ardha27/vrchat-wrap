@@ -206,7 +206,12 @@
   .glo-btn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer;display:block;width:100%;text-align:center;transition:.25s}
   .glo-btn:hover{border-color:var(--accent);color:var(--accent)}
   .glo-list{display:none;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:4px 0;overflow:hidden}
-  .glo-list.open{display:block}
+  .glo-list.open{display:block;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+  .glo-list::-webkit-scrollbar{width:4px}
+  .glo-list::-webkit-scrollbar-track{background:transparent}
+  .glo-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+  .glo-list::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.28)}
+  .glo-entry.mine{background:color-mix(in srgb,var(--accent) 8%,transparent);border-left:3px solid var(--accent);padding-left:15px}
   .glo-entry{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
   .glo-entry:last-child{border-bottom:none}
   .glo-icon{color:var(--accent);flex:none;line-height:0;margin-top:2px}
@@ -1345,10 +1350,10 @@ function appendCardSlide(st, sadSt){
   const role=ROLES[roleKey]||ROLES.ILDR;
   const N=SLIDES.length;
   const glossaryHTML=Object.entries(ROLES).map(([k,r])=>`
-    <div class="glo-entry">
+    <div class="glo-entry${k===roleKey?' mine':''}">
       <div class="glo-icon">${r.icon.replace('width="36" height="36"','width="24" height="24"')}</div>
       <div class="glo-text">
-        <div class="glo-code">${r.code}</div>
+        <div class="glo-code">${r.code}${k===roleKey?` <span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--accent);opacity:.8">← you</span>`:''}</div>
         <div class="glo-name">${esc(r.name)}</div>
         <div class="glo-tag">${esc(r.tag)}</div>
         <div class="glo-desc">${esc(r.desc)}</div>
@@ -1637,7 +1642,16 @@ function wireCard(){
   const refreshCap=()=>{if(cap)cap.value=captionText();};refreshCap();
   if(tc){tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg)`;});tc.addEventListener('pointerleave',()=>{tc.style.transform='';});}
   const gb=$('#gloBtn'),gl=$('#gloList');
-  if(gb&&gl)gb.addEventListener('click',()=>{gl.classList.toggle('open');gb.textContent=gl.classList.contains('open')?'✕ Close glossary':'☰ All '+Object.keys(ROLES).length+' personality types';});
+  if(gb&&gl)gb.addEventListener('click',()=>{
+    gl.classList.toggle('open');
+    const isOpen=gl.classList.contains('open');
+    gb.textContent=isOpen?'✕ Close glossary':'☰ All '+Object.keys(ROLES).length+' personality types';
+    if(isOpen){
+      setTimeout(()=>{const mine=gl.querySelector('.mine');if(mine)mine.scrollIntoView({block:'nearest'});},60);
+    } else {
+      setTimeout(()=>gb.scrollIntoView({block:'nearest',behavior:'smooth'}),60);
+    }
+  });
 
   // view leaderboard button (always shown)
   const lbViewBtn=$('#lbViewBtn');
