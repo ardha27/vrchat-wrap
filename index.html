@@ -70,6 +70,10 @@
   .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .nav.prev{left:14px}.nav.next{right:14px}
   @media(max-width:680px){.nav{display:none!important}}
+  #deckDlBtn{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:8;display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.55);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;transition:.25s}
+  body.deck-mode #deckDlBtn{display:flex}
+  #deckDlBtn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
+  #deckDlBtn.busy{opacity:.4;pointer-events:none}
   .tapnav{position:fixed;inset:0;z-index:1}
 
   .screen{display:none;width:100%;max-width:720px}
@@ -205,7 +209,7 @@
   .rr-name{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:6px 0 4px}
   .rr-tag{font-size:clamp(14px,3.5vw,18px);font-weight:700;color:var(--ink);line-height:1.2}
   .rr-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-top:10px}
-  .rr-axes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+  .rr-axes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .rr-axis{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
   .rr-axis .ax-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
   .rr-axis .ax-val{font-family:'Anton';font-size:16px;color:var(--accent)}
@@ -405,6 +409,9 @@
 
   <div id="deck"></div>
 </div>
+<button id="deckDlBtn" title="Download slide">
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+</button>
 
 <div class="lb-modal" id="lbModal">
   <div class="lb-inner">
@@ -1237,8 +1244,8 @@ function roleAxesHTML(st, sadSt, roleKey){
     const col=isHigh?'var(--accent)':'var(--muted)';
     return `<div style="height:3px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${p}%;background:${col};border-radius:3px;transition:width .6s"></div></div>`;
   };
-  return `<div class="rr-axes">
-    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">VRC16 · E/I S/L N/D B/R</div>
+  return `<div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;margin-top:14px">VRC16 · E/I S/L N/D B/R</div>
+  <div class="rr-axes">
     <div class="rr-axis">
       <div class="ax-label">World Style · <span style="color:var(--accent)">${pct(eScore)}%</span></div>
       <div class="ax-val">${axisE?'E':'I'} — ${axisE?'Explorer':'Inhabitant'}</div>
@@ -1382,7 +1389,6 @@ function appendCardSlide(st, sadSt){
       <div class="card-body">
         <div class="kicker rv">${st.cardKick}</div>
         <div class="tcard rv" id="tcard">
-          <div class="holo"></div>
           <div class="tc-top"><span>${st.cardHeader}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
           <div class="tc-head">
             <div class="tc-avatar" id="tc-art" style="${avatarStyle('PLAYER')}">P</div>
@@ -1720,9 +1726,17 @@ async function cardBlob(){
   }catch(e){el.style.transform=tf;return null;}
 }
 async function roleRevealBlob(){
-  const el=document.querySelector('.role-reveal');if(!el||!window.html2canvas)return null;
+  const el=document.querySelector('.role-reveal.rv');if(!el||!window.html2canvas)return null;
   try{
-    const cv=await html2canvas(el,{backgroundColor:'#0B0D17',scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
+    const cv=await html2canvas(el,{backgroundColor:null,scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
+      onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
+    return await new Promise(r=>cv.toBlob(r,'image/png'));
+  }catch{return null;}
+}
+async function deckBlob(){
+  const el=document.getElementById('deck');if(!el||!window.html2canvas)return null;
+  try{
+    const cv=await html2canvas(el,{backgroundColor:null,scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
       onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
     return await new Promise(r=>cv.toBlob(r,'image/png'));
   }catch{return null;}
@@ -1740,6 +1754,7 @@ function enterDeck(){
 }
 
 /* ---- nav: arrows, buttons, swipe (ignores inputs/buttons) ---- */
+$('#deckDlBtn').addEventListener('click',async()=>{const btn=$('#deckDlBtn');btn.classList.add('busy');const b=await deckBlob();btn.classList.remove('busy');if(b)downloadBlob(b,'vrchat-wrap-slide.png');});
 $('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
 $('#restart').onclick=()=>location.reload();
 addEventListener('keydown',e=>{if(!SLIDES.length)return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
