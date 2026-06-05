@@ -1,8 +1,8 @@
-name            = "vrcwrap"
+name            = "cloudflare-relay"
 main            = "worker.js"
 compatibility_date = "2024-09-23"
 
 [[d1_databases]]
 binding       = "DB"
 database_name = "vrcwrap-lb"
-database_id   = "REPLACE_WITH_YOUR_D1_ID"  # output of: npx wrangler d1 create vrcwrap-lb
+database_id   = "17c3adc8-e289-46e2-85c7-96be0d732cb1"
