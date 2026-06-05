@@ -383,8 +383,8 @@ let ROLE_KEY=null;
 // The key below is XOR-obfuscated. The Worker holds the plain key as
 // SUBMIT_SECRET env var. Run `node keygen.js` to generate your own pair.
 // This adds friction against automated abuse — not a cryptographic guarantee.
-const _KA=[/* REPLACE: output of keygen.js _KA */];
-const _KB=[/* REPLACE: output of keygen.js _KB */];
+const _KA=[46,61,82,111,254,103,142,72,58,207,161,96,64,107,2,170,124,111,81,110,255,100,140,73,57,152,244,58,69,56,7,168];
+const _KB=[76,92,102,13,206,82,188,127,88,251,199,3,35,14,54,203];
 function _lk(){return new Uint8Array(_KA.map((b,i)=>b^_KB[i%_KB.length]));}
 
 async function lbSign(data){
