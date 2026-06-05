@@ -47,9 +47,17 @@
   body.deck-mode .brand{display:none}
   .topright{position:fixed;top:max(env(safe-area-inset-top),12px);right:14px;z-index:7;display:flex;gap:8px;align-items:center}
   .lang{position:relative}
-  .lang select{appearance:none;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;color:var(--ink);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;padding:7px 28px 7px 13px;cursor:pointer}
-  .lang::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:10px}
-  .lang select:focus{outline:none;border-color:var(--accent)}
+  .lang-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:20px;padding:7px 12px;cursor:pointer;transition:.25s;text-transform:uppercase;white-space:nowrap}
+  .lang-btn:hover,.lang-btn.open{border-color:var(--accent);color:var(--accent)}
+  .lang-btn svg{flex:none;transition:transform .2s}
+  .lang-btn.open svg{transform:rotate(180deg)}
+  .lang-drop{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:160px;background:rgba(12,12,22,.97);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:0 16px 48px -8px rgba(0,0,0,.8);backdrop-filter:blur(16px);z-index:30}
+  .lang-drop.open{display:block}
+  .lang-item{display:block;width:100%;text-align:left;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);background:transparent;border:none;border-radius:9px;padding:9px 12px;cursor:pointer;transition:.18s;white-space:nowrap}
+  .lang-item:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+  .lang-item.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+  .info-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex:none}
+  .info-btn:hover{border-color:var(--accent);color:var(--accent)}
   .restart{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;transition:.25s;display:none}
   .restart:hover{color:var(--ink);border-color:var(--accent)}
 
@@ -337,7 +345,14 @@
   </div>
 </div>
 <div class="topright">
-  <div class="lang"><select id="langSel" aria-label="Language"></select></div>
+  <button class="info-btn" id="infoBtn" title="About / Disclosure">ⓘ</button>
+  <div class="lang" id="langWrap">
+    <button class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+      EN
+      <svg viewBox="0 0 10 6" width="8" height="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 1 5 5 9 1"/></svg>
+    </button>
+    <div class="lang-drop" id="langDrop" role="listbox"></div>
+  </div>
   <button class="restart" id="restart" data-i="restart">Restart</button>
 </div>
 <div class="progress" id="progress"></div>
@@ -566,10 +581,9 @@ async function loadLBTab(){
     const mr=$('#lbMyRank');if(mr)mr.style.display='none';
     return;
   }
-  rows.innerHTML=`<div class="lb-loading"><div style="opacity:.4;margin-bottom:8px;font-size:18px">—</div>Loading rankings…</div>`;
   let data;
   if(LB_CACHE[cat.id]){data=LB_CACHE[cat.id];}
-  else{const r=await lbTop100(cat.col);data=r&&r.data||[];LB_CACHE[cat.id]=data;}
+  else{rows.innerHTML=`<div class="lb-loading"><div style="opacity:.4;margin-bottom:8px;font-size:18px">—</div>Loading rankings…</div>`;const r=await lbTop100(cat.col);data=r&&r.data||[];LB_CACHE[cat.id]=data;}
   const myVal=S&&getMyVal(cat);
   let myRank=null;
   if(CARD_NAME&&S){
@@ -1708,7 +1722,7 @@ function downloadBlob(b,name){const u=URL.createObjectURL(b);const a=document.cr
 function enterDeck(){
   $('#intake').classList.remove('on');$('#loading').classList.remove('on');
   document.body.classList.add('deck-mode');
-  $('#progress').style.display='flex';$('#restart').style.display='block';$('#langSel').parentElement.style.display='none';
+  $('#progress').style.display='flex';$('#restart').style.display='block';$('#langWrap').style.display='none';$('#infoBtn').style.display='none';
   $('#hint').style.display='flex';
   if(innerWidth>680){$('#prev').style.display='flex';$('#next').style.display='flex';}
   showSlide(0);
@@ -1756,15 +1770,25 @@ $('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats('all');const s
 
 $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
-/* ---- language ---- */
+/* ---- language picker ---- */
 function initLang(){
-  const sel=$('#langSel');
-  sel.innerHTML=LANGS.map(l=>`<option value="${l}">${I18N[l].native}</option>`).join('');
-  LANG=pickLang();sel.value=LANG;applyLang();
+  const btn=$('#langBtn'),drop=$('#langDrop');
+  LANG=pickLang();applyLang();
   document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
-  sel.addEventListener('change',()=>{LANG=sel.value;localStorage.setItem('vrcwrap_lang',LANG);applyLang();document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());});
+  const setLang=code=>{LANG=code;localStorage.setItem('vrcwrap_lang',LANG);applyLang();
+    document.querySelectorAll('.curYear').forEach(el=>el.textContent=new Date().getFullYear());
+    btn.firstChild.textContent=LANG.toUpperCase()+' ';
+    drop.querySelectorAll('.lang-item').forEach(o=>o.classList.toggle('active',o.dataset.l===LANG));};
+  drop.innerHTML=LANGS.map(l=>`<button class="lang-item${l===LANG?' active':''}" data-l="${l}" role="option">${I18N[l].native}</button>`).join('');
+  btn.firstChild.textContent=LANG.toUpperCase()+' ';
+  drop.querySelectorAll('.lang-item').forEach(o=>o.addEventListener('click',()=>{setLang(o.dataset.l);drop.classList.remove('open');btn.classList.remove('open');btn.setAttribute('aria-expanded','false');}));
+  btn.addEventListener('click',e=>{e.stopPropagation();const open=drop.classList.toggle('open');btn.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);});
+  document.addEventListener('click',()=>{drop.classList.remove('open');btn.classList.remove('open');btn.setAttribute('aria-expanded','false');});
 }
 initLang();
+
+/* ---- info / disclosure button ---- */
+$('#infoBtn').addEventListener('click',()=>$('#wmModal').classList.remove('hidden'));
 
 // Leaderboard modal close — wired once globally so it works from home screen too
 $('#lbClose').addEventListener('click',()=>$('#lbModal').classList.remove('open'));
