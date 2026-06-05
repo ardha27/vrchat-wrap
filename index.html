@@ -70,7 +70,7 @@
   .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .nav.prev{left:14px}.nav.next{right:14px}
   @media(max-width:680px){.nav{display:none!important}}
-  .deck-dl-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;flex:none;padding:0}
+  .deck-dl-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;flex:none;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   .deck-dl-btn:hover{border-color:var(--accent);color:var(--accent)}
   .deck-dl-btn.busy{opacity:.35;pointer-events:none}
   .tapnav{position:fixed;inset:0;z-index:1}
@@ -1757,7 +1757,15 @@ async function deckBlob(btn){
     return await new Promise(r=>cv.toBlob(r,'image/png'));
   }catch(e){_unpatchCM(_orig);if(btn)btn.style.visibility='';console.debug('[vrcwrap] deckBlob error:',e);return null;}
 }
-function downloadBlob(b,name){const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+function _toast(msg){let t=document.getElementById('_dltoast');if(!t){t=document.createElement('div');t.id='_dltoast';t.style.cssText='position:fixed;bottom:max(env(safe-area-inset-bottom),72px);left:50%;transform:translateX(-50%);background:rgba(16,16,28,.97);color:#e8e8f0;padding:9px 20px;border-radius:20px;font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s;border:1px solid rgba(255,255,255,.12);white-space:nowrap';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2200);}
+async function downloadBlob(b,name){
+  const file=new File([b],name,{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file]});return;}catch(e){if(e.name==='AbortError')return;}
+  }
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);
+  _toast('Image saved ↓');
+}
 
 /* ---- screen flow ---- */
 function enterDeck(){
