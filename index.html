@@ -1007,8 +1007,19 @@ function analyzeSad(db,range){
   if(flt){const fl=rowsOf(`SELECT created_at,type FROM "${flt}"`);const filt=fl.map(r=>({d:parseTime(r.created_at),type:r.type})).filter(r=>inR(r.d));friendsAdded=filt.filter(r=>/^friend$/i.test(r.type||'')).length;unfriended=filt.filter(r=>/^unfriend$/i.test(r.type||'')).length;}
   const friendNet=friendsAdded-unfriended;
   let avatarChanges=0;
-  const avTbl=tables.find(t=>/(gamelog_avatar|change_avatar)/i.test(t));
-  if(avTbl){const rows=rowsOf(`SELECT created_at FROM "${avTbl}"`);avatarChanges=rows.filter(r=>inR(parseTime(r.created_at))).length;}
+  console.debug('[vrcwrap] all tables:',tables);
+  // Try every table whose name hints at avatar change/history events
+  const avTbls=tables.filter(t=>/avatar/i.test(t)&&/(gamelog|log|history|change|event|evolut)/i.test(t));
+  console.debug('[vrcwrap] avatar tables:',avTbls);
+  for(const avTbl of avTbls){
+    const rows=rowsOf(`SELECT created_at FROM "${avTbl}"`);
+    const cnt=rows.filter(r=>inR(parseTime(r.created_at))).length;
+    if(cnt>avatarChanges)avatarChanges=cnt;
+  }
+  // Fallback: also try any plain "gamelog_avatar*" even without a secondary keyword
+  if(!avatarChanges){const avTbl2=tables.find(t=>/^gamelog_avatar/i.test(t));if(avTbl2){const rows=rowsOf(`SELECT created_at FROM "${avTbl2}"`);avatarChanges=rows.filter(r=>inR(parseTime(r.created_at))).length;}}
+  // Last resort: count from gamelog_feed avatar-type entries attributed to self
+  if(!avatarChanges&&selfId&&has('gamelog_feed')){const feed=rowsOf(`SELECT created_at,type,user_id FROM gamelog_feed`);avatarChanges=feed.filter(r=>inR(parseTime(r.created_at))&&/avatar/i.test(r.type||'')&&r.user_id===selfId).length;}
   const sadSessions=loc.length;
   return{year:end.getFullYear(),range,startDate:start,endDate:end,hasReal:loc.length>0,
     sessions:sadSessions,unfriended,abandonedWorlds,oneTimePeople,amSessions,avatarChanges,
