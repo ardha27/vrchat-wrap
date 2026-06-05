@@ -469,7 +469,7 @@
 </div>
 
 <script>
-console.log('[vrcwrap] build h2c-pro (html2canvas-pro, native color-mix)');
+console.log('[vrcwrap] build h2c-pro2 (desktop=direct download, mobile=share)');
 /* ============================= I18N ============================= */
 const SITE='https://ardha27.github.io/vrchat-wrap/';
 const KOFI='https://ko-fi.com/ardhach';
@@ -1746,15 +1746,19 @@ async function deckBlob(btn){
   }catch(e){if(btn)btn.style.visibility='';window._lastCaptureErr=String(e);console.debug('[vrcwrap] deckBlob error:',e);return null;}
 }
 function _toast(msg){let t=document.getElementById('_dltoast');if(!t){t=document.createElement('div');t.id='_dltoast';t.style.cssText='position:fixed;bottom:max(env(safe-area-inset-bottom),72px);left:50%;transform:translateX(-50%);background:rgba(16,16,28,.97);color:#e8e8f0;padding:9px 20px;border-radius:20px;font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s;border:1px solid rgba(255,255,255,.12);white-space:nowrap';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2200);}
+// Touch/phone only — desktop should download straight to disk, not open a share sheet
+const IS_MOBILE=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 async function downloadBlob(b,name){
-  // Try native share with file (iOS / Android share sheet)
-  try{
-    const file=new File([b],name,{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file]});return;}catch(e){if(e.name==='AbortError')return;}
-    }
-  }catch(_){}
-  // Standard anchor download
+  // On mobile the share sheet is the natural "save" path (a.download is unreliable on iOS)
+  if(IS_MOBILE){
+    try{
+      const file=new File([b],name,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file]});return;}catch(e){if(e.name==='AbortError')return;}
+      }
+    }catch(_){}
+  }
+  // Desktop (and mobile fallback): direct download to disk
   try{
     const u=URL.createObjectURL(b);
     const a=document.createElement('a');a.href=u;a.download=name;
