@@ -1721,14 +1721,49 @@ async function cardBlob(){
     return await new Promise(r=>cv.toBlob(r,'image/png'));
   }catch(e){el.style.transform=tf;return null;}
 }
-// html2canvas can't parse color-mix() — patch stylesheets before capture, restore after
+// Replace color-mix() in a CSS string using a paren-balanced finder.
+// The simple regex /color-mix\([^;{}]+\)/ over-matches when color-mix is
+// nested inside drop-shadow() or radial-gradient() — it grabs the outer ).
+function _replaceCM(css, resolveFn){
+  let out='',i=0;
+  while(i<css.length){
+    const at=css.indexOf('color-mix(',i);
+    if(at===-1){out+=css.slice(i);break;}
+    out+=css.slice(i,at);
+    // Walk forward counting parens to find the balanced closing )
+    let depth=0,j=at;
+    while(j<css.length){
+      if(css[j]==='(')depth++;
+      else if(css[j]===')'){depth--;if(depth===0){j++;break;}}
+      j++;
+    }
+    out+=resolveFn(css.slice(at,j));
+    i=j;
+  }
+  return out;
+}
+// Resolve one color-mix() expression to rgba() via getComputedStyle + canvas.
+// Chrome 111+ getComputedStyle returns "color(srgb ...)" — canvas fully resolves it.
+function _resolveCM(expr){
+  try{
+    const t=document.createElement('div');
+    t.setAttribute('style','position:fixed;top:-9999px;width:1px;height:1px;pointer-events:none;color:'+expr);
+    document.body.appendChild(t);
+    const raw=getComputedStyle(t).color;
+    document.body.removeChild(t);
+    const cv=document.createElement('canvas');cv.width=cv.height=1;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle=raw;ctx.fillRect(0,0,1,1);
+    const[r,g,b,a]=ctx.getImageData(0,0,1,1).data;
+    return a===0?'transparent':`rgba(${r},${g},${b},${+(a/255).toFixed(3)})`;
+  }catch{return'transparent';}
+}
 function _patchCM(){
   try{
-    const s=document.querySelector('style');if(!s)return null;
+    const s=document.querySelector('style');
+    if(!s||!s.textContent.includes('color-mix('))return null;
     const orig=s.textContent;
-    s.textContent=orig.replace(/color-mix\([^;{}]+\)/g,m=>{
-      try{const t=document.createElement('div');t.style.color=m;document.body.appendChild(t);const v=getComputedStyle(t).color;document.body.removeChild(t);return v||'transparent';}catch{return'transparent';}
-    });
+    s.textContent=_replaceCM(orig,_resolveCM);
     return orig;
   }catch{return null;}
 }
