@@ -70,10 +70,9 @@
   .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .nav.prev{left:14px}.nav.next{right:14px}
   @media(max-width:680px){.nav{display:none!important}}
-  #deckDlBtn{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:8;display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.55);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;transition:.25s}
-  body.deck-mode #deckDlBtn{display:flex}
-  #deckDlBtn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
-  #deckDlBtn.busy{opacity:.4;pointer-events:none}
+  .deck-dl-btn{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:8;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.55);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;transition:.25s}
+  .deck-dl-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
+  .deck-dl-btn.busy{opacity:.4;pointer-events:none}
   .tapnav{position:fixed;inset:0;z-index:1}
 
   .screen{display:none;width:100%;max-width:720px}
@@ -409,9 +408,6 @@
 
   <div id="deck"></div>
 </div>
-<button id="deckDlBtn" title="Download slide">
-  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-</button>
 
 <div class="lb-modal" id="lbModal">
   <div class="lb-inner">
@@ -1615,6 +1611,11 @@ function showSlide(i){
   idx=Math.max(0,Math.min(SLIDES.length-1,i));
   setAccent(ACCENTS[idx]||'--green');
   $('#deck').innerHTML=`<section class="screen on">${SLIDES[idx]()}</section>`;
+  const _dlb=document.createElement('button');
+  _dlb.className='deck-dl-btn';_dlb.title='Download slide';
+  _dlb.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  _dlb.addEventListener('click',async()=>{_dlb.classList.add('busy');const b=await deckBlob(_dlb);_dlb.classList.remove('busy');if(b)downloadBlob(b,'vrchat-wrap-slide.png');});
+  $('#deck').appendChild(_dlb);
   document.querySelectorAll('#progress .seg').forEach((s,k)=>{s.classList.toggle('done',k<idx);s.classList.toggle('active',k===idx);});
   if(idx===SLIDES.length-1)wireCard();
 }
@@ -1725,21 +1726,41 @@ async function cardBlob(){
     return await new Promise(r=>cv.toBlob(r,'image/png'));
   }catch(e){el.style.transform=tf;return null;}
 }
+// html2canvas can't parse color-mix() — patch stylesheets before capture, restore after
+function _patchCM(){
+  const s=document.querySelector('style');if(!s)return null;
+  const orig=s.textContent;
+  s.textContent=orig.replace(/color-mix\([^;{}]+\)/g,m=>{
+    try{const t=document.createElement('div');t.style.color=m;document.body.appendChild(t);const v=getComputedStyle(t).color;document.body.removeChild(t);return v||'transparent';}catch{return'transparent';}
+  });
+  return orig;
+}
+function _unpatchCM(orig){const s=document.querySelector('style');if(s&&orig!=null)s.textContent=orig;}
+
 async function roleRevealBlob(){
   const el=document.querySelector('.role-reveal.rv');if(!el||!window.html2canvas)return null;
+  const _orig=_patchCM();
   try{
     const cv=await html2canvas(el,{backgroundColor:null,scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
       onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
+    _unpatchCM(_orig);
     return await new Promise(r=>cv.toBlob(r,'image/png'));
-  }catch{return null;}
+  }catch(e){_unpatchCM(_orig);console.debug('[vrcwrap] roleRevealBlob error:',e);return null;}
 }
-async function deckBlob(){
+async function deckBlob(btn){
   const el=document.getElementById('deck');if(!el||!window.html2canvas)return null;
+  if(btn)btn.style.visibility='hidden';
+  const _orig=_patchCM();
   try{
     const cv=await html2canvas(el,{backgroundColor:null,scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
-      onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
+      onclone:(doc)=>{
+        doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});
+        doc.querySelectorAll('.deck-dl-btn').forEach(e=>e.remove());
+      }});
+    _unpatchCM(_orig);
+    if(btn)btn.style.visibility='';
     return await new Promise(r=>cv.toBlob(r,'image/png'));
-  }catch{return null;}
+  }catch(e){_unpatchCM(_orig);if(btn)btn.style.visibility='';console.debug('[vrcwrap] deckBlob error:',e);return null;}
 }
 function downloadBlob(b,name){const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
 
@@ -1754,7 +1775,6 @@ function enterDeck(){
 }
 
 /* ---- nav: arrows, buttons, swipe (ignores inputs/buttons) ---- */
-$('#deckDlBtn').addEventListener('click',async()=>{const btn=$('#deckDlBtn');btn.classList.add('busy');const b=await deckBlob();btn.classList.remove('busy');if(b)downloadBlob(b,'vrchat-wrap-slide.png');});
 $('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
 $('#restart').onclick=()=>location.reload();
 addEventListener('keydown',e=>{if(!SLIDES.length)return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
