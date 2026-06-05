@@ -187,7 +187,7 @@
   .bars .b.peak{background:linear-gradient(180deg,#fff,var(--accent));box-shadow:0 0 14px var(--accent)}
   .axis{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
 
-  #s-card .card-body{align-items:center;text-align:center;padding:8px 14px 10px;justify-content:center}
+  #s-card .card-body{align-items:center;text-align:center;padding:8px 14px 16px;justify-content:flex-start}
   .tcard{position:relative;width:min(680px,92vw);aspect-ratio:16/9;border-radius:28px;padding:22px 28px;background:linear-gradient(150deg,#15152a,#0a0a16);border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 30px 60px -24px #000;transform-style:preserve-3d;transition:transform .15s}
   .tcard .holo{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(225,91,255,.3) 45%,rgba(52,214,255,.3) 55%,transparent 70%);background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.6;animation:holo 6s linear infinite;pointer-events:none}
   @keyframes holo{0%{background-position:0 0}100%{background-position:200% 200%}}
@@ -528,9 +528,11 @@ async function lbSubmit(username,st,sadSt,roleKey){
     const r=await fetch(_lbBase()+'/lb/submit',{method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({...data,sig})});
+    const j=await r.json().catch(()=>null);
+    console.debug('[vrcwrap] lb/submit →',r.status,j);
     if(!r.ok)return null;
-    return r.json();
-  }catch{return null;}
+    return j;
+  }catch(e){console.debug('[vrcwrap] lb/submit error:',e);return null;}
 }
 
 async function lbTop100(col){
@@ -655,8 +657,8 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
   s10_tag:'Collect',s10_kick:'Your {year} VRChat card',s10_kick_all:'Your all-time VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
-  dl:'Download trading card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
-  dl_hint:'saves the holographic card above · PNG · 16:9',
+  dl:'Download role card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  dl_hint:'saves your personality result · PNG',
   home_glo:'Role glossary',home_lb:'Leaderboard',
   outro:'Screenshot it. Share it. See you next time.',
   caption:'My VRChat Wrap — {h}h across {w} worlds with {p} people met. Make yours:',
@@ -696,8 +698,8 @@ const I18N={
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
   s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',s10_kick_all:'Kartu VRChat all-time kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
-  dl:'Unduh trading card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
-  dl_hint:'menyimpan kartu holografik di atas · PNG · 16:9',
+  dl:'Unduh role card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  dl_hint:'menyimpan hasil kepribadianmu · PNG',
   home_glo:'Glosarium role',home_lb:'Leaderboard',
   outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
   caption:'VRChat Wrap aku — {h} jam di {w} world, ketemu {p} orang. Bikin punyamu:',
@@ -1420,16 +1422,14 @@ function appendCardSlide(st, sadSt){
           ${roleAxesHTML(st,sadSt,roleKey)}
         </div>
         <div class="actions rv">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:5px;width:100%">
-            <button class="btn" id="dlBtn" style="width:100%;justify-content:center">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              ${t('dl')}
-            </button>
-            <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);opacity:.7">${t('dl_hint')}</span>
-          </div>
+          <button class="btn" id="dlBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ${t('dl')}
+          </button>
           <button class="btn ghost" id="xBtn">${t('share_x')}</button>
           <button class="btn ghost" id="shareBtn" style="display:none">${t('share')}</button>
         </div>
+        <p style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-align:center;opacity:.7;margin-top:2px">${t('dl_hint')}</p>
         <div class="cap rv">
           <div class="cap-lbl">${t('cap_lbl')}</div>
           <textarea id="capBox"></textarea>
@@ -1443,7 +1443,7 @@ function appendCardSlide(st, sadSt){
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2 5.5 5 5.5c1.8 0 3 .9 3.7 2.1C9.4 6.4 10.6 5.5 12.4 5.5c3 0 4.6 2.9 3 6.2C16.9 16.4 12 21 12 21z"/></svg>
           ${t('support')}
         </a>
-        <div class="actions rv" style="margin-top:8px;flex-direction:column;gap:8px">
+        <div class="actions rv" style="margin-top:8px">
           <button class="lb-btn" id="lbViewBtn">☰ View Global Leaderboard</button>
         </div>
         <div id="lbStatus" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-align:center;margin-top:4px"></div>
@@ -1617,6 +1617,7 @@ function go(d){if(!SLIDES.length)return;if(idx+d<0||idx+d>SLIDES.length-1)return
 /* ---- leaderboard auto-submit + rank fetch ---- */
 let CARD_NAME='';
 let _rankPromise=null;
+let _submitOk=null;
 
 async function fetchAndSubmitRanks(st,sadSt,roleKey){
   if(!WORLD_PROXY)return[];
@@ -1626,8 +1627,10 @@ async function fetchAndSubmitRanks(st,sadSt,roleKey){
     if(statusEl())statusEl().textContent='Saving to leaderboard…';
     const res=await lbSubmit(name,st,sadSt,roleKey);
     LB_CACHE={};
+    _submitOk=!!res;
     if(!res&&statusEl())statusEl().textContent='Leaderboard save failed.';
   } else {
+    _submitOk=null;
     if(statusEl())statusEl().textContent='Leaderboard opt-out — checking your rank…';
   }
   const ranks=await Promise.all(LB_CATS.map(async c=>{
@@ -1678,22 +1681,20 @@ function wireCard(){
   const statusEl=$('#lbStatus');
   if(badgeEl&&_rankPromise){
     _rankPromise.then(badges=>{
-      if(badges.length){
-        badgeEl.innerHTML=badges.map(b=>`<span class="rank-badge${b.cat.good?'':' shame'}">${b.cat.label} #${b.rank}</span>`).join('');
-        if(statusEl&&!LB_OPTOUT)statusEl.textContent='✓ Score saved to leaderboard';
-        else if(statusEl)statusEl.textContent='';
-      } else {
-        if(statusEl&&!LB_OPTOUT)statusEl.textContent='✓ Score saved to leaderboard';
-        else if(statusEl)statusEl.textContent='';
+      if(badges.length)badgeEl.innerHTML=badges.map(b=>`<span class="rank-badge${b.cat.good?'':' shame'}">${b.cat.label} #${b.rank}</span>`).join('');
+      if(statusEl){
+        if(LB_OPTOUT)statusEl.textContent='';
+        else if(_submitOk)statusEl.textContent='✓ Score saved to leaderboard';
+        else if(_submitOk===false)statusEl.textContent='Leaderboard save failed.';
       }
     }).catch(()=>{if(statusEl)statusEl.textContent='';});
   } else if(TF!=='all'&&statusEl){
     statusEl.textContent='Leaderboard available for All Time only';
   }
 
-  $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
+  $('#dlBtn').addEventListener('click',async()=>{const b=await roleRevealBlob();if(b)downloadBlob(b,'vrchat-role.png');});
   $('#xBtn').addEventListener('click',async()=>{
-    const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');
+    const b=await roleRevealBlob();if(b)downloadBlob(b,'vrchat-role.png');
     const txt=encodeURIComponent((cap?cap.value:captionText()));
     window.open('https://twitter.com/intent/tweet?text='+txt,'_blank','noopener');
   });
@@ -1701,8 +1702,8 @@ function wireCard(){
   if(navigator.canShare){
     const sb=$('#shareBtn');sb.style.display='';
     sb.addEventListener('click',async()=>{
-      const b=await cardBlob();if(!b)return;
-      const file=new File([b],'vrchat-wrap.png',{type:'image/png'});
+      const b=await roleRevealBlob();if(!b)return;
+      const file=new File([b],'vrchat-role.png',{type:'image/png'});
       try{ if(navigator.canShare({files:[file]})) await navigator.share({files:[file],text:(cap?cap.value:captionText())});
         else await navigator.share({text:(cap?cap.value:captionText()),url:SITE}); }catch(e){}
     });
@@ -1717,6 +1718,14 @@ async function cardBlob(){
     el.style.transform=tf;
     return await new Promise(r=>cv.toBlob(r,'image/png'));
   }catch(e){el.style.transform=tf;return null;}
+}
+async function roleRevealBlob(){
+  const el=document.querySelector('.role-reveal');if(!el||!window.html2canvas)return null;
+  try{
+    const cv=await html2canvas(el,{backgroundColor:'#0B0D17',scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
+      onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
+    return await new Promise(r=>cv.toBlob(r,'image/png'));
+  }catch{return null;}
 }
 function downloadBlob(b,name){const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
 
@@ -1757,6 +1766,7 @@ async function handleFile(file){
     await loadThumbs(st);
     await new Promise(r=>setTimeout(r,400));
     buildAll(st,sadSt);enterDeck();
+    _submitOk=null;
     if(TF==='all')_rankPromise=fetchAndSubmitRanks(st,sadSt,ROLE_KEY);
     else _rankPromise=null;
   }catch(err){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(err.message||t('err_read'));}
