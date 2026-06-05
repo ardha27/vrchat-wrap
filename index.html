@@ -376,33 +376,27 @@ const SITE='https://ardha27.github.io/vrchat-wrap/';
 const KOFI='https://ko-fi.com/ardhach';
 // Deploy worker.js to Cloudflare and paste its URL here to enable live world thumbnails.
 // Leave empty to fall back to generated color avatars. e.g. 'https://vrcwrap.you.workers.dev'
-const WORLD_PROXY='';
-const SUPABASE_URL=''; // paste your Supabase project URL
-const SUPABASE_ANON_KEY=''; // paste your anon key (safe to expose)
-let ROLE_KEY=null; // set when card slide is built
+const WORLD_PROXY=''; // CF Worker URL — also used as leaderboard endpoint base
+let ROLE_KEY=null;
 
-// Supabase SQL Editor:
-// create table leaderboard (
-//   id uuid default gen_random_uuid() primary key,
-//   username text not null,
-//   username_lower text generated always as (lower(username)) stored,
-//   hours numeric not null default 0,
-//   worlds integer not null default 0,
-//   people_met integer not null default 0,
-//   friends_added integer not null default 0,
-//   solo_pct integer not null default 0,
-//   one_time_people integer not null default 0,
-//   unfriended integer not null default 0,
-//   empty_hours numeric not null default 0,
-//   role_code text default '',
-//   role_name text default '',
-//   submitted_at timestamptz default now()
-// );
-// create unique index lb_uname_idx on leaderboard(username_lower);
-// alter table leaderboard enable row level security;
-// create policy "public read" on leaderboard for select using (true);
-// create policy "public insert" on leaderboard for insert with check (true);
-// create policy "public update" on leaderboard for update using (true) with check (true);
+// ── Submission signing ─────────────────────────────────────────────────────
+// The key below is XOR-obfuscated. The Worker holds the plain key as
+// SUBMIT_SECRET env var. Run `node keygen.js` to generate your own pair.
+// This adds friction against automated abuse — not a cryptographic guarantee.
+const _KA=[/* REPLACE: output of keygen.js _KA */];
+const _KB=[/* REPLACE: output of keygen.js _KB */];
+function _lk(){return new Uint8Array(_KA.map((b,i)=>b^_KB[i%_KB.length]));}
+
+async function lbSign(data){
+  if(!_KA.length)return'';
+  try{
+    const key=await crypto.subtle.importKey('raw',_lk(),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const canonical=JSON.stringify(Object.keys(data).sort().reduce((o,k)=>{o[k]=data[k];return o;},{}));
+    const sig=await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(canonical));
+    return btoa(String.fromCharCode(...new Uint8Array(sig)));
+  }catch{return'';}
+}
+// ──────────────────────────────────────────────────────────────────────────
 
 const LB_CATS=[
   {id:'hours',   label:'Time Lords',     col:'hours',          unit:'hrs',        good:true,
@@ -423,40 +417,44 @@ const LB_CATS=[
    desc:'Total hours logged in sessions where no one else appeared — not a single join event. Measures the raw volume of time spent in complete solitude, not just the proportion.'},
 ];
 
-async function sbFetch(path,method='GET',body=null,extra={}){
-  if(!SUPABASE_URL||!SUPABASE_ANON_KEY)return null;
-  const h={'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json',...(extra.headers||{})};
-  try{const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method,headers:h,body:body?JSON.stringify(body):null});
-    if(!r.ok)return null;
-    if(r.status===204)return{};
-    return{data:await r.json(),headers:r.headers};}
-  catch(e){return null;}
-}
+function _lbBase(){return WORLD_PROXY.replace(/\/$/,'');}
 
 async function lbSubmit(username,st,sadSt,roleKey){
-  if(!SUPABASE_URL||!SUPABASE_ANON_KEY||!username)return null;
+  if(!WORLD_PROXY||!username)return null;
   const role=ROLES[roleKey]||{};
   const sad=sadSt||{};
-  const row={username,username_lower:username.toLowerCase(),
-    hours:Math.round(st.hours),worlds:st.uniqueWorlds,people_met:st.peopleMet,
-    friends_added:st.friendsAdded,solo_pct:sad.soloPct||0,
-    one_time_people:sad.oneTimePeople||0,unfriended:sad.unfriended||0,
-    empty_hours:Math.round((sad.emptyHours||0)*10)/10,
+  const data={username,hours:Math.round(st.hours),worlds:st.uniqueWorlds,
+    people_met:st.peopleMet,friends_added:st.friendsAdded,
+    solo_pct:sad.soloPct||0,one_time_people:sad.oneTimePeople||0,
+    unfriended:sad.unfriended||0,empty_hours:Math.round((sad.emptyHours||0)*10)/10,
     role_code:role.code||'',role_name:role.name||''};
-  return sbFetch('leaderboard?on_conflict=username_lower','POST',row,{headers:{'Prefer':'resolution=merge-duplicates,return=representation'}});
+  const sig=await lbSign(data);
+  try{
+    const r=await fetch(_lbBase()+'/lb/submit',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...data,sig})});
+    if(!r.ok)return null;
+    return r.json();
+  }catch{return null;}
 }
 
 async function lbTop100(col){
-  return sbFetch(`leaderboard?select=username,role_code,role_name,${col}&order=${col}.desc&limit=100`);
+  if(!WORLD_PROXY)return null;
+  try{
+    const r=await fetch(_lbBase()+'/lb/top?col='+encodeURIComponent(col));
+    if(!r.ok)return null;
+    return r.json();
+  }catch{return null;}
 }
 
 async function lbMyRank(col,myVal){
-  const r=await sbFetch(`leaderboard?select=${col}&${col}=gt.${myVal}`,
-    'GET',null,{headers:{'Prefer':'count=exact','Range':'0-0'}});
-  if(!r)return null;
-  const cr=r.headers&&r.headers.get('Content-Range');
-  const cnt=cr?parseInt(cr.split('/')[1]||'0'):0;
-  return isNaN(cnt)?null:cnt+1;
+  if(!WORLD_PROXY)return null;
+  try{
+    const r=await fetch(_lbBase()+'/lb/rank?col='+encodeURIComponent(col)+'&val='+encodeURIComponent(myVal));
+    if(!r.ok)return null;
+    const j=await r.json();
+    return j.rank??null;
+  }catch{return null;}
 }
 
 let LB_ACTIVE=0,LB_CACHE={};
@@ -472,11 +470,11 @@ async function loadLBTab(){
   // update category description
   const descEl=$('#lbCatDesc');
   if(descEl){descEl.innerHTML=`<b>${esc(cat.label)}</b> — ${esc(cat.desc)}`;}
-  if(!SUPABASE_URL||!SUPABASE_ANON_KEY){
+  if(!WORLD_PROXY){
     rows.innerHTML=`<div class="lb-empty" style="padding:32px 20px">
       <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 14px;display:block;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">Leaderboard not configured</div>
-      <div style="font-size:11px;line-height:1.6">Set up a free Supabase project and add<br><code style="color:var(--accent)">SUPABASE_URL</code> + <code style="color:var(--accent)">SUPABASE_ANON_KEY</code><br>in index.html to enable global rankings.</div>
+      <div style="font-size:11px;line-height:1.6">Set <code style="color:var(--accent)">WORLD_PROXY</code> to your Cloudflare Worker URL<br>and deploy worker.js to enable global rankings.</div>
     </div>`;
     const mr=$('#lbMyRank');if(mr)mr.style.display='none';
     return;
@@ -1466,7 +1464,7 @@ function wireCard(){
     if(TF!=='all'){lbSubBtn.style.display='none';}
     else{
       lbSubBtn.addEventListener('click',async()=>{
-        if(!SUPABASE_URL||!SUPABASE_ANON_KEY){alert('Leaderboard not configured (SUPABASE_URL missing).');return;}
+        if(!WORLD_PROXY){alert('Set WORLD_PROXY to your CF Worker URL to enable leaderboard.');return;}
         const name=CARD_NAME||'Anonymous';
         lbSubBtn.disabled=true;lbSubBtn.textContent='Submitting…';
         const result=await lbSubmit(name,S,window._SAD,ROLE_KEY);
@@ -1584,15 +1582,13 @@ $('#lbModal').addEventListener('click',e=>{if(e.target===$('#lbModal'))$('#lbMod
 
 // Fetch leaderboard player count and show on home screen
 (async function fetchLbCount(){
-  if(!SUPABASE_URL||!SUPABASE_ANON_KEY)return;
+  if(!WORLD_PROXY)return;
   try{
-    const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/leaderboard?select=id',{
-      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'count=exact','Range':'0-0'}
-    });
+    const r=await fetch(WORLD_PROXY.replace(/\/$/,'')+'/lb/count');
     if(!r.ok)return;
-    const cr=r.headers.get('Content-Range');
-    const total=cr?parseInt(cr.split('/')[1]):0;
-    if(!isNaN(total)&&total>0){
+    const j=await r.json();
+    const total=j.count||0;
+    if(total>0){
       const el=$('#lbCount');
       if(el){el.style.display='';el.innerHTML=`<span style="color:var(--accent);font-weight:700">${total.toLocaleString('en-US')}</span> players worldwide on the leaderboard`;}
     }
