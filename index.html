@@ -1010,29 +1010,48 @@ function assignRole(st, sadSt){
   const h=st.hours;
   const uniqueW=st.uniqueWorlds;
   const topWV=(st.topWorlds&&st.topWorlds[0]?st.topWorlds[0].v:0)/sessions;
+  const peopleMet=st.peopleMet;
+  const activeDays=Math.max(1,st.activeDays);
+  // sad stats — only reference what analyzeSad currently returns
   const soloPct=sad.soloPct||0;
   const unfriended=sad.unfriended||0;
   const amSessions=sad.amSessions||0;
   const avatarChanges=sad.avatarChanges||0;
-  const shortS=sad.shortSessions||0;
   const oneTime=sad.oneTimePeople||0;
-  const friendNet=sad.friendNet||0;
-  const peopleMet=st.peopleMet;
-  const activeDays=Math.max(1,st.activeDays);
-  // special overrides (most extreme conditions first)
-  if(h>1000&&peopleMet>800)return'LEGEND';
-  if(amSessions>40&&h>200)return'SLEEPLESS_ARCHITECT';
-  if(avatarChanges>0&&avatarChanges/sessions>0.5)return'SHAPESHIFTER';
-  if(unfriended>15&&friendNet<-10)return'BURNING_BRIDGE';
-  if(shortS/sessions>0.4&&sessions>50)return'SPEEDRUNNER';
-  if(oneTime/Math.max(1,peopleMet)>0.8&&peopleMet>50)return'PHANTOM';
-  // 4-axis system
-  const axisE=uniqueW/sessions>0.4; // Explorer vs Inhabitant
-  const axisS=(peopleMet/sessions>1.5)&&soloPct<55; // Social vs Lone
-  const axisN=st.nightPct>50; // Night vs Day
-  const axisB=h/activeDays>5; // Binge vs Regular
+  const abandonedW=sad.abandonedWorlds||0;
+  const longestSession=sad.longestSession||0;   // hrs, from MARATHON slide
+  const longestGap=sad.longestGap||0;           // days, from ABSENT slide
+  const longestStreak=sad.longestStreak||0;     // days, from STREAK slide
+  const emptyHours=sad.emptyHours||0;           // hrs, from THE VOID slide
+  // derived ratios
+  const idRate=avatarChanges/sessions;
+  const phantomRate=oneTime/Math.max(1,peopleMet);
+  const explorerRate=uniqueW/sessions;
+  const bingeScore=h/activeDays;
+  const sparseScore=(sad.activitySpan||1)/activeDays;
+  // ── special overrides (most specific first) ──────────────────────────
+  if(h>1000&&peopleMet>800) return'LEGEND';
+  if(amSessions>40&&h>200) return'SLEEPLESS_ARCHITECT';
+  // identity flux: changes avatar more than once every 2 sessions on average
+  if(idRate>0.5&&avatarChanges>20) return'SHAPESHIFTER';
+  // burned bridges: high unfriend count regardless of net (friendNet no longer tracked)
+  if(unfriended>20) return'BURNING_BRIDGE';
+  // speedrunner: longest session ever < 1 hr with many sessions = never commits
+  if(longestSession<1&&sessions>60&&h<80) return'SPEEDRUNNER';
+  // phantom: vast majority of encounters were one-time only
+  if(phantomRate>0.8&&peopleMet>50) return'PHANTOM';
+  // ── 4-axis system ────────────────────────────────────────────────────
+  // E/I — Explorer vs Inhabitant: diverse world spread vs concentrated
+  const axisE=explorerRate>0.4;
+  // S/L — Social vs Lone: active social sessions + low solo %, weighted by emptyHours
+  const emptyRatio=h>0?emptyHours/h:0;
+  const axisS=(peopleMet/sessions>1.5)&&soloPct<50&&emptyRatio<0.6;
+  // N/D — Night vs Day: majority of sessions after midnight
+  const axisN=st.nightPct>50;
+  // B/R — Binge vs Regular: high hours per active day OR a marathon session ever
+  const axisB=bingeScore>5||longestSession>8;
   const code=(axisE?'E':'I')+(axisS?'S':'L')+(axisN?'N':'D')+(axisB?'B':'R');
-  return code; // maps to one of the 16 base types
+  return code;
 }
 
 function roleAxesHTML(st, sadSt, roleKey){
@@ -1045,11 +1064,28 @@ function roleAxesHTML(st, sadSt, roleKey){
   const axisS=role.code[1]==='S';
   const axisN=role.code[2]==='N';
   const axisB=role.code[3]==='B';
+  const emptyPct=st.hours>0?Math.round((sad.emptyHours||0)/st.hours*100):0;
   return `<div class="rr-axes">
-    <div class="rr-axis"><div class="ax-label">World Style</div><div class="ax-val">${axisE?'E':'I'} — ${axisE?'Explorer':'Inhabitant'}</div><div class="ax-sub">${fmt(st.uniqueWorlds)} worlds / ${fmt(sessions)} sessions</div></div>
-    <div class="rr-axis"><div class="ax-label">Social Mode</div><div class="ax-val">${axisS?'S':'L'} — ${axisS?'Social':'Lone'}</div><div class="ax-sub">${sad.soloPct||0}% of days solo</div></div>
-    <div class="rr-axis"><div class="ax-label">Active Hours</div><div class="ax-val">${axisN?'N':'D'} — ${axisN?'Night':'Day'}</div><div class="ax-sub">${st.nightPct}% sessions post-midnight</div></div>
-    <div class="rr-axis"><div class="ax-label">Session Style</div><div class="ax-val">${axisB?'B':'R'} — ${axisB?'Binge':'Regular'}</div><div class="ax-sub">${fmt1(st.hours/activeDays)} hrs/active day</div></div>
+    <div class="rr-axis">
+      <div class="ax-label">World Style</div>
+      <div class="ax-val">${axisE?'E':'I'} — ${axisE?'Explorer':'Inhabitant'}</div>
+      <div class="ax-sub">${fmt(st.uniqueWorlds)} worlds across ${fmt(sessions)} sessions</div>
+    </div>
+    <div class="rr-axis">
+      <div class="ax-label">Social Mode</div>
+      <div class="ax-val">${axisS?'S':'L'} — ${axisS?'Social':'Lone'}</div>
+      <div class="ax-sub">${sad.soloPct||0}% solo days · ${emptyPct}% of hours alone</div>
+    </div>
+    <div class="rr-axis">
+      <div class="ax-label">Active Hours</div>
+      <div class="ax-val">${axisN?'N':'D'} — ${axisN?'Night':'Day'}</div>
+      <div class="ax-sub">${st.nightPct}% of sessions after midnight</div>
+    </div>
+    <div class="rr-axis">
+      <div class="ax-label">Session Style</div>
+      <div class="ax-val">${axisB?'B':'R'} — ${axisB?'Binge':'Regular'}</div>
+      <div class="ax-sub">${fmt1(st.hours/activeDays)} hrs/day · longest ${fmt1(sad.longestSession||0)}h</div>
+    </div>
   </div>`;
 }
 
