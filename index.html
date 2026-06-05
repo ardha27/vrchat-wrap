@@ -209,7 +209,7 @@
   .rr-tag{font-size:clamp(14px,3.5vw,18px);font-weight:700;color:var(--ink);line-height:1.2}
   .rr-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-top:10px}
   .rr-axes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .rr-axis{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+  .rr-axis{border:1px solid var(--line);border-radius:12px;padding:10px 12px 13px;background:rgba(255,255,255,.025);position:relative;overflow:hidden}
   .rr-axis .ax-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
   .rr-axis .ax-val{font-family:'Anton';font-size:16px;color:var(--accent)}
   .rr-axis .ax-sub{font-size:11px;color:var(--muted);margin-top:2px}
@@ -1238,7 +1238,7 @@ function roleAxesHTML(st, sadSt, roleKey){
   const bar=(score,isHigh)=>{
     const p=pct(score);
     const col=isHigh?'var(--accent)':'var(--muted)';
-    return `<div style="height:3px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${p}%;background:${col};border-radius:3px;transition:width .6s"></div></div>`;
+    return `<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);overflow:hidden"><div style="height:100%;width:${p}%;background:${col};transition:width .6s"></div></div>`;
   };
   return `<div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;margin-top:14px">VRC16 · E/I S/L N/D B/R</div>
   <div class="rr-axes">
