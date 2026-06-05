@@ -1,6 +1,6 @@
 # VRChat Wrap
 
-Your year in VR, replayed. Drop your VRCX database and get a personal year-in-review of every world, friend, and late-night session, styled after Discord's Checkpoint.
+Your VRChat history, turned into a slide deck. Drop your VRCX database and get a personal recap of every world, session, and person you crossed paths with — last 30 days, last year, or all time.
 
 Everything runs in your browser. Your data never gets uploaded.
 
@@ -9,29 +9,41 @@ Everything runs in your browser. Your data never gets uploaded.
 1. Open the site.
 2. Find your VRCX database (`%AppData%\VRCX\VRCX.sqlite3` on Windows).
 3. Drag it onto the page, or click to browse.
-4. Swipe / arrow-key through your year.
+4. Pick a time window: last 30 days, last 12 months, or all time.
+5. Swipe / arrow-key through the slides.
 
 No account, no upload, no server. The file is read locally with sql.js (SQLite compiled to WebAssembly) and never leaves the tab. Don't have VRCX? Hit **View demo with sample data**.
 
 ## What you get
 
-Pick a window first — last 30 days, last 12 months, or all time — then walk ten slides pulled straight from your own logs:
+A series of slides pulled from your own logs:
 
 - Hours spent in-world
 - Unique worlds visited
-- The world you kept coming back to (click it to open in VRChat)
+- The world you kept coming back to (click to open in VRChat)
 - People you crossed paths with
 - Your squad: who you spent the most time with (each links to their VRChat profile)
 - Friends added
-- When you're actually online (night-owl clock)
-- Your busiest month
-- A holographic trading card you can download and share to X
+- When you're actually online — peak hour clock, night counted as 9 PM–6 AM
+- Your busiest month (all-time mode shows the year too)
+- Your VRC16 personality type — a 4-letter result based on your actual play patterns
 
-The final card has a name field, an auto-filled caption with the site link and hashtags, a download button, and Share on X (plus native share on mobile).
+The personality card shows your name, time range, type code, and the scores behind each axis. Download as JPG or share directly to X.
+
+### VRC16 personality types
+
+At the end you get a 4-letter play personality. Not a quiz — it comes from your data:
+
+- **E / I** — Explorer vs Inhabitant: do you constantly try new worlds, or return to the same ones?
+- **S / L** — Social vs Lone: do you fill sessions with people, or prefer quieter worlds?
+- **N / D** — Night vs Day: do most of your sessions happen after 9 PM?
+- **B / R** — Binge vs Regular: long marathon sessions, or consistent shorter plays?
+
+16 base types, plus 6 special overrides for edge cases (Night Wanderer, World Veteran, Metaverse Explorer, and others). Each axis is scored from several weighted ratios, not a single hard cutoff.
 
 ### Languages
 
-English, Indonesian, Japanese, Korean, Chinese, Spanish, and French. It picks your browser language by default and remembers your choice.
+English, Indonesian, Japanese, Korean, Chinese, Spanish, and French. Picks your browser language by default and remembers your choice.
 
 ### Live world thumbnails (optional)
 
@@ -42,9 +54,9 @@ World thumbnails are disabled by default because the VRChat API doesn't send COR
 3. Copy your worker URL (e.g. `https://vrcwrap.<you>.workers.dev`).
 4. Open `index.html`, find `const WORLD_PROXY=''`, and paste the URL inside the quotes.
 
-The worker is minimal — it validates the world id, fetches the API server-side (where CORS doesn't apply), and returns only the thumbnail fields. World ids are not logged or stored.
+The worker validates the world id, fetches the API server-side (where CORS doesn't apply), and returns only the thumbnail fields. World ids are not logged or stored.
 
-Friend profile pictures still aren't available — the user API requires a VRChat login and returns 401 without one. Squad members and world ranks without images fall back to their gradient avatars.
+Friend profile pictures still aren't available — the user API requires a VRChat login and returns 401 without one. Squad members without images fall back to gradient avatars.
 
 ## Run locally
 
@@ -71,7 +83,7 @@ Then enable Pages in repo settings → Source: `main` / root. sql.js loads over 
 
 ## Where the numbers come from
 
-Reads these VRCX tables, filtered to the detected year:
+Reads these VRCX tables, filtered to the selected time window:
 
 | Table | Used for |
 |-------|----------|
@@ -85,6 +97,7 @@ Each stat is computed defensively — a missing table or odd schema won't crash 
 
 - One `index.html` — no build step
 - [sql.js](https://github.com/sql-js/sql.js) for reading SQLite in the browser
+- [html2canvas-pro](https://github.com/niklasvh/html2canvas) for card capture (supports `color-mix()` and `oklch`)
 - Fonts: Anton, Space Mono, Outfit
 - Canvas particles + CSS for the rest
 
