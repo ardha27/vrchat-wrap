@@ -36,6 +36,7 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   .stage{position:relative;z-index:2;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:max(env(safe-area-inset-top),64px) 18px max(env(safe-area-inset-bottom),32px)}
   body.deck-mode .stage{height:100dvh;min-height:unset;overflow:hidden}
+  body.deck-mode .card{height:clamp(380px,70vh,560px);min-height:unset}
 
   .brand{position:fixed;top:max(env(safe-area-inset-top),14px);left:16px;z-index:6;display:flex;align-items:center;gap:10px;text-decoration:none}
   .brand .mk{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.25);transition:.5s;flex:none;color:#06120a}
@@ -120,7 +121,11 @@
   .card-top .ct-sep{margin:0 7px;opacity:.2}
   .card-top .ct-num{font-size:11px}
   @media(max-width:420px){.card-top .ct-date{display:none}.card-top .ct-sep{display:none}}
-  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  .card-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 26px 14px;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+  .card-body::-webkit-scrollbar{width:4px}
+  .card-body::-webkit-scrollbar-track{background:transparent}
+  .card-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+  .card-body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.28)}
   .card{touch-action:pan-y}
   /* layout variants */
   .card.lv-billboard .bignum{font-size:clamp(100px,28vw,190px);line-height:.78;letter-spacing:-.02em}
@@ -256,7 +261,11 @@
   /* welcome modal */
   .wm-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
   .wm-modal.hidden{display:none}
-  .wm-inner{width:min(520px,100%);max-height:90dvh;background:linear-gradient(180deg,rgba(18,18,32,.98),rgba(8,8,18,.98));border:1px solid var(--line);border-radius:24px;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:18px}
+  .wm-inner{width:min(520px,100%);max-height:90dvh;background:linear-gradient(180deg,rgba(18,18,32,.98),rgba(8,8,18,.98));border:1px solid var(--line);border-radius:24px;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+  .wm-inner::-webkit-scrollbar{width:4px}
+  .wm-inner::-webkit-scrollbar-track{background:transparent}
+  .wm-inner::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+  .wm-inner::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.28)}
   .wm-logo{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.1em;color:var(--accent)}
   .wm-section h3{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
   .wm-section p,.wm-section li{font-size:13px;line-height:1.7;color:rgba(255,255,255,.75)}
@@ -269,8 +278,12 @@
   .wm-divider{border:none;border-top:1px solid var(--line);margin:0}
   .wm-ok{width:100%;padding:13px;border-radius:13px;background:var(--accent);color:#06120a;font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.1em;border:none;cursor:pointer;transition:.2s}
   .wm-ok:hover{opacity:.88}
-  .lb-rows{overflow-y:auto;flex:1;padding:0 6px 12px}
-  .lb-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;transition:.2s}
+  .lb-rows{overflow-y:auto;flex:1;padding:0 8px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+  .lb-rows::-webkit-scrollbar{width:4px}
+  .lb-rows::-webkit-scrollbar-track{background:transparent}
+  .lb-rows::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+  .lb-rows::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.28)}
+  .lb-row{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;transition:.2s}
   .lb-row:hover{background:rgba(255,255,255,.03)}
   .lb-row.me{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
   .lb-rank{font-family:'Anton';font-size:16px;color:var(--muted);text-align:center}
@@ -327,7 +340,7 @@
 <div class="stage">
   <section class="screen on" id="intake">
     <div class="eyebrow rv">Checkpoint · <span class="curYear"></span></div>
-    <h1 class="hero-title rv">VRChat<br>Wrap</h1>
+    <h1 class="hero-title rv">VRChat Wrap</h1>
     <p class="hero-sub rv" data-i="sub"></p>
     <div class="tf rv">
       <div class="tf-label" data-i="tf_label"></div>
@@ -396,6 +409,18 @@
       <div class="wm-path">Windows: %APPDATA%\VRCX\VRCX.sqlite3</div>
       <div class="wm-path" style="margin-top:6px">Mac / Linux: ~/.local/share/VRCX/VRCX.sqlite3</div>
       <p style="margin-top:10px;font-size:12px;color:var(--muted)">The file is read entirely in your browser — it is never uploaded to any server.</p>
+    </div>
+    <hr class="wm-divider"/>
+    <div class="wm-section">
+      <h3>VRC16 — your play personality</h3>
+      <p>At the end, you'll receive a 4-letter type based on your actual play patterns:</p>
+      <ul>
+        <li><b>E / I</b> — <b>Explorer</b> vs <b>Inhabitant</b>: do you constantly try new worlds, or return to familiar places?</li>
+        <li><b>S / L</b> — <b>Social</b> vs <b>Lone</b>: do you fill sessions with people, or prefer empty worlds?</li>
+        <li><b>N / D</b> — <b>Night</b> vs <b>Day</b>: do most sessions happen after midnight?</li>
+        <li><b>B / R</b> — <b>Binge</b> vs <b>Regular</b>: long marathon sessions, or consistent shorter plays?</li>
+      </ul>
+      <p style="font-size:12px;color:var(--muted)">Each axis is scored from multiple weighted ratios — not a single hard cutoff. Six special types can also override the base 16.</p>
     </div>
     <hr class="wm-divider"/>
     <div class="wm-section">
@@ -515,6 +540,7 @@ async function openLB(){
   tabs.addEventListener('mouseleave',()=>{isDown=false;tabs.style.cursor='';});
   tabs.addEventListener('mouseup',()=>{isDown=false;tabs.style.cursor='';});
   tabs.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-tabs.offsetLeft;tabs.scrollLeft=scrollLeft-(x-startX)*1.5;});
+  tabs.addEventListener('wheel',e=>{e.preventDefault();tabs.scrollLeft+=e.deltaY||e.deltaX;},{passive:false});
   loadLBTab();
 }
 async function loadLBTab(){
@@ -587,7 +613,7 @@ function monthName(l,i){ if(l==='ja'||l==='zh') return (i+1)+'月'; if(l==='ko')
 
 const I18N={
  en:{native:'English',restart:'Restart',
-  sub:'A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, friend, and late-night session.',
+  sub:'Your VRChat journey, replayed. Drop your <b>VRCX database</b> and relive every world, friend, and late-night session.',
   tf_label:'Pick your window',tf_month:'last 30 days',tf_year:'last 12 months',tf_all:'everything',tf_month_v:'1 Month',tf_year_v:'1 Year',tf_all_v:'All Time',
   drop_title:'Drop your VRCX database here',drop_hint:'or click to browse — the file never leaves your browser',
   or:'or',demo:'View demo with sample data',privacy:'VRCX file never leaves your browser · leaderboard is <b>opt-in</b>',
@@ -628,7 +654,7 @@ const I18N={
   sha_tag:'Dedication',sha_kick:'Days you actually showed up',sha_unit:'active days out of {total}',sha_lede:'You were present on <b>{n}</b> different days — <b>{pct}%</b> of the window. Consistency is its own kind of showing up.'},
 
  id:{native:'Indonesia',restart:'Ulangi',
-  sub:'Satu tahun di dalam metaverse, diputar ulang. Taruh <b>database VRCX</b> kamu dan kenang lagi tiap world, teman, dan sesi tengah malam.',
+  sub:'Perjalanan VRChat kamu, diputar ulang. Taruh <b>database VRCX</b> kamu dan kenang lagi tiap world, teman, dan sesi tengah malam.',
   tf_label:'Pilih rentang waktu',tf_month:'30 hari terakhir',tf_year:'12 bulan terakhir',tf_all:'semuanya',tf_month_v:'1 Bulan',tf_year_v:'1 Tahun',tf_all_v:'Semua',
   drop_title:'Taruh database VRCX kamu di sini',drop_hint:'atau klik untuk pilih file — file tidak pernah keluar dari browser',
   or:'atau',demo:'Lihat demo dengan data contoh',privacy:'File VRCX tidak keluar dari browser · leaderboard bersifat <b>opsional</b>',
@@ -906,8 +932,12 @@ function demoStats(range){
     year:{s:1287,w:342,h:1645,d:228,p:3914,e:14820,fa:127,sq:[['Nyx',412],['Kuma_VR',388],['Pixel',301],['Aurora',264],['Volt',198]],tw:[['The Black Cat',142],['Murder 4',97],['Prismic Lounge',73],['Movie & Chill',58],['Just Hangout',44]]},
     all:{s:3120,w:760,h:4210,d:540,p:8800,e:36500,fa:640,sq:[['Nyx',980],['Kuma_VR',870],['Pixel',640],['Aurora',520],['Volt',410]],tw:[['The Black Cat',330],['Murder 4',210],['Prismic Lounge',180],['Movie & Chill',150],['Just Hangout',120]]}};
   const b=base[range]||base.year;
-  const now=new Date();const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
+  const now=new Date();
+  const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(now.getFullYear()-3,0,1);
   return {year:y,range,label:range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all'),
+    headPeriod:range==='month'?t('head_month'):range==='year'?String(y):t('head_all'),
+    cardKick:range==='all'?t('s10_kick_all'):t('s10_kick',{year:y}),
+    cardHeader:range==='all'?'ALL TIME':range==='month'?'30 DAYS':`CHECKPOINT ${y}`,
     startDate:dstart,endDate:now,sessions:b.s,uniqueWorlds:b.w,hours:b.h,activeDays:b.d,nightPct:61,
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
     months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,
@@ -917,7 +947,7 @@ function demoStats(range){
 
 function demoSadStats(range){
   const y=new Date().getFullYear();const now=new Date();
-  const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(0);
+  const dstart=range==='month'?new Date(now-30*864e5):range==='year'?new Date(now-365*864e5):new Date(now.getFullYear()-3,0,1);
   return{year:y,range,startDate:dstart,endDate:now,hasReal:true,demo:true,
     sessions:1287,unfriended:22,abandonedWorlds:393,oneTimePeople:824,amSessions:120,avatarChanges:136,
     soloPct:34,activitySpan:186,firstDate:fmtDate(dstart),lastDate:fmtDate(now),
@@ -1093,28 +1123,29 @@ function calcAxes(st,sadSt){
 
   // ── E/I: Explorer vs Inhabitant ──────────────────────────────────────
   // High: diverse spread, tries new places; Low: returns to same spots
-  const eScore=_norm(explorerRate,0.85)*0.45
-              +_norm(abandonedRate,0.75)*0.35
-              -_norm(topConcentration,0.5)*0.20;
+  // Ceiling 0.85: visiting new world 85% of sessions = extreme explorer
+  const eScore=_norm(explorerRate,0.85)*0.45   // unique worlds / sessions
+              +_norm(abandonedRate,0.75)*0.35   // % visited-once worlds
+              -_norm(topConcentration,0.5)*0.20; // dominance of favourite world
   // ── S/L: Social vs Lone ──────────────────────────────────────────────
-  // High: dense social play, makes friends; Low: solo, empty sessions
-  const sScore=_norm(peopleDensity,6)*0.45
-              +_norm(friendRate,0.35)*0.20
-              -soloPct*0.20
-              -emptyRatio*0.15;
+  // Ceiling 3: meeting 3 distinct people/session = very social in VRChat
+  const sScore=_norm(peopleDensity,3)*0.45     // people met per session
+              +_norm(friendRate,0.35)*0.20      // friends added per session
+              -soloPct*0.20                     // fraction of solo days
+              -emptyRatio*0.15;                 // fraction of hours alone
   // ── N/D: Night vs Day ────────────────────────────────────────────────
-  // High: midnight+ and dawn sessions dominate
-  const nScore=(st.nightPct/100)*0.75
-              +dawnRate*0.25;
+  // Threshold 0.35: playing 45%+ sessions after midnight → Night
+  const nScore=(st.nightPct/100)*0.75          // sessions after midnight
+              +dawnRate*0.25;                   // 4-7 AM sessions (stayed up)
   // ── B/R: Binge vs Regular ────────────────────────────────────────────
-  // High: long sessions, few days but heavy; Low: frequent short sessions
-  const bScore=_norm(bingeScore,8)*0.40
-              +_norm(avgSessionH,4)*0.40
-              +_norm(longestSession,12)*0.10
-              -streakRatio*0.10;
+  // Ceiling 8/4: 8 hrs/day or 4 hrs/session = extreme binger
+  const bScore=_norm(bingeScore,8)*0.40        // avg hours per active day
+              +_norm(avgSessionH,4)*0.40        // avg hours per session
+              +_norm(longestSession,12)*0.10    // ever had marathon session
+              -streakRatio*0.10;               // daily consistency → Regular
 
   return{eScore,sScore,nScore,bScore,
-    axisE:eScore>0.38,axisS:sScore>0.25,axisN:nScore>0.45,axisB:bScore>0.35};
+    axisE:eScore>0.38,axisS:sScore>0.25,axisN:nScore>0.35,axisB:bScore>0.35};
 }
 
 function assignRole(st, sadSt){
@@ -1170,6 +1201,7 @@ function roleAxesHTML(st, sadSt, roleKey){
     return `<div style="height:3px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${p}%;background:${col};border-radius:3px;transition:width .6s"></div></div>`;
   };
   return `<div class="rr-axes">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">VRC16 · E/I S/L N/D B/R</div>
     <div class="rr-axis">
       <div class="ax-label">World Style · <span style="color:var(--accent)">${pct(eScore)}%</span></div>
       <div class="ax-val">${axisE?'E':'I'} — ${axisE?'Explorer':'Inhabitant'}</div>
@@ -1684,7 +1716,7 @@ file.onchange=e=>handleFile(e.target.files[0]);
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
 drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
-$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);const sadSt=demoSadStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));buildAll(st,sadSt);enterDeck();_rankPromise=null;})();};
+$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats('all');const sadSt=demoSadStats('all');await loadThumbs(st);await new Promise(r=>setTimeout(r,500));buildAll(st,sadSt);enterDeck();_rankPromise=null;})();};
 
 $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
