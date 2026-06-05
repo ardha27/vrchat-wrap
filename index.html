@@ -70,9 +70,9 @@
   .nav:hover{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
   .nav.prev{left:14px}.nav.next{right:14px}
   @media(max-width:680px){.nav{display:none!important}}
-  .deck-dl-btn{position:fixed;bottom:max(env(safe-area-inset-bottom),16px);left:50%;transform:translateX(-50%);z-index:8;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(10,10,18,.55);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;transition:.25s}
-  .deck-dl-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
-  .deck-dl-btn.busy{opacity:.4;pointer-events:none}
+  .deck-dl-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;flex:none;padding:0}
+  .deck-dl-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .deck-dl-btn.busy{opacity:.35;pointer-events:none}
   .tapnav{position:fixed;inset:0;z-index:1}
 
   .screen{display:none;width:100%;max-width:720px}
@@ -1304,7 +1304,7 @@ function card(tag,page,bodyHTML,footL,layout=''){
   return `<div class="card${layout?' '+layout:''}">
     <div class="card-top"><span class="tag">◢ ${tag}</span><span class="ct-right"><span class="ct-date">${S?fmtDate(S.startDate)+' – '+fmtDate(S.endDate):''}</span><span class="ct-sep">|</span><span class="ct-num">${String(page).padStart(2,'0')} / ${SLIDES.length}</span></span></div>
     <div class="card-body"><div class="cb-inner">${bodyHTML}</div></div>
-    <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span class="pix">▦ ▥ ▤</span></div>
+    <div class="card-foot"><span>${footL||('VRCHAT WRAP · '+YR)}</span><span style="display:flex;align-items:center;gap:7px"><button class="deck-dl-btn" title="Download slide"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><span class="pix">▦ ▥ ▤</span></span></div>
   </div>`;}
 
 function buildSad(sadSt){
@@ -1451,7 +1451,7 @@ function appendCardSlide(st, sadSt){
         <div id="lbStatus" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-align:center;margin-top:4px"></div>
         <div class="rank-badges rv" id="rankBadges"></div>
       </div>
-      <div class="card-foot"><span>VRCHAT WRAP · ${st.range==='all'?t('tf_all_v'):st.year}</span><span class="pix">▦ ▥ ▤</span></div>
+      <div class="card-foot"><span>VRCHAT WRAP · ${st.range==='all'?t('tf_all_v'):st.year}</span><span style="display:flex;align-items:center;gap:7px"><button class="deck-dl-btn" title="Download slide"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><span class="pix">▦ ▥ ▤</span></span></div>
     </div>`);
 }
 function buildIntro(st){
@@ -1474,7 +1474,7 @@ function buildTransition(){
       <p class="lede rv slow" style="max-width:36ch;text-align:center;color:rgba(255,255,255,.6)">${t('str_lede')}</p>
       <div class="rv slow" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--magenta);opacity:.7;text-transform:uppercase">the other side of your year</div>
     </div>
-    <div class="card-foot" style="border-color:rgba(225,91,255,.2)"><span style="color:rgba(255,255,255,.3)">VRCHAT WRAP · ${YR}</span><span class="pix" style="color:var(--magenta);opacity:.5">▦ ▥ ▤</span></div>
+    <div class="card-foot" style="border-color:rgba(225,91,255,.2)"><span style="color:rgba(255,255,255,.3)">VRCHAT WRAP · ${YR}</span><span style="display:flex;align-items:center;gap:7px"><button class="deck-dl-btn" title="Download slide" style="border-color:rgba(225,91,255,.3);color:rgba(225,91,255,.5)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><span class="pix" style="color:var(--magenta);opacity:.5">▦ ▥ ▤</span></span></div>
   </div>`);
 }
 function buildAll(st, sadSt){
@@ -1611,11 +1611,6 @@ function showSlide(i){
   idx=Math.max(0,Math.min(SLIDES.length-1,i));
   setAccent(ACCENTS[idx]||'--green');
   $('#deck').innerHTML=`<section class="screen on">${SLIDES[idx]()}</section>`;
-  const _dlb=document.createElement('button');
-  _dlb.className='deck-dl-btn';_dlb.title='Download slide';
-  _dlb.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-  _dlb.addEventListener('click',async()=>{_dlb.classList.add('busy');const b=await deckBlob(_dlb);_dlb.classList.remove('busy');if(b)downloadBlob(b,'vrchat-wrap-slide.png');});
-  $('#deck').appendChild(_dlb);
   document.querySelectorAll('#progress .seg').forEach((s,k)=>{s.classList.toggle('done',k<idx);s.classList.toggle('active',k===idx);});
   if(idx===SLIDES.length-1)wireCard();
 }
@@ -1775,6 +1770,7 @@ function enterDeck(){
 }
 
 /* ---- nav: arrows, buttons, swipe (ignores inputs/buttons) ---- */
+document.addEventListener('click',async e=>{const btn=e.target.closest('.deck-dl-btn');if(!btn)return;e.stopPropagation();btn.classList.add('busy');const b=await deckBlob(btn);btn.classList.remove('busy');if(b)downloadBlob(b,'vrchat-wrap-slide.png');});
 $('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
 $('#restart').onclick=()=>location.reload();
 addEventListener('keydown',e=>{if(!SLIDES.length)return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
