@@ -203,6 +203,9 @@
   .tc-role{font-family:'Space Mono',monospace;font-size:clamp(7.5px,1.3vw,10px);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:3px;line-height:1.2}
   .tc-date{font-family:'Space Mono',monospace;font-size:clamp(8px,1.5vw,10px);letter-spacing:.1em;color:var(--muted);margin-top:3px}
   .role-reveal{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:20px;padding:20px 22px;background:color-mix(in srgb,var(--accent) 6%,rgba(10,10,20,.6));margin-top:12px;text-align:left}
+  .rr-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--accent) 18%,var(--line))}
+  .rr-player{font-family:'Anton';font-size:15px;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
+  .rr-period{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;opacity:.85}
   .rr-code{font-family:'Anton';font-size:32px;color:var(--accent);letter-spacing:.14em;line-height:1;filter:drop-shadow(0 0 16px color-mix(in srgb,var(--accent) 50%,transparent))}
   .rr-icon{color:var(--accent);line-height:0;margin-bottom:8px}
   .rr-name{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:6px 0 4px}
@@ -657,11 +660,11 @@ const I18N={
   s5_tag:'Social',s5_kick:'Different people you crossed paths with',s5_unit:'avatars met · {e} total encounters',s5_lede:'Behind every avatar was a person. You shared a space with <b>{n}</b> of them.',
   s6_tag:'Your squad',s6_kick:'The people you spent the most time with',s6_head:'Squad',s6_seen:'{n} seen',s6_empty:'Not enough join logs to name names, but they know who they are.',
   s7_tag:'New bonds',s7_kick:'Friends you added',s7_unit:'new friendships',s7_lede:'<b>{n}</b> people went from stranger to friend. The list keeps growing.',s7_lede0:'The real ones were already on the list. Quality over quantity.',
-  s8_tag:'Rhythm',s8_kick:"When you're really online",s8_owl:'Night<br><em>owl</em>',s8_peak:'Peak: <em>{t}</em>',s8_lede:'<b>{p}%</b> of your sessions started after midnight. Your prime time is <b>{t}</b>.',
+  s8_tag:'Rhythm',s8_kick:"When you're really online",s8_owl:'Night<br><em>owl</em>',s8_peak:'Peak: <em>{t}</em>',s8_lede:'<b>{p}%</b> of your sessions happened in night hours (9 PM–6 AM). Your prime time is <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
   s10_tag:'Collect',s10_kick:'Your {year} VRChat card',s10_kick_all:'Your all-time VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
-  dl:'Download role card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
+  dl:'Download role card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',x_attach_hint:'Image saved — attach it to your tweet!',
   dl_hint:'saves your personality result · PNG',
   home_glo:'Role glossary',home_lb:'Leaderboard',
   outro:'Screenshot it. Share it. See you next time.',
@@ -698,11 +701,11 @@ const I18N={
   s5_tag:'Sosial',s5_kick:'Orang berbeda yang kamu temui',s5_unit:'avatar ditemui · {e} total pertemuan',s5_lede:'Di balik tiap avatar ada manusia. Kamu berbagi ruang dengan <b>{n}</b> di antaranya.',
   s6_tag:'Squad kamu',s6_kick:'Orang yang paling sering bareng kamu',s6_head:'Squad',s6_seen:'{n} kali',s6_empty:'Log join belum cukup buat sebut nama, tapi mereka tahu siapa mereka.',
   s7_tag:'Ikatan baru',s7_kick:'Teman yang kamu tambah',s7_unit:'pertemanan baru',s7_lede:'<b>{n}</b> orang berubah dari asing jadi teman. Daftarnya terus bertambah.',s7_lede0:'Yang sejati sudah ada di daftar. Kualitas di atas kuantitas.',
-  s8_tag:'Ritme',s8_kick:'Kapan kamu benar-benar online',s8_owl:'Burung<br><em>malam</em>',s8_peak:'Puncak: <em>{t}</em>',s8_lede:'<b>{p}%</b> sesimu mulai setelah tengah malam. Waktu emasmu jam <b>{t}</b>.',
+  s8_tag:'Ritme',s8_kick:'Kapan kamu benar-benar online',s8_owl:'Burung<br><em>malam</em>',s8_peak:'Puncak: <em>{t}</em>',s8_lede:'<b>{p}%</b> sesimu terjadi di jam malam (21.00–06.00). Waktu emasmu jam <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
   s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',s10_kick_all:'Kartu VRChat all-time kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
-  dl:'Unduh role card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
+  dl:'Unduh role card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',x_attach_hint:'Gambar tersimpan — lampirkan ke tweet kamu!',
   dl_hint:'menyimpan hasil kepribadianmu · PNG',
   home_glo:'Glosarium role',home_lb:'Leaderboard',
   outro:'Screenshot. Bagikan. Sampai jumpa lagi.',
@@ -739,11 +742,11 @@ const I18N={
   s5_tag:'ソーシャル',s5_kick:'すれ違った人の数',s5_unit:'人と遭遇 · 合計{e}回',s5_lede:'どのアバターの裏にも人がいた。<b>{n}</b>人と空間を共にした。',
   s6_tag:'あなたの仲間',s6_kick:'一番一緒に過ごした人たち',s6_head:'仲間',s6_seen:'{n}回',s6_empty:'名前を挙げるにはログが足りないけど、彼らは分かっている。',
   s7_tag:'新しい絆',s7_kick:'追加したフレンド',s7_unit:'人の新しいフレンド',s7_lede:'<b>{n}</b>人が他人からフレンドになった。リストは増え続ける。',s7_lede0:'本物はもうリストにいた。量より質。',
-  s8_tag:'リズム',s8_kick:'本当にオンラインな時間',s8_owl:'夜<br><em>ふくろう</em>',s8_peak:'ピーク: <em>{t}</em>',s8_lede:'セッションの<b>{p}%</b>が深夜0時以降に開始。ゴールデンタイムは<b>{t}</b>。',
+  s8_tag:'リズム',s8_kick:'本当にオンラインな時間',s8_owl:'夜<br><em>ふくろう</em>',s8_peak:'ピーク: <em>{t}</em>',s8_lede:'セッションの<b>{p}%</b>が夜間（21時〜6時）に実施。ゴールデンタイムは<b>{t}</b>。',
   s9_tag:'勢い',s9_kick:'最も忙しかった月',s9_lede:'その月に一番現れた。何かが引き戻し続けた。',m_month_v:'その月の訪問',m_month_avg:'月平均',
   s10_tag:'コレクト',s10_kick:'あなたの{year}年VRChatカード',role_night:'夜の放浪者',role_vet:'ワールド老兵',role_expl:'メタバース探検家',
   tc_hours:'時間',tc_worlds:'ワールド',tc_met:'遭遇',tc_friends:'フレンド',tc_visits:'訪問',tc_days:'日間',tc_topw:'トップワールド',tc_squad:'トップ仲間',tc_foot:'VRCHAT WRAP · データはこの端末から出ていません',
-  dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',
+  dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',x_attach_hint:'画像を保存しました — ツイートに添付してね！',
   outro:'スクショして、シェアして、また会おう。',
   caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:',
   s_unfriended:'失った友達',s_unit_unf:'人のフレンド解除',s_lede_unf:'誰かがあなたの人生に入るたびに、誰かが去っていった。',
@@ -772,11 +775,11 @@ const I18N={
   s5_tag:'소셜',s5_kick:'마주친 다른 사람들',s5_unit:'명과 만남 · 총 {e}회',s5_lede:'모든 아바타 뒤에 사람이 있었죠. <b>{n}</b>명과 공간을 나눴습니다.',
   s6_tag:'당신의 스쿼드',s6_kick:'가장 많은 시간을 함께한 사람들',s6_head:'스쿼드',s6_seen:'{n}회',s6_empty:'이름을 부르기엔 로그가 부족하지만, 그들은 압니다.',
   s7_tag:'새로운 인연',s7_kick:'추가한 친구',s7_unit:'명의 새 친구',s7_lede:'<b>{n}</b>명이 남에서 친구가 되었습니다. 목록은 계속 늘어납니다.',s7_lede0:'진짜는 이미 목록에 있었죠. 양보다 질.',
-  s8_tag:'리듬',s8_kick:'진짜 접속하는 시간',s8_owl:'야행성<br><em>올빼미</em>',s8_peak:'피크: <em>{t}</em>',s8_lede:'세션의 <b>{p}%</b>가 자정 이후 시작. 황금 시간대는 <b>{t}</b>.',
+  s8_tag:'리듬',s8_kick:'진짜 접속하는 시간',s8_owl:'야행성<br><em>올빼미</em>',s8_peak:'피크: <em>{t}</em>',s8_lede:'세션의 <b>{p}%</b>가 심야 시간대(오후 9시~오전 6시)에 진행. 황금 시간대는 <b>{t}</b>.',
   s9_tag:'모멘텀',s9_kick:'가장 바빴던 달',s9_lede:'그달에 가장 많이 나타났죠. 무언가가 계속 당신을 끌어당겼습니다.',m_month_v:'그달 방문',m_month_avg:'월 평균',
   s10_tag:'컬렉트',s10_kick:'당신의 {year} VRChat 카드',role_night:'밤의 방랑자',role_vet:'월드 베테랑',role_expl:'메타버스 탐험가',
   tc_hours:'시간',tc_worlds:'월드',tc_met:'만남',tc_friends:'친구',tc_visits:'방문',tc_days:'일',tc_topw:'인기 월드',tc_squad:'인기 스쿼드',tc_foot:'VRCHAT WRAP · 데이터는 이 기기를 떠나지 않았습니다',
-  dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',
+  dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',x_attach_hint:'이미지 저장됨 — 트윗에 첨부하세요!',
   outro:'스크린샷하고, 공유하고, 다음에 또 만나요.',
   caption:'내 VRChat Wrap — {h}시간, 월드 {w}곳, {p}명과 만남. 당신도 만들어보세요:'},
 
@@ -795,11 +798,11 @@ const I18N={
   s5_tag:'社交',s5_kick:'你遇见的不同的人',s5_unit:'个化身相遇 · 共{e}次',s5_lede:'每个化身背后都有一个人。你与其中<b>{n}</b>位共享了空间。',
   s6_tag:'你的小队',s6_kick:'你花时间最多的人',s6_head:'小队',s6_seen:'{n}次',s6_empty:'记录还不够点名，但他们心里有数。',
   s7_tag:'新羁绊',s7_kick:'你添加的好友',s7_unit:'位新好友',s7_lede:'<b>{n}</b>人从陌生人变成好友。名单还在增长。',s7_lede0:'真正的人早已在名单里。质胜于量。',
-  s8_tag:'节奏',s8_kick:'你真正在线的时间',s8_owl:'夜<br><em>猫子</em>',s8_peak:'高峰: <em>{t}</em>',s8_lede:'你<b>{p}%</b>的会话在午夜后开始。你的黄金时段是<b>{t}</b>。',
+  s8_tag:'节奏',s8_kick:'你真正在线的时间',s8_owl:'夜<br><em>猫子</em>',s8_peak:'高峰: <em>{t}</em>',s8_lede:'你<b>{p}%</b>的会话在夜间（晚9点–早6点）进行。你的黄金时段是<b>{t}</b>。',
   s9_tag:'势头',s9_kick:'你最忙的月份',s9_lede:'那个月你出现得最多。有什么一直把你拉回来。',m_month_v:'当月访问',m_month_avg:'月均',
   s10_tag:'收藏',s10_kick:'你的{year}年VRChat卡片',role_night:'夜行者',role_vet:'世界老兵',role_expl:'元宇宙探索者',
   tc_hours:'小时',tc_worlds:'世界',tc_met:'相遇',tc_friends:'好友',tc_visits:'访问',tc_days:'天',tc_topw:'热门世界',tc_squad:'最佳小队',tc_foot:'VRCHAT WRAP · 数据从未离开此设备',
-  dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',
+  dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',x_attach_hint:'图片已保存 — 附到你的推文！',
   outro:'截图、分享、下次再见。',
   caption:'我的VRChat Wrap — {h}小时，{w}个世界，遇见{p}人。来做你的:'},
 
@@ -818,11 +821,11 @@ const I18N={
   s5_tag:'Social',s5_kick:'Personas distintas que cruzaste',s5_unit:'avatares conocidos · {e} encuentros',s5_lede:'Detrás de cada avatar había una persona. Compartiste espacio con <b>{n}</b> de ellas.',
   s6_tag:'Tu escuadrón',s6_kick:'Con quienes pasaste más tiempo',s6_head:'Escuadrón',s6_seen:'{n} veces',s6_empty:'No hay registros suficientes para nombrar, pero ellos lo saben.',
   s7_tag:'Nuevos lazos',s7_kick:'Amigos que añadiste',s7_unit:'nuevas amistades',s7_lede:'<b>{n}</b> personas pasaron de extraños a amigos. La lista sigue creciendo.',s7_lede0:'Los de verdad ya estaban en la lista. Calidad sobre cantidad.',
-  s8_tag:'Ritmo',s8_kick:'Cuándo estás realmente en línea',s8_owl:'Ave<br><em>nocturna</em>',s8_peak:'Pico: <em>{t}</em>',s8_lede:'El <b>{p}%</b> de tus sesiones empezó después de medianoche. Tu hora pico es <b>{t}</b>.',
+  s8_tag:'Ritmo',s8_kick:'Cuándo estás realmente en línea',s8_owl:'Ave<br><em>nocturna</em>',s8_peak:'Pico: <em>{t}</em>',s8_lede:'El <b>{p}%</b> de tus sesiones ocurrió en horas nocturnas (9 PM–6 AM). Tu hora pico es <b>{t}</b>.',
   s9_tag:'Impulso',s9_kick:'Tu mes más activo',s9_lede:'Ahí fue cuando más apareciste. Algo te seguía trayendo de vuelta.',m_month_v:'Visitas ese mes',m_month_avg:'Promedio mensual',
   s10_tag:'Colecciona',s10_kick:'Tu tarjeta VRChat {year}',role_night:'Errante Nocturno',role_vet:'Veterano de Mundos',role_expl:'Explorador del Metaverso',
   tc_hours:'horas',tc_worlds:'mundos',tc_met:'conocidos',tc_friends:'amigos',tc_visits:'visitas',tc_days:'días',tc_topw:'mundos top',tc_squad:'escuadrón top',tc_foot:'VRCHAT WRAP · TUS DATOS NUNCA SALIERON DE ESTE DISPOSITIVO',
-  dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',
+  dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',x_attach_hint:'Imagen guardada — ¡adjúntala a tu tweet!',
   outro:'Captúrala. Compártela. Hasta la próxima.',
   caption:'Mi VRChat Wrap — {h}h en {w} mundos, {p} personas conocidas. Haz el tuyo:'},
 
@@ -841,11 +844,11 @@ const I18N={
   s5_tag:'Social',s5_kick:'Personnes différentes croisées',s5_unit:'avatars rencontrés · {e} rencontres',s5_lede:'Derrière chaque avatar, une personne. Tu as partagé un espace avec <b>{n}</b> d\'entre elles.',
   s6_tag:'Ton équipe',s6_kick:'Ceux avec qui tu as passé le plus de temps',s6_head:'Équipe',s6_seen:'{n} fois',s6_empty:'Pas assez de journaux pour citer des noms, mais ils se reconnaissent.',
   s7_tag:'Nouveaux liens',s7_kick:'Amis ajoutés',s7_unit:'nouvelles amitiés',s7_lede:'<b>{n}</b> personnes sont passées d\'inconnus à amis. La liste s\'allonge.',s7_lede0:'Les vrais étaient déjà sur la liste. La qualité avant la quantité.',
-  s8_tag:'Rythme',s8_kick:'Quand tu es vraiment en ligne',s8_owl:'Oiseau<br><em>de nuit</em>',s8_peak:'Pic : <em>{t}</em>',s8_lede:'<b>{p}%</b> de tes sessions ont commencé après minuit. Ton heure de pointe est <b>{t}</b>.',
+  s8_tag:'Rythme',s8_kick:'Quand tu es vraiment en ligne',s8_owl:'Oiseau<br><em>de nuit</em>',s8_peak:'Pic : <em>{t}</em>',s8_lede:'<b>{p}%</b> de tes sessions ont eu lieu en heures nocturnes (21h–6h). Ton heure de pointe est <b>{t}</b>.',
   s9_tag:'Élan',s9_kick:'Ton mois le plus actif',s9_lede:'C\'est là que tu es le plus apparu. Quelque chose te ramenait sans cesse.',m_month_v:'Visites ce mois',m_month_avg:'Moyenne mensuelle',
   s10_tag:'Collection',s10_kick:'Ta carte VRChat {year}',role_night:'Vagabond Nocturne',role_vet:'Vétéran des Mondes',role_expl:'Explorateur du Métavers',
   tc_hours:'heures',tc_worlds:'mondes',tc_met:'rencontrés',tc_friends:'amis',tc_visits:'visites',tc_days:'jours',tc_topw:'meilleurs mondes',tc_squad:'meilleur squad',tc_foot:'VRCHAT WRAP · TES DONNÉES N\'ONT JAMAIS QUITTÉ CET APPAREIL',
-  dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',
+  dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',x_attach_hint:'Image enregistrée — joins-la à ton tweet !',
   outro:'Capture-la. Partage-la. À la prochaine.',
   caption:'Mon VRChat Wrap — {h}h dans {w} mondes, {p} personnes rencontrées. Fais le tien :'}
 };
@@ -927,12 +930,20 @@ function analyze(db,range){
   stats.topWorlds=Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>({n,v,id:wid[n]}));
   const hours=new Array(24).fill(0);loc.forEach(r=>{if(r.d)hours[r.d.getHours()]++;});
   stats.hours24=hours;
-  const night=hours.slice(0,6).reduce((a,b)=>a+b,0);
+  const night=hours[21]+hours[22]+hours[23]+hours.slice(0,6).reduce((a,b)=>a+b,0);
   stats.nightPct=loc.length?Math.round(night/loc.length*100):0;
   const mo=new Array(12).fill(0);loc.forEach(r=>{if(r.d)mo[r.d.getMonth()]++;});
   stats.months=mo;
-  stats.busiestMonthIdx=mo.some(x=>x)?mo.indexOf(Math.max(...mo)):-1;
-  stats.monthMax=Math.max(0,...mo);
+  if(range==='all'){
+    const ymo={};loc.forEach(r=>{if(r.d){const k=r.d.getFullYear()*12+r.d.getMonth();ymo[k]=(ymo[k]||0)+1;}});
+    const entries=Object.entries(ymo);
+    if(entries.length){const [bk,bv]=entries.sort((a,b)=>b[1]-a[1])[0];stats.busiestMonthIdx=+bk%12;stats.busiestMonthYear=Math.floor(+bk/12);stats.monthMax=+bv;}
+    else{stats.busiestMonthIdx=-1;stats.busiestMonthYear=null;stats.monthMax=0;}
+  }else{
+    stats.busiestMonthIdx=mo.some(x=>x)?mo.indexOf(Math.max(...mo)):-1;
+    stats.busiestMonthYear=null;
+    stats.monthMax=Math.max(0,...mo);
+  }
   stats.activeDays=new Set(loc.map(r=>r.d&&r.d.toISOString().slice(0,10))).size;
 
   out(t('load_msg'));
@@ -970,7 +981,7 @@ function demoStats(range){
     cardHeader:range==='all'?'ALL TIME':range==='month'?'30 DAYS':`CHECKPOINT ${y}`,
     startDate:dstart,endDate:now,sessions:b.s,uniqueWorlds:b.w,hours:b.h,activeDays:b.d,nightPct:61,
     hours24:[31,24,18,9,5,3,2,2,3,6,11,18,26,30,33,38,44,52,67,81,94,88,71,49],
-    months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,
+    months:[88,76,91,84,99,103,112,108,121,138,96,71],busiestMonthIdx:9,monthMax:138,busiestMonthYear:range==='all'?y-1:null,
     topWorlds:b.tw.map(([n,v])=>({n,v})),peopleMet:b.p,encounters:b.e,
     squad:b.sq.map(([n,v])=>({n,v})),selfName:range==='month'?'Nyx':'Nyx',friendsAdded:range==='all'?640:b.fa,hasReal:true,demo:true};
 }
@@ -1175,8 +1186,8 @@ function calcAxes(st,sadSt){
               -soloPct*0.20                     // fraction of solo days
               -emptyRatio*0.15;                 // fraction of hours alone
   // ── N/D: Night vs Day ────────────────────────────────────────────────
-  // Threshold 0.35: playing 45%+ sessions after midnight → Night
-  const nScore=(st.nightPct/100)*0.75          // sessions after midnight
+  // Threshold 0.30: 40%+ sessions in night hours (9 PM – 6 AM) → Night
+  const nScore=(st.nightPct/100)*0.75          // sessions in night hours (22–05)
               +dawnRate*0.25;                   // 4-7 AM sessions (stayed up)
   // ── B/R: Binge vs Regular ────────────────────────────────────────────
   // Ceiling 8/4: 8 hrs/day or 4 hrs/session = extreme binger
@@ -1186,7 +1197,7 @@ function calcAxes(st,sadSt){
               -streakRatio*0.10;               // daily consistency → Regular
 
   return{eScore,sScore,nScore,bScore,
-    axisE:eScore>0.38,axisS:sScore>0.25,axisN:nScore>0.35,axisB:bScore>0.35};
+    axisE:eScore>0.38,axisS:sScore>0.25,axisN:nScore>0.30,axisB:bScore>0.35};
 }
 
 function assignRole(st, sadSt){
@@ -1258,7 +1269,7 @@ function roleAxesHTML(st, sadSt, roleKey){
     <div class="rr-axis">
       <div class="ax-label">Active Hours · <span style="color:var(--accent)">${pct(nScore)}%</span></div>
       <div class="ax-val">${axisN?'N':'D'} — ${axisN?'Night':'Day'}</div>
-      <div class="ax-sub">${st.nightPct}% sessions after midnight · ${Math.round((sad.amSessions||0)/sessions*100)}% at 4–7 AM</div>
+      <div class="ax-sub">${st.nightPct}% night sessions (10 PM–6 AM) · ${Math.round((sad.amSessions||0)/sessions*100)}% at 4–7 AM</div>
       ${bar(nScore,axisN)}
     </div>
     <div class="rr-axis">
@@ -1417,6 +1428,10 @@ function appendCardSlide(st, sadSt){
           <div class="tc-foot">${t('tc_foot')}</div>
         </div>
         <div class="role-reveal rv">
+          <div class="rr-meta">
+            <span class="rr-player">${esc(st.selfName||'ANONYMOUS')}</span>
+            <span class="rr-period">${st.range==='all'?t('tf_all_v'):st.range==='year'?String(st.year):t('tf_month_v')}</span>
+          </div>
           <div class="rr-icon">${role.icon}</div>
           <div class="rr-code">${esc(role.code)}</div>
           <div class="rr-name">${esc(role.name)}</div>
@@ -1559,6 +1574,7 @@ function build(st){
     ()=>card(t('s9_tag'),BASE+9,`
       <div class="kicker rv">${t('s9_kick')}</div>
       <h2 class="headline rv">${busiest}</h2>
+      ${st.range==='all'&&st.busiestMonthYear?`<div class="unit rv" style="margin-top:-6px;font-size:clamp(20px,5.5vw,36px);opacity:.6;letter-spacing:.04em">${st.busiestMonthYear}</div>`:''}
       <p class="lede rv">${t('s9_lede')}</p>
       <div class="mini rv">
         <div class="m"><div class="mv">${fmt(st.monthMax)}</div><div class="ml">${t('m_month_v')}</div></div>
@@ -1695,18 +1711,28 @@ function wireCard(){
     statusEl.textContent='Leaderboard available for All Time only';
   }
 
-  $('#dlBtn').addEventListener('click',async()=>{const b=await roleRevealBlob();if(b)await downloadBlob(b,'vrchat-role.png');else _toast((window._lastCaptureErr||'Capture failed').slice(0,80));});
+  $('#dlBtn').addEventListener('click',async()=>{const b=await roleRevealBlob();if(b)await downloadBlob(b,'vrchat-role.jpg');else _toast((window._lastCaptureErr||'Capture failed').slice(0,80));});
   $('#xBtn').addEventListener('click',async()=>{
-    const b=await roleRevealBlob();if(b)await downloadBlob(b,'vrchat-role.png');
-    const txt=encodeURIComponent((cap?cap.value:captionText()));
-    window.open('https://twitter.com/intent/tweet?text='+txt,'_blank','noopener');
+    const b=await roleRevealBlob();
+    const caption=cap?cap.value:captionText();
+    const twitterUrl='https://twitter.com/intent/tweet?text='+encodeURIComponent(caption);
+    if(!b){window.open(twitterUrl,'_blank','noopener');return;}
+    const file=new File([b],'vrchat-role.jpg',{type:'image/jpeg'});
+    // Mobile: native share sheet → user picks X → image is attached automatically
+    if(IS_MOBILE&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],text:caption});return;}catch(e){if(e.name==='AbortError')return;}
+    }
+    // Desktop: download image + hint + open Twitter intent
+    await downloadBlob(b,'vrchat-role.jpg');
+    _toast(t('x_attach_hint'));
+    window.open(twitterUrl,'_blank','noopener');
   });
   // native share (mobile) with image file
   if(navigator.canShare){
     const sb=$('#shareBtn');sb.style.display='';
     sb.addEventListener('click',async()=>{
       const b=await roleRevealBlob();if(!b)return;
-      const file=new File([b],'vrchat-role.png',{type:'image/png'});
+      const file=new File([b],'vrchat-role.jpg',{type:'image/jpeg'});
       try{ if(navigator.canShare({files:[file]})) await navigator.share({files:[file],text:(cap?cap.value:captionText())});
         else await navigator.share({text:(cap?cap.value:captionText()),url:SITE}); }catch(e){}
     });
@@ -1729,7 +1755,7 @@ async function roleRevealBlob(){
   try{
     const cv=await html2canvas(el,{backgroundColor:null,scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
       onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});}});
-    return await new Promise(r=>cv.toBlob(r,'image/png'));
+    return await new Promise(r=>cv.toBlob(r,'image/jpeg',0.93));
   }catch(e){window._lastCaptureErr=String(e);console.debug('[vrcwrap] roleRevealBlob error:',e);return null;}
 }
 async function deckBlob(btn){
@@ -1752,7 +1778,8 @@ async function downloadBlob(b,name){
   // On mobile the share sheet is the natural "save" path (a.download is unreliable on iOS)
   if(IS_MOBILE){
     try{
-      const file=new File([b],name,{type:'image/png'});
+      const mime=name.endsWith('.jpg')||name.endsWith('.jpeg')?'image/jpeg':'image/png';
+      const file=new File([b],name,{type:mime});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         try{await navigator.share({files:[file]});return;}catch(e){if(e.name==='AbortError')return;}
       }
