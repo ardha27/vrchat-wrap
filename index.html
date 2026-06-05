@@ -410,7 +410,7 @@
       <p>Your VRCX file is <b>never sent</b>. Submission is always opt-in, triggered manually.</p>
       <div class="wm-toggle">
         <input type="checkbox" id="wmOptOut"/>
-        <label for="wmOptOut">Disable leaderboard — hide the submit button entirely</label>
+        <label for="wmOptOut">Don't save my data to the leaderboard (your rank will still be shown)</label>
       </div>
     </div>
     <button class="wm-ok" id="wmOk">Got it</button>
@@ -1084,26 +1084,28 @@ function assignRole(st, sadSt){
   const explorerRate=uniqueW/sessions;
   const bingeScore=h/activeDays;
   const sparseScore=(sad.activitySpan||1)/activeDays;
-  // ── special overrides (most specific first) ──────────────────────────
-  if(h>1000&&peopleMet>800) return'LEGEND';
-  if(amSessions>40&&h>200) return'SLEEPLESS_ARCHITECT';
-  // identity flux: changes avatar more than once every 2 sessions on average
-  if(idRate>0.5&&avatarChanges>20) return'SHAPESHIFTER';
-  // burned bridges: high unfriend count regardless of net (friendNet no longer tracked)
-  if(unfriended>20) return'BURNING_BRIDGE';
-  // speedrunner: longest session ever < 1 hr with many sessions = never commits
-  if(longestSession<1&&sessions>60&&h<80) return'SPEEDRUNNER';
-  // phantom: vast majority of encounters were one-time only
-  if(phantomRate>0.8&&peopleMet>50) return'PHANTOM';
+  // ── special overrides (most specific first, all ratio/percentage-based) ─
+  // LEGEND: avg 3+ hrs/day sustained AND highly social (4+ people per session)
+  if(h/activeDays>3&&peopleMet/sessions>4) return'LEGEND';
+  // SLEEPLESS_ARCHITECT: 25%+ sessions at 4-7 AM AND averaging 2+ hrs/active day
+  if(amSessions/sessions>0.25&&bingeScore>2) return'SLEEPLESS_ARCHITECT';
+  // SHAPESHIFTER: changes avatar more than once every 2 sessions, min 20 sessions
+  if(idRate>0.5&&sessions>20) return'SHAPESHIFTER';
+  // BURNING_BRIDGE: 40%+ of all friend events ended in unfriend, min 5 unfriends
+  if(unfriended/Math.max(1,st.friendsAdded+unfriended)>0.4&&unfriended>5) return'BURNING_BRIDGE';
+  // SPEEDRUNNER: longest session ever <1 hr AND avg <1.5 hr/session, min 30 sessions
+  if(longestSession<1&&h/sessions<1.5&&sessions>30) return'SPEEDRUNNER';
+  // PHANTOM: 80%+ of encounters were one-time, meets at least 0.5 person/session
+  if(phantomRate>0.8&&peopleMet/sessions>0.5) return'PHANTOM';
   // ── 4-axis system ────────────────────────────────────────────────────
-  // E/I — Explorer vs Inhabitant: diverse world spread vs concentrated
+  // E/I — Explorer vs Inhabitant: >40% of sessions visit a new world
   const axisE=explorerRate>0.4;
-  // S/L — Social vs Lone: active social sessions + low solo %, weighted by emptyHours
+  // S/L — Social vs Lone: 1.5+ people/session AND <50% solo days AND <60% empty hours
   const emptyRatio=h>0?emptyHours/h:0;
   const axisS=(peopleMet/sessions>1.5)&&soloPct<50&&emptyRatio<0.6;
   // N/D — Night vs Day: majority of sessions after midnight
   const axisN=st.nightPct>50;
-  // B/R — Binge vs Regular: high hours per active day OR a marathon session ever
+  // B/R — Binge vs Regular: >5 hrs/active day avg OR any single session >8 hrs
   const axisB=bingeScore>5||longestSession>8;
   const code=(axisE?'E':'I')+(axisS?'S':'L')+(axisN?'N':'D')+(axisB?'B':'R');
   return code;
@@ -1325,8 +1327,8 @@ function appendCardSlide(st, sadSt){
         </a>
         <div class="actions rv" style="margin-top:8px;flex-direction:column;gap:8px">
           <button class="lb-btn" id="lbViewBtn">☰ View Global Leaderboard</button>
-          <button class="lb-btn" id="lbSubBtn" style="background:transparent;border:1px solid var(--accent);color:var(--accent)">↑ Submit my score (All Time only)</button>
         </div>
+        <div id="lbStatus" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-align:center;margin-top:4px"></div>
         <div class="rank-badges rv" id="rankBadges"></div>
       </div>
       <div class="card-foot"><span>VRCHAT WRAP · ${st.range==='all'?t('tf_all_v'):st.year}</span><span class="pix">▦ ▥ ▤</span></div>
@@ -1494,8 +1496,29 @@ function showSlide(i){
 }
 function go(d){if(!SLIDES.length)return;if(idx+d<0||idx+d>SLIDES.length-1)return;showSlide(idx+d);}
 
-/* ---- final card wiring ---- */
+/* ---- leaderboard auto-submit + rank fetch ---- */
 let CARD_NAME='';
+let _rankPromise=null;
+
+async function fetchAndSubmitRanks(st,sadSt,roleKey){
+  if(!WORLD_PROXY)return[];
+  const statusEl=()=>$('#lbStatus');
+  const name=CARD_NAME||st.selfName||'Anonymous';
+  if(!LB_OPTOUT){
+    if(statusEl())statusEl().textContent='Saving to leaderboard…';
+    const res=await lbSubmit(name,st,sadSt,roleKey);
+    LB_CACHE={};
+    if(!res&&statusEl())statusEl().textContent='Leaderboard save failed.';
+  } else {
+    if(statusEl())statusEl().textContent='Leaderboard opt-out — checking your rank…';
+  }
+  const ranks=await Promise.all(LB_CATS.map(async c=>{
+    const myV=getMyVal(c);if(myV==null)return null;
+    const r=await lbMyRank(c.col,myV);
+    return r&&r<=100?{cat:c,rank:r}:null;
+  }));
+  return ranks.filter(Boolean);
+}
 function captionText(){
   const nm=CARD_NAME||'';
   const role=ROLE_KEY&&ROLES[ROLE_KEY];
@@ -1515,33 +1538,22 @@ function wireCard(){
   const lbViewBtn=$('#lbViewBtn');
   if(lbViewBtn)lbViewBtn.addEventListener('click',()=>openLB());
 
-  // submit button (only for all-time)
-  const lbSubBtn=$('#lbSubBtn');
-  if(lbSubBtn){
-    if(TF!=='all'||LB_OPTOUT){lbSubBtn.style.display='none';}
-    else{
-      lbSubBtn.addEventListener('click',async()=>{
-        if(!WORLD_PROXY){alert('Set WORLD_PROXY to your CF Worker URL to enable leaderboard.');return;}
-        const name=CARD_NAME||'Anonymous';
-        lbSubBtn.disabled=true;lbSubBtn.textContent='Submitting…';
-        const result=await lbSubmit(name,S,window._SAD,ROLE_KEY);
-        if(!result){lbSubBtn.textContent='Failed — try again';lbSubBtn.disabled=false;return;}
-        lbSubBtn.textContent='✓ Submitted!';
-        LB_CACHE={};
-        const badgeEl=$('#rankBadges');
-        if(badgeEl){
-          const ranks=await Promise.all(LB_CATS.map(async c=>{
-            const myV=getMyVal(c);if(myV==null)return null;
-            const r=await lbMyRank(c.col,myV);
-            return r&&r<=100?{cat:c,rank:r}:null;
-          }));
-          const badges=ranks.filter(Boolean);
-          if(badges.length){
-            badgeEl.innerHTML=badges.map(b=>`<span class="rank-badge${b.cat.good?'':' shame'}">${b.cat.label} #${b.rank}</span>`).join('');
-          }
-        }
-      });
-    }
+  // show rank badges from background auto-submit
+  const badgeEl=$('#rankBadges');
+  const statusEl=$('#lbStatus');
+  if(badgeEl&&_rankPromise){
+    _rankPromise.then(badges=>{
+      if(badges.length){
+        badgeEl.innerHTML=badges.map(b=>`<span class="rank-badge${b.cat.good?'':' shame'}">${b.cat.label} #${b.rank}</span>`).join('');
+        if(statusEl&&!LB_OPTOUT)statusEl.textContent='✓ Score saved to leaderboard';
+        else if(statusEl)statusEl.textContent='';
+      } else {
+        if(statusEl&&!LB_OPTOUT)statusEl.textContent='✓ Score saved to leaderboard';
+        else if(statusEl)statusEl.textContent='';
+      }
+    }).catch(()=>{if(statusEl)statusEl.textContent='';});
+  } else if(TF!=='all'&&statusEl){
+    statusEl.textContent='Leaderboard available for All Time only';
   }
 
   $('#dlBtn').addEventListener('click',async()=>{const b=await cardBlob();if(b)downloadBlob(b,'vrchat-wrap.png');});
@@ -1610,6 +1622,8 @@ async function handleFile(file){
     await loadThumbs(st);
     await new Promise(r=>setTimeout(r,400));
     buildAll(st,sadSt);enterDeck();
+    if(TF==='all')_rankPromise=fetchAndSubmitRanks(st,sadSt,ROLE_KEY);
+    else _rankPromise=null;
   }catch(err){$('#loading').classList.remove('on');$('#intake').classList.add('on');showErr(err.message||t('err_read'));}
 }
 const drop=$('#drop'),file=$('#file');
@@ -1619,7 +1633,7 @@ file.onchange=e=>handleFile(e.target.files[0]);
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
 drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
-$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);const sadSt=demoSadStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));buildAll(st,sadSt);enterDeck();})();};
+$('#demo').onclick=()=>{startLoad();(async()=>{const st=demoStats(TF);const sadSt=demoSadStats(TF);await loadThumbs(st);await new Promise(r=>setTimeout(r,500));buildAll(st,sadSt);enterDeck();_rankPromise=null;})();};
 
 $('#tfOpts').addEventListener('click',e=>{const o=e.target.closest('.tf-opt');if(!o)return;TF=o.dataset.tf;document.querySelectorAll('.tf-opt').forEach(x=>x.classList.toggle('sel',x===o));});
 
