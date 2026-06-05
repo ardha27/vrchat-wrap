@@ -393,7 +393,7 @@ let ROLE_KEY=null; // set when card slide is built
 //   solo_pct integer not null default 0,
 //   one_time_people integer not null default 0,
 //   unfriended integer not null default 0,
-//   short_sessions integer not null default 0,
+//   empty_hours numeric not null default 0,
 //   role_code text default '',
 //   role_name text default '',
 //   submitted_at timestamptz default now()
@@ -419,8 +419,8 @@ const LB_CATS=[
    desc:'People you encountered exactly once across your entire history. One session, possibly one conversation, never again. A count of connections that never had a second chance.'},
   {id:'bridges', label:'Bridge Burners', col:'unfriended',     unit:'unfriended', good:false,
    desc:'Total people unfriended over all time. Some connections end — these are the ones that ended deliberately, logged by VRCX as unfriend events.'},
-  {id:'speed',   label:'Speedrunners',   col:'short_sessions', unit:'sessions <1 min', good:false,
-   desc:'Sessions that lasted under sixty seconds. Log in, look around, log out — or change your mind before the world even loads. A count of incomplete arrivals.'},
+  {id:'void',    label:'The Void',        col:'empty_hours',    unit:'hrs alone',      good:false,
+   desc:'Total hours logged in sessions where no one else appeared — not a single join event. Measures the raw volume of time spent in complete solitude, not just the proportion.'},
 ];
 
 async function sbFetch(path,method='GET',body=null,extra={}){
@@ -441,7 +441,7 @@ async function lbSubmit(username,st,sadSt,roleKey){
     hours:Math.round(st.hours),worlds:st.uniqueWorlds,people_met:st.peopleMet,
     friends_added:st.friendsAdded,solo_pct:sad.soloPct||0,
     one_time_people:sad.oneTimePeople||0,unfriended:sad.unfriended||0,
-    short_sessions:sad.shortSessions||0,
+    empty_hours:Math.round((sad.emptyHours||0)*10)/10,
     role_code:role.code||'',role_name:role.name||''};
   return sbFetch('leaderboard?on_conflict=username_lower','POST',row,{headers:{'Prefer':'resolution=merge-duplicates,return=representation'}});
 }
@@ -521,7 +521,7 @@ function getMyVal(cat){
   if(!S)return null;
   const sad=window._SAD||{};
   const map={hours:S.hours,worlds:S.uniqueWorlds,people_met:S.peopleMet,friends_added:S.friendsAdded,
-    solo_pct:sad.soloPct||0,one_time_people:sad.oneTimePeople||0,unfriended:sad.unfriended||0,short_sessions:sad.shortSessions||0};
+    solo_pct:sad.soloPct||0,one_time_people:sad.oneTimePeople||0,unfriended:sad.unfriended||0,empty_hours:sad.emptyHours||0};
   return map[cat.col]??null;
 }
 
