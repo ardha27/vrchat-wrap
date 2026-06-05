@@ -41,7 +41,7 @@
   .brand .mk{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.25);transition:.5s;flex:none;color:#06120a}
   .brand .mk svg{display:block}
   .brand-label{display:flex;flex-direction:column;line-height:1}
-  .brand-label .b1{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:.12em;color:var(--ink);line-height:1}
+  .brand-label .b1{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:.12em;color:var(--ink);line-height:1;white-space:nowrap}
   .brand-label .b2{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-top:1px}
   body.deck-mode .brand{display:none}
   .topright{position:fixed;top:max(env(safe-area-inset-top),12px);right:14px;z-index:7;display:flex;gap:8px;align-items:center}
@@ -253,6 +253,22 @@
   .lb-tab.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
   .lb-tab.shame{border-color:var(--pink)}
   .lb-tab.shame.active{border-color:var(--pink);background:color-mix(in srgb,var(--pink) 15%,transparent);color:var(--pink)}
+  /* welcome modal */
+  .wm-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
+  .wm-modal.hidden{display:none}
+  .wm-inner{width:min(520px,100%);max-height:90dvh;background:linear-gradient(180deg,rgba(18,18,32,.98),rgba(8,8,18,.98));border:1px solid var(--line);border-radius:24px;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:18px}
+  .wm-logo{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.1em;color:var(--accent)}
+  .wm-section h3{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .wm-section p,.wm-section li{font-size:13px;line-height:1.7;color:rgba(255,255,255,.75)}
+  .wm-section ul{padding-left:18px;margin:6px 0}
+  .wm-section li{margin-bottom:4px}
+  .wm-path{font-family:'Space Mono',monospace;font-size:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--accent);word-break:break-all;margin-top:4px}
+  .wm-toggle{display:flex;align-items:center;gap:12px;margin-top:4px}
+  .wm-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:none}
+  .wm-toggle label{font-size:13px;color:rgba(255,255,255,.8);cursor:pointer;line-height:1.4}
+  .wm-divider{border:none;border-top:1px solid var(--line);margin:0}
+  .wm-ok{width:100%;padding:13px;border-radius:13px;background:var(--accent);color:#06120a;font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.1em;border:none;cursor:pointer;transition:.2s}
+  .wm-ok:hover{opacity:.88}
   .lb-rows{overflow-y:auto;flex:1;padding:0 6px 12px}
   .lb-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;transition:.2s}
   .lb-row:hover{background:rgba(255,255,255,.03)}
@@ -317,8 +333,8 @@
       <div class="tf-label" data-i="tf_label"></div>
       <div class="tf-opts" id="tfOpts">
         <div class="tf-opt" data-tf="month"><div class="tv" data-i="tf_month_v"></div><div class="tl" data-i="tf_month"></div></div>
-        <div class="tf-opt sel" data-tf="year"><div class="tv" data-i="tf_year_v"></div><div class="tl" data-i="tf_year"></div></div>
-        <div class="tf-opt" data-tf="all"><div class="tv" data-i="tf_all_v"></div><div class="tl" data-i="tf_all"></div></div>
+        <div class="tf-opt" data-tf="year"><div class="tv" data-i="tf_year_v"></div><div class="tl" data-i="tf_year"></div></div>
+        <div class="tf-opt sel" data-tf="all"><div class="tv" data-i="tf_all_v"></div><div class="tl" data-i="tf_all"></div></div>
       </div>
     </div>
     <div class="drop rv" id="drop">
@@ -367,6 +383,37 @@
     <div class="lb-cat-desc" id="lbCatDesc"></div>
     <div class="lb-my-rank" id="lbMyRank" style="display:none"></div>
     <div class="lb-rows" id="lbRows"><div class="lb-loading">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Welcome / onboarding modal -->
+<div class="wm-modal hidden" id="wmModal">
+  <div class="wm-inner">
+    <div class="wm-logo">VRCHAT WRAP</div>
+    <div class="wm-section">
+      <h3>Where is my VRCX database?</h3>
+      <p>Open <b>VRCX</b>, go to <b>Settings → General</b> and look for the <em>AppData folder</em> path, or find the file directly at one of these locations:</p>
+      <div class="wm-path">Windows: %APPDATA%\VRCX\VRCX.sqlite3</div>
+      <div class="wm-path" style="margin-top:6px">Mac / Linux: ~/.local/share/VRCX/VRCX.sqlite3</div>
+      <p style="margin-top:10px;font-size:12px;color:var(--muted)">The file is read entirely in your browser — it is never uploaded to any server.</p>
+    </div>
+    <hr class="wm-divider"/>
+    <div class="wm-section">
+      <h3>Leaderboard & data disclosure</h3>
+      <p>If you choose to submit your score, the following stats are sent to a public leaderboard:</p>
+      <ul>
+        <li>Display name (as you enter it)</li>
+        <li>Total hours · unique worlds · people met · friends added</li>
+        <li>Solo % · one-time encounters · unfriended · empty hours</li>
+        <li>Your role code &amp; role name</li>
+      </ul>
+      <p>Your VRCX file is <b>never sent</b>. Submission is always opt-in, triggered manually.</p>
+      <div class="wm-toggle">
+        <input type="checkbox" id="wmOptOut"/>
+        <label for="wmOptOut">Disable leaderboard — hide the submit button entirely</label>
+      </div>
+    </div>
+    <button class="wm-ok" id="wmOk">Got it</button>
   </div>
 </div>
 
@@ -462,6 +509,12 @@ async function openLB(){
   const m=$('#lbModal');m.classList.add('open');
   const tabs=$('#lbTabs');tabs.innerHTML=LB_CATS.map((c,i)=>`<button class="lb-tab${i===0?' active':''}${c.good?'':' shame'}" data-i="${i}">${esc(c.label)}</button>`).join('');
   tabs.querySelectorAll('.lb-tab').forEach(b=>b.addEventListener('click',()=>{LB_ACTIVE=+b.dataset.i;tabs.querySelectorAll('.lb-tab').forEach(x=>x.classList.toggle('active',x===b));loadLBTab();}));
+  // mouse drag-to-scroll for desktop
+  let isDown=false,startX,scrollLeft;
+  tabs.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX-tabs.offsetLeft;scrollLeft=tabs.scrollLeft;tabs.style.cursor='grabbing';});
+  tabs.addEventListener('mouseleave',()=>{isDown=false;tabs.style.cursor='';});
+  tabs.addEventListener('mouseup',()=>{isDown=false;tabs.style.cursor='';});
+  tabs.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-tabs.offsetLeft;tabs.scrollLeft=scrollLeft-(x-startX)*1.5;});
   loadLBTab();
 }
 async function loadLBTab(){
@@ -494,11 +547,12 @@ async function loadLBTab(){
   if(myRank){mr.style.display='';mr.innerHTML=`Your rank in <b>${esc(cat.label)}</b>: <b>#${myRank}</b>${myRank<=100?' — top 100':' — outside top 100'}`;}
   else if(mr)mr.style.display='none';
   if(!data.length){
-    rows.innerHTML=`<div class="lb-empty" style="padding:36px 20px">
-      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;color:var(--muted)"><path d="M8 21h8M12 17v4M7 4h10l1 7a5 5 0 0 1-12 0L7 4z"/><path d="M5 8H3a2 2 0 0 0 2 2M19 8h2a2 2 0 0 1-2 2"/></svg>
-      <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px">No entries yet</div>
-      <div style="font-size:12px;line-height:1.6;color:var(--muted)">Be the first to claim the #1 spot in<br><b style="color:var(--ink)">${esc(cat.label)}</b>.<br><span style="color:var(--accent);font-size:11px;letter-spacing:.06em">Only All Time submissions count.</span></div>
-    </div>`;
+    rows.innerHTML=`<div style="padding:10px 16px 6px;font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.08em">No entries yet — be the first to claim #1</div>`
+      +Array.from({length:20},(_,i)=>`<div class="lb-row" style="opacity:${0.18+i*0.01}">
+        <div class="lb-rank">#${i+1}</div>
+        <div class="lb-info"><div class="lb-name" style="color:var(--muted)">—</div><div class="lb-role">···</div></div>
+        <div class="lb-val" style="color:var(--muted)">—</div>
+      </div>`).join('');
     return;
   }
   rows.innerHTML=data.map((r,i)=>{
@@ -536,11 +590,11 @@ const I18N={
   sub:'A year inside the metaverse, replayed. Drop your <b>VRCX database</b> and relive every world, friend, and late-night session.',
   tf_label:'Pick your window',tf_month:'last 30 days',tf_year:'last 12 months',tf_all:'everything',tf_month_v:'1 Month',tf_year_v:'1 Year',tf_all_v:'All Time',
   drop_title:'Drop your VRCX database here',drop_hint:'or click to browse — the file never leaves your browser',
-  or:'or',demo:'View demo with sample data',privacy:'100% local · <b>no upload</b> · no server · no tracking',
+  or:'or',demo:'View demo with sample data',privacy:'VRCX file never leaves your browser · leaderboard is <b>opt-in</b>',
   load_title:'Reading your year…',load_msg:'parsing VRCX tables',
   err_invalid:"That doesn't look like a valid SQLite file.",err_empty:'No VRChat activity found in this window. Try a wider range or check your VRCX.sqlite3.',err_read:'Could not read that file.',
   hint:'swipe or use ← → to move',
-  s1_tag:'Checkpoint',s1_kick:'Your year in VR · {label}',s1_head:"Let's replay<br>your <em>{year}</em>.",s1_lede:"You logged in. You stayed up too late. You met strangers who became regulars. Here's the proof, pulled from your own logs.",m_visits:'World visits',m_days:'Days online',
+  s1_tag:'Checkpoint',s1_kick:'Your VR recap · {label}',s1_head:"Let's replay<br>your <em>{period}</em>.",s1_lede:"You logged in. You stayed up too late. You met strangers who became regulars. Here's the proof, pulled from your own logs.",m_visits:'World visits',m_days:'Days online',head_all:'it all',head_month:'the last 30 days',
   s2_tag:'Time lived',s2_kick:'Hours spent in-world',s2_unit:'hours · about {d} full days',s2_lede:"Real time, real presence. Every hour spent somewhere that doesn't exist.",
   s3_tag:'Explorer',s3_kick:'Worlds you stepped into',s3_unit:'unique worlds across {v} visits',s3_lede:'From quiet lounges to chaos rooms, you wandered into <b>{n}</b> corners of the metaverse.',
   s4_tag:'Home base',s4_kick:'The place you kept coming back to',s4_lede:'Your most-visited world, <b>{v} times</b>. Everyone has a spot that feels like home.',
@@ -549,7 +603,7 @@ const I18N={
   s7_tag:'New bonds',s7_kick:'Friends you added',s7_unit:'new friendships',s7_lede:'<b>{n}</b> people went from stranger to friend. The list keeps growing.',s7_lede0:'The real ones were already on the list. Quality over quantity.',
   s8_tag:'Rhythm',s8_kick:"When you're really online",s8_owl:'Night<br><em>owl</em>',s8_peak:'Peak: <em>{t}</em>',s8_lede:'<b>{p}%</b> of your sessions started after midnight. Your prime time is <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
-  s10_tag:'Collect',s10_kick:'Your {year} VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
+  s10_tag:'Collect',s10_kick:'Your {year} VRChat card',s10_kick_all:'Your all-time VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
   tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
   dl:'Download trading card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',
   dl_hint:'saves the holographic card above · PNG · 16:9',
@@ -569,7 +623,7 @@ const I18N={
   s_marathon:'The long haul',s_unit_mar:'hour single session',s_lede_mar:"You stayed for {n} hours straight once. That wasn't a session — that was a commitment. Only you know what kept you in there.",
   s_absent:'The empty stretch',s_unit_abs:'days without logging in',s_lede_abs:'The longest you disappeared from VRChat entirely — {n} days. Something kept you away. Or something pulled you back in.',
   s_empty:'The void',s_unit_empty:'hours with no one else present',s_lede_empty:"{n} hours of VRChat where the join log stayed silent. No arrivals. No encounters. Just you and whatever world you picked. It's hard to say whether that's peaceful or something else.",
-  si_tag:'Start',si_kick:'Your {year} in VR · {label}',si_head:'Ready to<br>relive <em>{year}?</em>',si_lede:'Ten highlights. Ten hard truths. Everything pulled from your own logs — nothing fabricated, nothing held back.',si_m_visits:'Total visits',si_m_days:'Days online',
+  si_tag:'Start',si_kick:'Your VRChat journey · {label}',si_head:'Ready to<br>relive <em>{period}?</em>',si_lede:'Ten highlights. Ten hard truths. Everything pulled from your own logs — nothing fabricated, nothing held back.',si_m_visits:'Total visits',si_m_days:'Days online',
   str_tag:'Warning',str_head:'Now for the<br><em>dark side</em>.',str_lede:"Every wrap glosses over the hard parts. This one doesn't. The next ten slides are what you don't screenshot and share.",
   sha_tag:'Dedication',sha_kick:'Days you actually showed up',sha_unit:'active days out of {total}',sha_lede:'You were present on <b>{n}</b> different days — <b>{pct}%</b> of the window. Consistency is its own kind of showing up.'},
 
@@ -577,11 +631,11 @@ const I18N={
   sub:'Satu tahun di dalam metaverse, diputar ulang. Taruh <b>database VRCX</b> kamu dan kenang lagi tiap world, teman, dan sesi tengah malam.',
   tf_label:'Pilih rentang waktu',tf_month:'30 hari terakhir',tf_year:'12 bulan terakhir',tf_all:'semuanya',tf_month_v:'1 Bulan',tf_year_v:'1 Tahun',tf_all_v:'Semua',
   drop_title:'Taruh database VRCX kamu di sini',drop_hint:'atau klik untuk pilih file — file tidak pernah keluar dari browser',
-  or:'atau',demo:'Lihat demo dengan data contoh',privacy:'100% lokal · <b>tanpa unggah</b> · tanpa server · tanpa pelacakan',
+  or:'atau',demo:'Lihat demo dengan data contoh',privacy:'File VRCX tidak keluar dari browser · leaderboard bersifat <b>opsional</b>',
   load_title:'Membaca tahunmu…',load_msg:'membaca tabel VRCX',
   err_invalid:'Ini sepertinya bukan file SQLite yang valid.',err_empty:'Tidak ada aktivitas VRChat di rentang ini. Coba rentang lebih luas atau cek VRCX.sqlite3 kamu.',err_read:'Gagal membaca file itu.',
   hint:'geser atau pakai ← → untuk pindah',
-  s1_tag:'Checkpoint',s1_kick:'Tahunmu di VR · {label}',s1_head:'Putar ulang<br>tahun <em>{year}</em> kamu.',s1_lede:'Kamu login. Begadang. Ketemu orang asing yang jadi langganan. Ini buktinya, langsung dari log kamu sendiri.',m_visits:'Kunjungan world',m_days:'Hari aktif',
+  s1_tag:'Checkpoint',s1_kick:'Rekap VR kamu · {label}',s1_head:'Putar ulang<br><em>{period}</em> kamu.',s1_lede:'Kamu login. Begadang. Ketemu orang asing yang jadi langganan. Ini buktinya, langsung dari log kamu sendiri.',m_visits:'Kunjungan world',m_days:'Hari aktif',head_all:'semuanya',head_month:'30 hari terakhir',
   s2_tag:'Waktu hidup',s2_kick:'Jam yang dihabiskan di world',s2_unit:'jam · sekitar {d} hari penuh',s2_lede:'Waktu nyata, kehadiran nyata. Tiap jam dihabiskan di tempat yang tidak benar-benar ada.',
   s3_tag:'Penjelajah',s3_kick:'World yang kamu masuki',s3_unit:'world unik dari {v} kunjungan',s3_lede:'Dari lounge tenang sampai ruang kacau, kamu masuk ke <b>{n}</b> sudut metaverse.',
   s4_tag:'Markas',s4_kick:'Tempat yang selalu kamu datangi',s4_lede:'World paling sering kamu kunjungi, <b>{v} kali</b>. Semua orang punya tempat yang terasa seperti rumah.',
@@ -590,7 +644,7 @@ const I18N={
   s7_tag:'Ikatan baru',s7_kick:'Teman yang kamu tambah',s7_unit:'pertemanan baru',s7_lede:'<b>{n}</b> orang berubah dari asing jadi teman. Daftarnya terus bertambah.',s7_lede0:'Yang sejati sudah ada di daftar. Kualitas di atas kuantitas.',
   s8_tag:'Ritme',s8_kick:'Kapan kamu benar-benar online',s8_owl:'Burung<br><em>malam</em>',s8_peak:'Puncak: <em>{t}</em>',s8_lede:'<b>{p}%</b> sesimu mulai setelah tengah malam. Waktu emasmu jam <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
-  s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
+  s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',s10_kick_all:'Kartu VRChat all-time kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
   tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
   dl:'Unduh trading card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',
   dl_hint:'menyimpan kartu holografik di atas · PNG · 16:9',
@@ -610,7 +664,7 @@ const I18N={
   s_marathon:'Sesi terpanjang',s_unit_mar:'jam dalam satu sesi',s_lede_mar:'Kamu bertahan {n} jam nonstop sekali. Itu bukan sesi biasa — itu komitmen. Hanya kamu yang tahu apa yang membuat kamu betah.',
   s_absent:'Jeda terpanjang',s_unit_abs:'hari tanpa login',s_lede_abs:'Sekian hari kamu menghilang total dari VRChat — {n} hari. Sesuatu menahanmu. Atau ada yang akhirnya menarikmu kembali.',
   s_empty:'Kekosongan',s_unit_empty:'jam tanpa siapapun hadir',s_lede_empty:'{n} jam di VRChat di mana tidak ada satu pun yang join. Tidak ada kedatangan. Tidak ada pertemuan. Hanya kamu dan world yang kamu pilih. Sulit bilang itu damai atau sesuatu yang lain.',
-  si_tag:'Mulai',si_kick:'Tahun {year} kamu di VR · {label}',si_head:'Siap putar ulang<br><em>{year}?</em>',si_lede:'Sepuluh highlight. Sepuluh kebenaran pahit. Semua langsung dari log kamu — tanpa rekayasa, tanpa filter.',si_m_visits:'Total kunjungan',si_m_days:'Hari aktif',
+  si_tag:'Mulai',si_kick:'Perjalanan VRChat kamu · {label}',si_head:'Siap putar ulang<br><em>{period}?</em>',si_lede:'Sepuluh highlight. Sepuluh kebenaran pahit. Semua langsung dari log kamu — tanpa rekayasa, tanpa filter.',si_m_visits:'Total kunjungan',si_m_days:'Hari aktif',
   str_tag:'Peringatan',str_head:'Sekarang,<br><em>sisi gelapnya</em>.',str_lede:'Setiap wrap menutup-nutupi bagian sulitnya. Yang ini tidak. Sepuluh slide berikut adalah yang tidak kamu screenshot dan bagikan.',
   sha_tag:'Dedikasi',sha_kick:'Hari kamu benar-benar muncul',sha_unit:'hari aktif dari {total}',sha_lede:'Kamu hadir di <b>{n}</b> hari berbeda — <b>{pct}%</b> dari total rentang. Konsistensi adalah bentuk kehadiran tersendiri.'},
 
@@ -622,7 +676,7 @@ const I18N={
   load_title:'あなたの一年を読み込み中…',load_msg:'VRCXテーブルを解析中',
   err_invalid:'有効なSQLiteファイルではないようです。',err_empty:'この期間にVRChatの記録が見つかりません。範囲を広げるかVRCX.sqlite3を確認してください。',err_read:'ファイルを読み込めませんでした。',
   hint:'スワイプまたは ← → で移動',
-  s1_tag:'チェックポイント',s1_kick:'VRでの一年 · {label}',s1_head:'<em>{year}</em>を<br>振り返ろう。',s1_lede:'ログインして、夜更かしして、出会った人が常連になった。その証拠を、あなた自身の記録から。',m_visits:'ワールド訪問',m_days:'オンライン日数',
+  s1_tag:'チェックポイント',s1_kick:'VRの記録 · {label}',s1_head:'<em>{period}</em>を<br>振り返ろう。',head_all:'すべて',head_month:'先月',s10_kick_all:'あなたの全期間VRChatカード',s1_lede:'ログインして、夜更かしして、出会った人が常連になった。その証拠を、あなた自身の記録から。',m_visits:'ワールド訪問',m_days:'オンライン日数',
   s2_tag:'過ごした時間',s2_kick:'ワールド内で過ごした時間',s2_unit:'時間 · 約{d}日分',s2_lede:'本物の時間、本物の存在感。存在しない場所で過ごした一時間一時間。',
   s3_tag:'探検家',s3_kick:'足を踏み入れたワールド',s3_unit:'のユニークワールド／{v}回の訪問',s3_lede:'静かなラウンジからカオスな部屋まで、メタバースの<b>{n}</b>か所を巡った。',
   s4_tag:'ホーム',s4_kick:'何度も戻ってきた場所',s4_lede:'一番訪れたワールド、<b>{v}回</b>。誰にでも家のように感じる場所がある。',
@@ -655,7 +709,7 @@ const I18N={
   load_title:'당신의 한 해를 읽는 중…',load_msg:'VRCX 테이블 분석 중',
   err_invalid:'유효한 SQLite 파일이 아닌 것 같습니다.',err_empty:'이 기간에 VRChat 활동이 없습니다. 범위를 넓히거나 VRCX.sqlite3를 확인하세요.',err_read:'파일을 읽을 수 없습니다.',
   hint:'스와이프하거나 ← → 로 이동',
-  s1_tag:'체크포인트',s1_kick:'VR에서의 한 해 · {label}',s1_head:'<em>{year}</em>년을<br>다시 재생.',s1_lede:'로그인하고, 밤을 새우고, 낯선 사람이 단골이 되었죠. 그 증거를 당신의 로그에서.',m_visits:'월드 방문',m_days:'접속한 날',
+  s1_tag:'체크포인트',s1_kick:'VR 기록 · {label}',s1_head:'<em>{period}</em><br>다시 재생.',head_all:'전부',head_month:'지난 30일',s10_kick_all:'당신의 전체 기간 VRChat 카드',s1_lede:'로그인하고, 밤을 새우고, 낯선 사람이 단골이 되었죠. 그 증거를 당신의 로그에서.',m_visits:'월드 방문',m_days:'접속한 날',
   s2_tag:'보낸 시간',s2_kick:'월드에서 보낸 시간',s2_unit:'시간 · 약 {d}일',s2_lede:'진짜 시간, 진짜 존재. 존재하지 않는 곳에서 보낸 모든 시간.',
   s3_tag:'탐험가',s3_kick:'발을 들인 월드',s3_unit:'개의 고유 월드 / {v}회 방문',s3_lede:'조용한 라운지부터 혼돈의 방까지, 메타버스의 <b>{n}</b>곳을 누볐습니다.',
   s4_tag:'홈',s4_kick:'계속 돌아온 곳',s4_lede:'가장 많이 방문한 월드, <b>{v}회</b>. 누구나 집처럼 느껴지는 곳이 있죠.',
@@ -678,7 +732,7 @@ const I18N={
   load_title:'正在读取你的一年…',load_msg:'正在解析VRCX表',
   err_invalid:'这看起来不是有效的SQLite文件。',err_empty:'此范围内没有VRChat活动。请扩大范围或检查你的VRCX.sqlite3。',err_read:'无法读取该文件。',
   hint:'滑动或用 ← → 切换',
-  s1_tag:'检查点',s1_kick:'你在VR的一年 · {label}',s1_head:'回放你的<br><em>{year}</em>年。',s1_lede:'你登录、熬夜、把陌生人变成常客。这就是证据，来自你自己的记录。',m_visits:'世界访问',m_days:'在线天数',
+  s1_tag:'检查点',s1_kick:'你的VR记录 · {label}',s1_head:'回放你的<br><em>{period}</em>。',head_all:'一切',head_month:'过去30天',s10_kick_all:'你的全时VRChat卡片',s1_lede:'你登录、熬夜、把陌生人变成常客。这就是证据，来自你自己的记录。',m_visits:'世界访问',m_days:'在线天数',
   s2_tag:'度过的时间',s2_kick:'在世界中度过的时间',s2_unit:'小时 · 约{d}整天',s2_lede:'真实的时间，真实的存在。每一小时都花在并不存在的地方。',
   s3_tag:'探索者',s3_kick:'你踏入的世界',s3_unit:'个独特世界 / {v}次访问',s3_lede:'从安静的休息室到混乱的房间，你走进了元宇宙的<b>{n}</b>个角落。',
   s4_tag:'大本营',s4_kick:'你一再回到的地方',s4_lede:'你访问最多的世界，<b>{v}次</b>。每个人都有一个像家的地方。',
@@ -701,7 +755,7 @@ const I18N={
   load_title:'Leyendo tu año…',load_msg:'analizando tablas VRCX',
   err_invalid:'Esto no parece un archivo SQLite válido.',err_empty:'No hay actividad de VRChat en este rango. Prueba un rango más amplio o revisa tu VRCX.sqlite3.',err_read:'No se pudo leer el archivo.',
   hint:'desliza o usa ← → para moverte',
-  s1_tag:'Checkpoint',s1_kick:'Tu año en VR · {label}',s1_head:'Repitamos<br>tu <em>{year}</em>.',s1_lede:'Iniciaste sesión. Trasnochaste. Conociste a extraños que se volvieron habituales. Aquí está la prueba, de tus propios registros.',m_visits:'Visitas a mundos',m_days:'Días en línea',
+  s1_tag:'Checkpoint',s1_kick:'Tu resumen en VR · {label}',s1_head:'Repitamos<br><em>{period}</em>.',head_all:'todo',head_month:'el último mes',s10_kick_all:'Tu tarjeta VRChat de todos los tiempos',s1_lede:'Iniciaste sesión. Trasnochaste. Conociste a extraños que se volvieron habituales. Aquí está la prueba, de tus propios registros.',m_visits:'Visitas a mundos',m_days:'Días en línea',
   s2_tag:'Tiempo vivido',s2_kick:'Horas dentro de mundos',s2_unit:'horas · unos {d} días completos',s2_lede:'Tiempo real, presencia real. Cada hora en un lugar que no existe.',
   s3_tag:'Explorador',s3_kick:'Mundos en los que entraste',s3_unit:'mundos únicos en {v} visitas',s3_lede:'De salas tranquilas a cuartos caóticos, recorriste <b>{n}</b> rincones del metaverso.',
   s4_tag:'Base',s4_kick:'El lugar al que siempre volvías',s4_lede:'Tu mundo más visitado, <b>{v} veces</b>. Todos tienen un sitio que se siente como hogar.',
@@ -724,7 +778,7 @@ const I18N={
   load_title:'Lecture de ton année…',load_msg:'analyse des tables VRCX',
   err_invalid:'Cela ne ressemble pas à un fichier SQLite valide.',err_empty:'Aucune activité VRChat sur cette période. Élargis la plage ou vérifie ton VRCX.sqlite3.',err_read:'Impossible de lire ce fichier.',
   hint:'glisse ou utilise ← → pour avancer',
-  s1_tag:'Checkpoint',s1_kick:'Ton année en VR · {label}',s1_head:'Rejouons<br>ton <em>{year}</em>.',s1_lede:'Tu t\'es connecté. Tu as veillé tard. Des inconnus sont devenus des habitués. Voici la preuve, tirée de tes propres journaux.',m_visits:'Visites de mondes',m_days:'Jours en ligne',
+  s1_tag:'Checkpoint',s1_kick:'Ton historique VR · {label}',s1_head:'Rejouons<br><em>{period}</em>.',head_all:'tout',head_month:'ce dernier mois',s10_kick_all:'Ta carte VRChat de tous les temps',s1_lede:'Tu t\'es connecté. Tu as veillé tard. Des inconnus sont devenus des habitués. Voici la preuve, tirée de tes propres journaux.',m_visits:'Visites de mondes',m_days:'Jours en ligne',
   s2_tag:'Temps vécu',s2_kick:'Heures passées dans les mondes',s2_unit:'heures · environ {d} jours pleins',s2_lede:'Du temps réel, une présence réelle. Chaque heure passée dans un lieu qui n\'existe pas.',
   s3_tag:'Explorateur',s3_kick:'Mondes où tu es entré',s3_unit:'mondes uniques sur {v} visites',s3_lede:'Des salons calmes aux salles chaotiques, tu as parcouru <b>{n}</b> coins du métavers.',
   s4_tag:'Camp de base',s4_kick:'L\'endroit où tu revenais toujours',s4_lede:'Ton monde le plus visité, <b>{v} fois</b>. Chacun a un endroit qui ressemble à un chez-soi.',
@@ -794,11 +848,14 @@ function analyze(db,range){
   let start;
   if(range==='month')start=new Date(end.getTime()-30*864e5);
   else if(range==='year')start=new Date(end.getTime()-365*864e5);
-  else start=new Date(0);
+  else start=allDates.length?new Date(Math.min(...allDates.map(d=>d.getTime()))):new Date();
   const inR=d=>d&&d>=start&&d<=end;
 
   const stats={year:end.getFullYear(),range};
   stats.label = range==='month'?t('tf_month'):range==='year'?t('tf_year'):t('tf_all');
+  stats.headPeriod = range==='month'?t('head_month'):range==='year'?String(end.getFullYear()):t('head_all');
+  stats.cardKick = range==='all'?t('s10_kick_all'):t('s10_kick',{year:end.getFullYear()});
+  stats.cardHeader = range==='all'?'ALL TIME':range==='month'?'30 DAYS':`CHECKPOINT ${end.getFullYear()}`;
   stats.startDate=start;stats.endDate=end;
 
   // self user id, reconstructed from the VRCX per-user table prefix (usr<32hex>_...)
@@ -879,7 +936,7 @@ function analyzeSad(db,range){
   let start;
   if(range==='month')start=new Date(end.getTime()-30*864e5);
   else if(range==='year')start=new Date(end.getTime()-365*864e5);
-  else start=new Date(0);
+  else start=allDates.length?new Date(Math.min(...allDates.map(d=>d.getTime()))):new Date();
   const inR=d=>d&&d>=start&&d<=end;
   loc=loc.filter(r=>inR(r.d));
   const wc={};loc.forEach(r=>wc[r.name]=(wc[r.name]||0)+1);
@@ -1201,10 +1258,10 @@ function appendCardSlide(st, sadSt){
   SLIDES.push(()=>`<div class="card" id="s-card">
       <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>${N+1} / ${N+1}</span></div>
       <div class="card-body">
-        <div class="kicker rv">${t('s10_kick',{year:st.year})}</div>
+        <div class="kicker rv">${st.cardKick}</div>
         <div class="tcard rv" id="tcard">
           <div class="holo"></div>
-          <div class="tc-top"><span>CHECKPOINT ${st.year}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
+          <div class="tc-top"><span>${st.cardHeader}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
           <div class="tc-head">
             <div class="tc-avatar" id="tc-art" style="${avatarStyle('PLAYER')}">P</div>
             <div class="tc-meta">
@@ -1272,14 +1329,14 @@ function appendCardSlide(st, sadSt){
         </div>
         <div class="rank-badges rv" id="rankBadges"></div>
       </div>
-      <div class="card-foot"><span>VRCHAT WRAP · ${st.year}</span><span class="pix">▦ ▥ ▤</span></div>
+      <div class="card-foot"><span>VRCHAT WRAP · ${st.range==='all'?t('tf_all_v'):st.year}</span><span class="pix">▦ ▥ ▤</span></div>
     </div>`);
 }
 function buildIntro(st){
   const N=SLIDES.length;
   SLIDES.push(()=>card(t('si_tag'),N+1,`
-    <div class="kicker rv">${t('si_kick',{year:st.year,label:st.label})}</div>
-    <h2 class="headline rv" style="font-size:clamp(40px,11vw,82px)">${t('si_head',{year:st.year})}</h2>
+    <div class="kicker rv">${t('si_kick',{label:st.label})}</div>
+    <h2 class="headline rv" style="font-size:clamp(40px,11vw,82px)">${t('si_head',{period:st.headPeriod})}</h2>
     <p class="lede rv">${t('si_lede')}</p>
     <div class="intro-dates rv">
       <b>${fmtDate(st.startDate)}</b> &mdash; <b>${fmtDate(st.endDate)}</b>
@@ -1320,7 +1377,7 @@ function build(st){
     // s1 Checkpoint — split: headline + mini-grid (unique, data intro)
     ()=>card(t('s1_tag'),BASE+1,`
       <div class="kicker rv">${t('s1_kick',{label:st.label})}</div>
-      <h2 class="headline rv">${t('s1_head',{year:st.year})}</h2>
+      <h2 class="headline rv">${t('s1_head',{period:st.headPeriod})}</h2>
       <p class="lede rv">${t('s1_lede')}</p>
       <div class="mini rv" style="margin-top:6px">
         <div class="m"><div class="mv">${fmt(st.sessions)}</div><div class="ml">${t('m_visits')}</div></div>
@@ -1461,7 +1518,7 @@ function wireCard(){
   // submit button (only for all-time)
   const lbSubBtn=$('#lbSubBtn');
   if(lbSubBtn){
-    if(TF!=='all'){lbSubBtn.style.display='none';}
+    if(TF!=='all'||LB_OPTOUT){lbSubBtn.style.display='none';}
     else{
       lbSubBtn.addEventListener('click',async()=>{
         if(!WORLD_PROXY){alert('Set WORLD_PROXY to your CF Worker URL to enable leaderboard.');return;}
@@ -1537,7 +1594,7 @@ addEventListener('pointercancel',()=>{tracking=false;});
 addEventListener('pointerup',e=>{if(!tracking)return;tracking=false;const dx=e.clientX-tsx,dy=e.clientY-tsy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1);});
 
 /* ============================= INTAKE ============================= */
-let TF='year';
+let TF='all';
 function showErr(m){const e=$('#err');e.textContent='! '+m;e.style.display='block';}
 function startLoad(){$('#err').style.display='none';$('#intake').classList.remove('on');$('#loading').classList.add('on');}
 
@@ -1579,6 +1636,24 @@ initLang();
 // Leaderboard modal close — wired once globally so it works from home screen too
 $('#lbClose').addEventListener('click',()=>$('#lbModal').classList.remove('open'));
 $('#lbModal').addEventListener('click',e=>{if(e.target===$('#lbModal'))$('#lbModal').classList.remove('open');});
+
+// Welcome modal
+let LB_OPTOUT=localStorage.getItem('vrcwrap_lb_optout')==='1';
+(function initWelcome(){
+  const modal=$('#wmModal');
+  const okBtn=$('#wmOk');
+  const chk=$('#wmOptOut');
+  if(!modal)return;
+  chk.checked=LB_OPTOUT;
+  if(!localStorage.getItem('vrcwrap_welcomed'))modal.classList.remove('hidden');
+  okBtn.addEventListener('click',()=>{
+    LB_OPTOUT=chk.checked;
+    localStorage.setItem('vrcwrap_lb_optout',LB_OPTOUT?'1':'0');
+    localStorage.setItem('vrcwrap_welcomed','1');
+    modal.classList.add('hidden');
+  });
+  modal.addEventListener('click',e=>{if(e.target===modal){LB_OPTOUT=chk.checked;localStorage.setItem('vrcwrap_lb_optout',LB_OPTOUT?'1':'0');localStorage.setItem('vrcwrap_welcomed','1');modal.classList.add('hidden');}});
+})();
 
 // Fetch leaderboard player count and show on home screen
 (async function fetchLbCount(){
