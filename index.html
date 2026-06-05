@@ -191,17 +191,6 @@
   .axis{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
 
   #s-card .card-body{align-items:center;text-align:center;padding:8px 14px 16px;justify-content:flex-start}
-  .tcard{position:relative;width:min(680px,92vw);aspect-ratio:16/9;border-radius:28px;padding:22px 28px;background:linear-gradient(150deg,#15152a,#0a0a16);border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 30px 60px -24px #000;transform-style:preserve-3d;transition:transform .15s}
-  .tcard .holo{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(225,91,255,.3) 45%,rgba(52,214,255,.3) 55%,transparent 70%);background-size:250% 250%;mix-blend-mode:color-dodge;opacity:.6;animation:holo 6s linear infinite;pointer-events:none}
-  @keyframes holo{0%{background-position:0 0}100%{background-position:200% 200%}}
-  .tcard .tc-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);position:relative;z-index:2}
-  .tc-head{display:flex;align-items:center;gap:18px;margin:10px 0 0;position:relative;z-index:2}
-  .tc-avatar{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:36px;color:#0a0a12;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 0 36px -8px var(--accent);flex:none}
-  .tc-meta{text-align:left}
-  .tc-name{font-family:'Anton';font-size:clamp(22px,4.2vw,34px);text-transform:uppercase;line-height:1.05;word-break:break-word}
-  .tc-role-code{font-family:'Anton';font-size:clamp(18px,4vw,26px);color:var(--accent);letter-spacing:.12em;line-height:1;margin-top:4px;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 60%,transparent))}
-  .tc-role{font-family:'Space Mono',monospace;font-size:clamp(7.5px,1.3vw,10px);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:3px;line-height:1.2}
-  .tc-date{font-family:'Space Mono',monospace;font-size:clamp(8px,1.5vw,10px);letter-spacing:.1em;color:var(--muted);margin-top:3px}
   .role-reveal{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:20px;padding:20px 22px;background:color-mix(in srgb,var(--accent) 6%,rgba(10,10,20,.6));margin-top:12px;text-align:left}
   .rr-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid color-mix(in srgb,var(--accent) 18%,var(--line))}
   .rr-player{font-family:'Anton';font-size:15px;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
@@ -234,17 +223,6 @@
   .glo-name{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:2px 0 5px}
   .glo-tag{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
   .glo-desc{font-size:12px;color:var(--muted);line-height:1.55}
-  .tc-statgrid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-  .tc-statgrid .s{border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 8px;background:rgba(255,255,255,.02)}
-  .tc-statgrid .s .sv{font-family:'Anton';font-size:clamp(20px,5vw,28px);color:var(--accent);line-height:1}
-  .tc-statgrid .s .sl{font-family:'Space Mono',monospace;font-size:clamp(7.5px,1.4vw,9px);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:4px}
-  .tc-lists{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;text-align:left}
-  .tc-list{border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:8px 11px;background:rgba(255,255,255,.02)}
-  .tc-list .tl{font-family:'Space Mono',monospace;font-size:clamp(7px,1.2vw,8px);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
-  .tc-list .ti{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:clamp(8px,1.4vw,10px);color:var(--muted);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-  .tc-list .ti:last-child{border-bottom:none}
-  .tc-list .ti .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:clamp(80px,14vw,140px);color:var(--ink)}
-  .tc-foot{position:relative;z-index:2;margin-top:auto;font-family:'Space Mono',monospace;font-size:clamp(7px,1.2vw,8px);letter-spacing:.1em;color:var(--muted);text-align:center;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
   .actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:6px;width:100%}
   .actions .btn{padding:12px 18px;font-size:12px}
   .cap{width:100%;max-width:340px;margin:4px auto 0}
@@ -663,7 +641,6 @@ const I18N={
   s8_tag:'Rhythm',s8_kick:"When you're really online",s8_owl:'Night<br><em>owl</em>',s8_peak:'Peak: <em>{t}</em>',s8_lede:'<b>{p}%</b> of your sessions happened in night hours (9 PM–6 AM). Your prime time is <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Your busiest month',s9_lede:'That is when you showed up the most. Something kept pulling you back.',m_month_v:'Visits that month',m_month_avg:'Monthly average',
   s10_tag:'Collect',s10_kick:'Your {year} VRChat card',s10_kick_all:'Your all-time VRChat card',role_night:'Night Wanderer',role_vet:'World Veteran',role_expl:'Metaverse Explorer',
-  tc_hours:'hours',tc_worlds:'worlds',tc_met:'met',tc_friends:'friends',tc_visits:'visits',tc_days:'days',tc_topw:'top worlds',tc_squad:'top squad',tc_foot:'VRCHAT WRAP · YOUR DATA NEVER LEFT THIS DEVICE',
   dl:'Download role card',share_x:'Share on X',share:'Share',cap_lbl:'Caption for sharing',support:'Support this project',x_attach_hint:'Image saved — attach it to your tweet!',
   dl_hint:'saves your personality result · PNG',
   home_glo:'Role glossary',home_lb:'Leaderboard',
@@ -704,7 +681,6 @@ const I18N={
   s8_tag:'Ritme',s8_kick:'Kapan kamu benar-benar online',s8_owl:'Burung<br><em>malam</em>',s8_peak:'Puncak: <em>{t}</em>',s8_lede:'<b>{p}%</b> sesimu terjadi di jam malam (21.00–06.00). Waktu emasmu jam <b>{t}</b>.',
   s9_tag:'Momentum',s9_kick:'Bulan tersibukmu',s9_lede:'Saat itu kamu paling sering muncul. Ada yang terus menarikmu kembali.',m_month_v:'Kunjungan bulan itu',m_month_avg:'Rata-rata per bulan',
   s10_tag:'Koleksi',s10_kick:'Kartu VRChat {year} kamu',s10_kick_all:'Kartu VRChat all-time kamu',role_night:'Pengembara Malam',role_vet:'Veteran World',role_expl:'Penjelajah Metaverse',
-  tc_hours:'jam',tc_worlds:'world',tc_met:'ditemui',tc_friends:'teman',tc_visits:'kunjungan',tc_days:'hari',tc_topw:'world teratas',tc_squad:'squad teratas',tc_foot:'VRCHAT WRAP · DATAMU TIDAK PERNAH KELUAR DARI PERANGKAT INI',
   dl:'Unduh role card',share_x:'Bagikan ke X',share:'Bagikan',cap_lbl:'Caption untuk dibagikan',support:'Dukung proyek ini',x_attach_hint:'Gambar tersimpan — lampirkan ke tweet kamu!',
   dl_hint:'menyimpan hasil kepribadianmu · PNG',
   home_glo:'Glosarium role',home_lb:'Leaderboard',
@@ -745,7 +721,6 @@ const I18N={
   s8_tag:'リズム',s8_kick:'本当にオンラインな時間',s8_owl:'夜<br><em>ふくろう</em>',s8_peak:'ピーク: <em>{t}</em>',s8_lede:'セッションの<b>{p}%</b>が夜間（21時〜6時）に実施。ゴールデンタイムは<b>{t}</b>。',
   s9_tag:'勢い',s9_kick:'最も忙しかった月',s9_lede:'その月に一番現れた。何かが引き戻し続けた。',m_month_v:'その月の訪問',m_month_avg:'月平均',
   s10_tag:'コレクト',s10_kick:'あなたの{year}年VRChatカード',role_night:'夜の放浪者',role_vet:'ワールド老兵',role_expl:'メタバース探検家',
-  tc_hours:'時間',tc_worlds:'ワールド',tc_met:'遭遇',tc_friends:'フレンド',tc_visits:'訪問',tc_days:'日間',tc_topw:'トップワールド',tc_squad:'トップ仲間',tc_foot:'VRCHAT WRAP · データはこの端末から出ていません',
   dl:'カードを保存',share_x:'Xでシェア',share:'シェア',cap_lbl:'シェア用キャプション',support:'このプロジェクトを支援',x_attach_hint:'画像を保存しました — ツイートに添付してね！',
   outro:'スクショして、シェアして、また会おう。',
   caption:'私のVRChat Wrap — {h}時間、{w}ワールド、{p}人と遭遇。あなたも作ろう:',
@@ -778,7 +753,6 @@ const I18N={
   s8_tag:'리듬',s8_kick:'진짜 접속하는 시간',s8_owl:'야행성<br><em>올빼미</em>',s8_peak:'피크: <em>{t}</em>',s8_lede:'세션의 <b>{p}%</b>가 심야 시간대(오후 9시~오전 6시)에 진행. 황금 시간대는 <b>{t}</b>.',
   s9_tag:'모멘텀',s9_kick:'가장 바빴던 달',s9_lede:'그달에 가장 많이 나타났죠. 무언가가 계속 당신을 끌어당겼습니다.',m_month_v:'그달 방문',m_month_avg:'월 평균',
   s10_tag:'컬렉트',s10_kick:'당신의 {year} VRChat 카드',role_night:'밤의 방랑자',role_vet:'월드 베테랑',role_expl:'메타버스 탐험가',
-  tc_hours:'시간',tc_worlds:'월드',tc_met:'만남',tc_friends:'친구',tc_visits:'방문',tc_days:'일',tc_topw:'인기 월드',tc_squad:'인기 스쿼드',tc_foot:'VRCHAT WRAP · 데이터는 이 기기를 떠나지 않았습니다',
   dl:'카드 저장',share_x:'X에 공유',share:'공유',cap_lbl:'공유용 캡션',support:'이 프로젝트 후원',x_attach_hint:'이미지 저장됨 — 트윗에 첨부하세요!',
   outro:'스크린샷하고, 공유하고, 다음에 또 만나요.',
   caption:'내 VRChat Wrap — {h}시간, 월드 {w}곳, {p}명과 만남. 당신도 만들어보세요:'},
@@ -801,7 +775,6 @@ const I18N={
   s8_tag:'节奏',s8_kick:'你真正在线的时间',s8_owl:'夜<br><em>猫子</em>',s8_peak:'高峰: <em>{t}</em>',s8_lede:'你<b>{p}%</b>的会话在夜间（晚9点–早6点）进行。你的黄金时段是<b>{t}</b>。',
   s9_tag:'势头',s9_kick:'你最忙的月份',s9_lede:'那个月你出现得最多。有什么一直把你拉回来。',m_month_v:'当月访问',m_month_avg:'月均',
   s10_tag:'收藏',s10_kick:'你的{year}年VRChat卡片',role_night:'夜行者',role_vet:'世界老兵',role_expl:'元宇宙探索者',
-  tc_hours:'小时',tc_worlds:'世界',tc_met:'相遇',tc_friends:'好友',tc_visits:'访问',tc_days:'天',tc_topw:'热门世界',tc_squad:'最佳小队',tc_foot:'VRCHAT WRAP · 数据从未离开此设备',
   dl:'下载卡片',share_x:'分享到X',share:'分享',cap_lbl:'分享文案',support:'支持这个项目',x_attach_hint:'图片已保存 — 附到你的推文！',
   outro:'截图、分享、下次再见。',
   caption:'我的VRChat Wrap — {h}小时，{w}个世界，遇见{p}人。来做你的:'},
@@ -824,7 +797,6 @@ const I18N={
   s8_tag:'Ritmo',s8_kick:'Cuándo estás realmente en línea',s8_owl:'Ave<br><em>nocturna</em>',s8_peak:'Pico: <em>{t}</em>',s8_lede:'El <b>{p}%</b> de tus sesiones ocurrió en horas nocturnas (9 PM–6 AM). Tu hora pico es <b>{t}</b>.',
   s9_tag:'Impulso',s9_kick:'Tu mes más activo',s9_lede:'Ahí fue cuando más apareciste. Algo te seguía trayendo de vuelta.',m_month_v:'Visitas ese mes',m_month_avg:'Promedio mensual',
   s10_tag:'Colecciona',s10_kick:'Tu tarjeta VRChat {year}',role_night:'Errante Nocturno',role_vet:'Veterano de Mundos',role_expl:'Explorador del Metaverso',
-  tc_hours:'horas',tc_worlds:'mundos',tc_met:'conocidos',tc_friends:'amigos',tc_visits:'visitas',tc_days:'días',tc_topw:'mundos top',tc_squad:'escuadrón top',tc_foot:'VRCHAT WRAP · TUS DATOS NUNCA SALIERON DE ESTE DISPOSITIVO',
   dl:'Descargar tarjeta',share_x:'Compartir en X',share:'Compartir',cap_lbl:'Texto para compartir',support:'Apoya este proyecto',x_attach_hint:'Imagen guardada — ¡adjúntala a tu tweet!',
   outro:'Captúrala. Compártela. Hasta la próxima.',
   caption:'Mi VRChat Wrap — {h}h en {w} mundos, {p} personas conocidas. Haz el tuyo:'},
@@ -847,7 +819,6 @@ const I18N={
   s8_tag:'Rythme',s8_kick:'Quand tu es vraiment en ligne',s8_owl:'Oiseau<br><em>de nuit</em>',s8_peak:'Pic : <em>{t}</em>',s8_lede:'<b>{p}%</b> de tes sessions ont eu lieu en heures nocturnes (21h–6h). Ton heure de pointe est <b>{t}</b>.',
   s9_tag:'Élan',s9_kick:'Ton mois le plus actif',s9_lede:'C\'est là que tu es le plus apparu. Quelque chose te ramenait sans cesse.',m_month_v:'Visites ce mois',m_month_avg:'Moyenne mensuelle',
   s10_tag:'Collection',s10_kick:'Ta carte VRChat {year}',role_night:'Vagabond Nocturne',role_vet:'Vétéran des Mondes',role_expl:'Explorateur du Métavers',
-  tc_hours:'heures',tc_worlds:'mondes',tc_met:'rencontrés',tc_friends:'amis',tc_visits:'visites',tc_days:'jours',tc_topw:'meilleurs mondes',tc_squad:'meilleur squad',tc_foot:'VRCHAT WRAP · TES DONNÉES N\'ONT JAMAIS QUITTÉ CET APPAREIL',
   dl:'Télécharger la carte',share_x:'Partager sur X',share:'Partager',cap_lbl:'Légende à partager',support:'Soutenir ce projet',x_attach_hint:'Image enregistrée — joins-la à ton tweet !',
   outro:'Capture-la. Partage-la. À la prochaine.',
   caption:'Mon VRChat Wrap — {h}h dans {w} mondes, {p} personnes rencontrées. Fais le tien :'}
@@ -1396,37 +1367,6 @@ function appendCardSlide(st, sadSt){
       <div class="card-top"><span class="tag">◢ ${t('s10_tag')}</span><span>${N+1} / ${N+1}</span></div>
       <div class="card-body">
         <div class="kicker rv">${st.cardKick}</div>
-        <div class="tcard rv" id="tcard">
-          <div class="tc-top"><span>${st.cardHeader}</span><span>#${String(Math.floor(st.hours)%9999).padStart(4,'0')}</span></div>
-          <div class="tc-head">
-            <div class="tc-avatar" id="tc-art" style="${avatarStyle('PLAYER')}">P</div>
-            <div class="tc-meta">
-              <div class="tc-name" id="tc-name">PLAYER</div>
-              <div class="tc-role-code">${esc(role.code)}</div>
-              <div class="tc-role">${esc(role.name)}</div>
-              <div class="tc-date">${fmtDate(st.startDate)} &mdash; ${fmtDate(st.endDate)}</div>
-            </div>
-          </div>
-          <div class="tc-statgrid">
-            <div class="s"><div class="sv">${fmt(st.hours)}</div><div class="sl">${t('tc_hours')}</div></div>
-            <div class="s"><div class="sv">${fmt(st.uniqueWorlds)}</div><div class="sl">${t('tc_worlds')}</div></div>
-            <div class="s"><div class="sv">${fmt(st.peopleMet)}</div><div class="sl">${t('tc_met')}</div></div>
-            <div class="s"><div class="sv">${fmt(st.sessions)}</div><div class="sl">${t('tc_visits')||'visits'}</div></div>
-            <div class="s"><div class="sv">${fmt(st.friendsAdded)}</div><div class="sl">${t('tc_friends')}</div></div>
-            <div class="s"><div class="sv">${fmt(st.activeDays)}</div><div class="sl">${t('tc_days')||'days'}</div></div>
-          </div>
-          <div class="tc-lists">
-            <div class="tc-list">
-              <div class="tl">${t('tc_topw')||'top worlds'}</div>
-              ${st.topWorlds.slice(0,3).map(w=>`<div class="ti"><span class="tn">${esc(w.n)}</span><span>${fmt(w.v)}×</span></div>`).join('')}
-            </div>
-            <div class="tc-list">
-              <div class="tl">${t('tc_squad')||'top squad'}</div>
-              ${st.squad.slice(0,3).map(p=>`<div class="ti"><span class="tn">${esc(p.n)}</span><span>${fmt(p.v)}</span></div>`).join('')}
-            </div>
-          </div>
-          <div class="tc-foot">${t('tc_foot')}</div>
-        </div>
         <div class="role-reveal rv">
           <div class="rr-meta">
             <span class="rr-player">${esc(st.selfName||'ANONYMOUS')}</span>
@@ -1674,11 +1614,9 @@ function captionText(){
   return lines.join('\n');
 }
 function wireCard(){
-  const tn=$('#tc-name'),tc=$('#tcard'),ta=$('#tc-art'),cap=$('#capBox');
+  const cap=$('#capBox');
   CARD_NAME=S&&S.selfName||'PLAYER';
-  if(tn){tn.textContent=CARD_NAME.toUpperCase();if(ta){ta.textContent=initial(CARD_NAME);ta.style.cssText=avatarStyle(CARD_NAME);}}
   const refreshCap=()=>{if(cap)cap.value=captionText();};refreshCap();
-  if(tc){tc.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=tc.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;tc.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg)`;});tc.addEventListener('pointerleave',()=>{tc.style.transform='';});}
   const gb=$('#gloBtn'),gl=$('#gloList');
   if(gb&&gl)gb.addEventListener('click',()=>{
     gl.classList.toggle('open');
@@ -1738,16 +1676,7 @@ function wireCard(){
     });
   }
 }
-async function cardBlob(){
-  const el=$('#tcard');if(!el||!window.html2canvas)return null;
-  const tf=el.style.transform;el.style.transform='';
-  try{
-    const cv=await html2canvas(el,{backgroundColor:'#0a0a16',scale:Math.min(4,(window.devicePixelRatio||1)*2.5),logging:false,useCORS:true,
-      onclone:(doc)=>{doc.querySelectorAll('.rv').forEach(e=>{e.style.opacity='1';e.style.transform='none';e.style.animation='none';});const c=doc.getElementById('tcard');if(c)c.style.transform='none';}});
-    el.style.transform=tf;
-    return await new Promise(r=>cv.toBlob(r,'image/png'));
-  }catch(e){el.style.transform=tf;return null;}
-}
+
 // We use html2canvas-pro, which natively parses color()/color-mix()/oklch —
 // no stylesheet patching needed (the old patch broke under extension SES).
 async function roleRevealBlob(){
