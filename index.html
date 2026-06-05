@@ -565,6 +565,8 @@ async function openLB(){
   tabs.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-tabs.offsetLeft;tabs.scrollLeft=scrollLeft-(x-startX)*1.5;});
   tabs.addEventListener('wheel',e=>{e.preventDefault();tabs.scrollLeft+=e.deltaY||e.deltaX;},{passive:false});
   loadLBTab();
+  // Prefetch all other categories in background so switching is instant
+  if(WORLD_PROXY) LB_CATS.forEach(c=>{if(!LB_CACHE[c.id])lbTop100(c.col).then(r=>{if(r&&r.data)LB_CACHE[c.id]=r.data;});});
 }
 async function loadLBTab(){
   const cat=LB_CATS[LB_ACTIVE];
